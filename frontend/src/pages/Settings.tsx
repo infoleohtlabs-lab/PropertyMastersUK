@@ -1291,14 +1291,12 @@ const Settings: React.FC = () => {
 
             {/* Integrations Settings */}
             {activeTab === 'integrations' && (
-              <div className="form-container">
-                <div className="section-header">
-                  <h2 className="section-title">Third-Party Integrations</h2>
-                </div>
+              <Card className="p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-6">Third-Party Integrations</h2>
                 
-                <div className="settings-list">
-                  <div className="form-group">
-                    <label className="form-label">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Google Maps API Key
                     </label>
                     <Input
@@ -1309,9 +1307,8 @@ const Settings: React.FC = () => {
                         integrations: { ...prev.integrations, googleMapsApiKey: e.target.value }
                       }))}
                       placeholder="Enter Google Maps API key"
-                      className="form-input focus-ring"
                     />
-                    <p className="setting-description">Required for map functionality and location services</p>
+                    <p className="text-sm text-gray-500 mt-1">Required for map functionality and location services</p>
                   </div>
 
                   <div className="flex items-center justify-between py-4 border-t border-gray-200">
