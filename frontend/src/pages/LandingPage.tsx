@@ -56,6 +56,35 @@ const LandingPage: React.FC = () => {
   const [propertyType, setPropertyType] = useState('');
   const [priceRange, setPriceRange] = useState('');
   const [searchType, setSearchType] = useState('sale');
+
+  // Dynamic price ranges based on search type
+  const getPriceRangeOptions = () => {
+    if (searchType === 'rent') {
+      return [
+        { value: '', label: 'Price Range' },
+        { value: '0-500', label: 'Up to £500/month' },
+        { value: '500-1000', label: '£500 - £1,000/month' },
+        { value: '1000-1500', label: '£1,000 - £1,500/month' },
+        { value: '1500-2000', label: '£1,500 - £2,000/month' },
+        { value: '2000-3000', label: '£2,000 - £3,000/month' },
+        { value: '3000+', label: '£3,000+/month' }
+      ];
+    } else {
+      return [
+        { value: '', label: 'Price Range' },
+        { value: '0-200000', label: 'Up to £200k' },
+        { value: '200000-400000', label: '£200k - £400k' },
+        { value: '400000-600000', label: '£400k - £600k' },
+        { value: '600000-1000000', label: '£600k - £1M' },
+        { value: '1000000+', label: '£1M+' }
+      ];
+    }
+  };
+
+  // Reset price range when search type changes
+  useEffect(() => {
+    setPriceRange('');
+  }, [searchType]);
   const [postcodeResults, setPostcodeResults] = useState<string[]>([]);
   const [showPostcodeDropdown, setShowPostcodeDropdown] = useState(false);
   const [marketStats, setMarketStats] = useState({
@@ -311,8 +340,61 @@ const LandingPage: React.FC = () => {
           opacity: 0;
         }
       `}</style>
+      
+      {/* Header Navigation */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+              <img 
+                src="/PropertyMasters.svg" 
+                alt="PropertyMasters UK" 
+                className="h-10 w-auto"
+              />
+              <span className="text-xl font-bold text-gray-900 hidden sm:block">
+                PropertyMasters UK
+              </span>
+            </Link>
+            
+            {/* Navigation Links */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-gray-700 hover:text-[#5ab1d8] transition-colors font-medium">
+                Home
+              </Link>
+              <Link to="/properties" className="text-gray-700 hover:text-[#5ab1d8] transition-colors font-medium">
+                Properties
+              </Link>
+              <Link to="/about" className="text-gray-700 hover:text-[#5ab1d8] transition-colors font-medium">
+                About
+              </Link>
+              <Link to="/contact" className="text-gray-700 hover:text-[#5ab1d8] transition-colors font-medium">
+                Contact
+              </Link>
+            </nav>
+            
+            {/* CTA Button */}
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="hidden sm:inline-flex border-[#5ab1d8] text-[#5ab1d8] hover:bg-[#5ab1d8] hover:text-white"
+              >
+                Sign In
+              </Button>
+              <Button 
+                size="sm" 
+                className="bg-[#5ab1d8] hover:bg-[#4a9bc7] text-white"
+              >
+                Get Started
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+      
       {/* Hero Section with Ocean Breeze Theme */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 pb-8">
         {/* Ocean Breeze Background */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#5ab1d8] via-[#4a9bc7] to-[#3a85b6]" />
@@ -351,7 +433,7 @@ const LandingPage: React.FC = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <div className="mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full text-sm font-medium mb-4 hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
               🏆 UK's #1 Property Platform 2024
@@ -359,7 +441,7 @@ const LandingPage: React.FC = () => {
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             Discover Your Perfect
-            <span className="block text-white drop-shadow-lg bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent animate-pulse">
+            <span className="block text-white drop-shadow-lg animate-pulse">
               UK Property
             </span>
           </h1>
@@ -479,12 +561,11 @@ const LandingPage: React.FC = () => {
                     onChange={(e) => setPriceRange(e.target.value)}
                     className="w-full h-12 px-3 border border-gray-300 rounded-md text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Price Range</option>
-                    <option value="0-200000">Up to £200k</option>
-                    <option value="200000-400000">£200k - £400k</option>
-                    <option value="400000-600000">£400k - £600k</option>
-                    <option value="600000-1000000">£600k - £1M</option>
-                    <option value="1000000+">£1M+</option>
+                    {getPriceRangeOptions().map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="lg:col-span-1">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Building2, Menu, X, User, LogOut, Settings, Bell, Search, ChevronDown } from 'lucide-react';
+import { Building2, Menu, X, User, LogOut, Settings, Bell, Search, ChevronDown, LayoutDashboard } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { Button } from '../ui/Button';
 import { showToast } from '../ui/Toast';

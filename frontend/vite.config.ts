@@ -11,10 +11,10 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 3003,
     host: true,
     hmr: {
-      port: 3000
+      port: 3003
     }
   },
   build: {
