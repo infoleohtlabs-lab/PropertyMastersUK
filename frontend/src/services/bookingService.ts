@@ -111,22 +111,23 @@ class BookingService {
     dateTo: string,
     bookingType?: string
   ): Promise<BookingSlot[]> {
-    const params = new URLSearchParams({
-      propertyId,
-      agentId,
-      dateFrom,
-      dateTo,
-      ...(bookingType && { bookingType })
-    });
+    const params = new URLSearchParams();
+    params.append('propertyId', propertyId);
+    params.append('agentId', agentId);
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
+    if (bookingType) {
+      params.append('bookingType', bookingType);
+    }
     
     const response = await apiService.get(`/bookings/slots/available?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   // Create a new booking
   async createBooking(bookingData: BookingRequest): Promise<Booking> {
     const response = await apiService.post('/bookings', bookingData);
-    return response.data;
+    return (response as any).data;
   }
 
   // Get bookings with filters
@@ -135,20 +136,30 @@ class BookingService {
     page = 1,
     limit = 20
   ): Promise<{ bookings: Booking[]; total: number; pages: number }> {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...filters
-    });
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (Array.isArray(value)) {
+            value.forEach(item => params.append(key, item.toString()));
+          } else {
+            params.append(key, value.toString());
+          }
+        }
+      });
+    }
     
     const response = await apiService.get(`/bookings?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   // Get booking by ID
   async getBooking(id: string): Promise<Booking> {
     const response = await apiService.get(`/bookings/${id}`);
-    return response.data;
+    return (response as any).data;
   }
 
   // Update booking status
@@ -161,7 +172,7 @@ class BookingService {
       status,
       notes
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Reschedule booking
@@ -170,13 +181,13 @@ class BookingService {
       `/bookings/${rescheduleData.bookingId}/reschedule`,
       rescheduleData
     );
-    return response.data;
+    return (response as any).data;
   }
 
   // Cancel booking
   async cancelBooking(id: string, reason?: string): Promise<Booking> {
     const response = await apiService.patch(`/bookings/${id}/cancel`, { reason });
-    return response.data;
+    return (response as any).data;
   }
 
   // Get agent availability
@@ -187,7 +198,7 @@ class BookingService {
     const response = await apiService.get(`/bookings/agents/${agentId}/availability`, {
       params: { date }
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Set agent availability
@@ -198,7 +209,7 @@ class BookingService {
     const response = await apiService.post(`/bookings/agents/${agentId}/availability`, {
       slots
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Get booking statistics
@@ -213,7 +224,7 @@ class BookingService {
     if (dateTo) params.append('dateTo', dateTo);
     
     const response = await apiService.get(`/bookings/stats?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   // Send booking reminder
@@ -235,7 +246,7 @@ class BookingService {
     const response = await apiService.get(`/bookings/upcoming`, {
       params: { userId, userType, limit }
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Check for booking conflicts
@@ -253,7 +264,7 @@ class BookingService {
       endTime,
       excludeBookingId
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Bulk update bookings
@@ -265,7 +276,7 @@ class BookingService {
       bookingIds,
       updates
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Get booking history for a property
@@ -276,7 +287,7 @@ class BookingService {
     const response = await apiService.get(`/bookings/property/${propertyId}/history`, {
       params: { limit }
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Get booking analytics
@@ -298,7 +309,7 @@ class BookingService {
     if (dateTo) params.append('dateTo', dateTo);
     
     const response = await apiService.get(`/bookings/analytics?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 }
 

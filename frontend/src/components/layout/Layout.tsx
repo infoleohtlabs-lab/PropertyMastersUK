@@ -1,193 +1,114 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
 import { ToastProvider } from '../ui/Toast';
-// Utility function for combining class names
-const cn = (...classes: (string | undefined | null | false)[]) => {
-  return classes.filter(Boolean).join(' ');
-};
+import Header from './Header';
+import Navigation from './Navigation';
+import Footer from './Footer';
 
 interface LayoutProps {
   children?: React.ReactNode;
-  className?: string;
-  showHeader?: boolean;
-  showFooter?: boolean;
-  fullHeight?: boolean;
 }
 
-const Layout: React.FC<LayoutProps> = ({
-  children,
-  className,
-  showHeader = true,
-  showFooter = true,
-  fullHeight = false
-}) => {
-  return (
-    <div className={cn(
-      'min-h-screen flex flex-col',
-      fullHeight && 'h-screen',
-      className
-    )}>
-      {/* Toast Provider */}
-      <ToastProvider />
-      
-      {/* Header */}
-      {showHeader && <Header />}
-      
-      {/* Main Content */}
-      <main className="flex-1">
-        {children || <Outlet />}
-      </main>
-      
-      {/* Footer */}
-      {showFooter && <Footer />}
-    </div>
-  );
-};
+export interface DashboardLayoutProps extends LayoutProps {}
+export interface AuthLayoutProps extends LayoutProps {}
+export interface PropertyLayoutProps extends LayoutProps {}
+export interface ErrorLayoutProps extends LayoutProps {}
 
-// Dashboard Layout with Sidebar
-interface DashboardLayoutProps {
-  children?: React.ReactNode;
-  sidebar: React.ReactNode;
-  className?: string;
-}
-
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  children,
-  sidebar,
-  className
-}) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className={cn('min-h-screen flex flex-col', className)}>
-      {/* Toast Provider */}
-      <ToastProvider />
-      
-      {/* Header */}
-      <Header />
-      
-      {/* Dashboard Content */}
-      <div className="flex-1 flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-200 overflow-y-auto">
-          {sidebar}
-        </aside>
-        
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto">
+    <ToastProvider>
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1">
           {children || <Outlet />}
         </main>
+        <Footer />
       </div>
-    </div>
+    </ToastProvider>
   );
 };
 
-// Auth Layout (for login/register pages)
-interface AuthLayoutProps {
-  children?: React.ReactNode;
-  className?: string;
-}
+export const DashboardLayout: React.FC<LayoutProps> = ({ children }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({
-  children,
-  className
-}) => {
   return (
-    <div className={cn(
-      'min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8',
-      className
-    )}>
-      {/* Toast Provider */}
-      <ToastProvider />
-      
-      {/* Auth Content */}
-      <div className="max-w-md w-full space-y-8">
-        {children || <Outlet />}
-      </div>
-    </div>
-  );
-};
-
-// Property Layout (for property listing/details pages)
-interface PropertyLayoutProps {
-  children?: React.ReactNode;
-  className?: string;
-  showFilters?: boolean;
-  filters?: React.ReactNode;
-}
-
-const PropertyLayout: React.FC<PropertyLayoutProps> = ({
-  children,
-  className,
-  showFilters = false,
-  filters
-}) => {
-  return (
-    <div className={cn('min-h-screen flex flex-col', className)}>
-      {/* Toast Provider */}
-      <ToastProvider />
-      
-      {/* Header */}
-      <Header />
-      
-      {/* Property Content */}
-      <div className="flex-1">
-        {showFilters && filters && (
-          <div className="bg-white border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              {filters}
-            </div>
-          </div>
+    <ToastProvider>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation 
+          isOpen={sidebarOpen} 
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+          isMobile={false}
+        />
+        
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 z-40 lg:hidden bg-black bg-opacity-50 transition-opacity duration-300" 
+            onClick={() => setSidebarOpen(false)}
+          />
         )}
         
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {children || <Outlet />}
-        </main>
+        {/* Main content */}
+        <div className="lg:pl-64 transition-all duration-300">
+          <div className="container-responsive section-spacing">
+            {children || <Outlet />}
+          </div>
+        </div>
+        
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          className="lg:hidden fixed top-4 left-4 z-50 btn-primary p-2 rounded-md shadow-lg transition-all duration-200 hover:scale-105"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <span className="sr-only">Open sidebar</span>
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
-      
-      {/* Footer */}
-      <Footer />
-    </div>
+    </ToastProvider>
   );
 };
 
-// Error Layout (for error pages)
-interface ErrorLayoutProps {
-  children?: React.ReactNode;
-  className?: string;
-}
-
-const ErrorLayout: React.FC<ErrorLayoutProps> = ({
-  children,
-  className
-}) => {
+export const AuthLayout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className={cn(
-      'min-h-screen flex items-center justify-center bg-gray-50',
-      className
-    )}>
-      {/* Toast Provider */}
-      <ToastProvider />
-      
-      {/* Error Content */}
-      <div className="text-center">
-        {children || <Outlet />}
+    <ToastProvider>
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center section-spacing">
+        <div className="container-responsive max-w-md mx-auto">
+          {children || <Outlet />}
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 };
 
-export {
-  Layout,
-  DashboardLayout,
-  AuthLayout,
-  PropertyLayout,
-  ErrorLayout
+export const PropertyLayout: React.FC<LayoutProps> = ({ children }) => {
+  return (
+    <ToastProvider>
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 bg-gray-50">
+          <div className="container-responsive section-spacing">
+            {children || <Outlet />}
+          </div>
+        </main>
+        <Footer />
+      </div>
+    </ToastProvider>
+  );
 };
-export type {
-  LayoutProps,
-  DashboardLayoutProps,
-  AuthLayoutProps,
-  PropertyLayoutProps,
-  ErrorLayoutProps
+
+export const ErrorLayout: React.FC<LayoutProps> = ({ children }) => {
+  return (
+    <ToastProvider>
+      <div className="min-h-screen flex flex-col justify-center items-center bg-gray-50">
+        <div className="container-responsive max-w-lg mx-auto text-center section-spacing">
+          {children || <Outlet />}
+        </div>
+      </div>
+    </ToastProvider>
+  );
 };
+
+export default Layout;

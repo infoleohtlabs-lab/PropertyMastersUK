@@ -113,21 +113,14 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
   const navigationItems = getNavigationItems();
 
   return (
-    <header className={`bg-white shadow-lg border-b border-gray-200 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto container-responsive">
+        <div className="flex-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900 hidden sm:block">
-                PropertyMasters UK
-              </span>
-              <span className="text-xl font-bold text-gray-900 sm:hidden">
-                PM UK
-              </span>
-            </Link>
-          </div>
+          <Link to="/" className="flex items-center space-x-2">
+            <Building2 className="h-8 w-8 text-primary-600" />
+            <span className="text-heading-4">PropertyMasters</span>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
@@ -135,10 +128,10 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  item.current
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                className={`text-label transition-colors duration-200 ${
+                  location.pathname === item.href
+                    ? 'text-primary-600 border-b-2 border-primary-600'
+                    : 'text-gray-700 hover:text-primary-600'
                 }`}
               >
                 {item.name}
@@ -147,88 +140,81 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4">
-            {/* Search */}
-            <div className="relative hidden sm:block">
-              {isSearchOpen ? (
-                <form onSubmit={handleSearch} className="flex items-center">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search properties..."
-                    className="w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoFocus
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setIsSearchOpen(false)}
-                    className="ml-2 p-2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </form>
-              ) : (
-                <button
-                  onClick={() => setIsSearchOpen(true)}
-                  className="p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <Search className="h-5 w-5" />
-                </button>
-              )}
+          <div className="flex items-center gap-3">
+          {/* Search Bar */}
+          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
+            <div className="relative w-full">
+              <div className="absolute inset-y-0 left-0 pl-3 flex-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search properties..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleSearch}
+                className="input-field pl-10"
+              />
             </div>
+          </div>
 
             {user ? (
               <>
                 {/* Notifications */}
-                <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-                </button>
+                <div className="relative">
+                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-200 hover:bg-gray-50 rounded-md">
+                    <Bell className="h-5 w-5" />
+                    {/* Notification badge */}
+                    <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white" />
+                  </button>
+                </div>
 
                 {/* User Menu */}
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="flex items-center space-x-2 p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
                   >
-                    <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">
-                        {(user.firstName?.charAt(0) || user.lastName?.charAt(0) || 'U').toUpperCase()}
+                    <div className="w-8 h-8 bg-primary-600 rounded-full flex-center">
+                      <span className="text-label text-white">
+                        {user.firstName?.charAt(0) || 'U'}
                       </span>
                     </div>
-                    <span className="hidden sm:block text-sm font-medium">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</span>
                     <ChevronDown className="h-4 w-4" />
                   </button>
 
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                      <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{`${user.firstName || ''} ${user.lastName || ''}`.trim()}</p>
-                        <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200 animate-slide-down">
+                      <div className="px-4 py-2 border-b border-gray-200">
+                        <p className="text-label">{user.firstName} {user.lastName}</p>
+                        <p className="text-caption">{user.email}</p>
                       </div>
                       <Link
-                        to={getDashboardLink()}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        to="/dashboard"
+                        className="block px-4 py-2 text-body-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <User className="h-4 w-4 mr-2" />
-                        Dashboard
+                        <div className="flex items-center space-x-2">
+                          <LayoutDashboard className="h-4 w-4" />
+                          <span>Dashboard</span>
+                        </div>
                       </Link>
                       <Link
                         to="/profile"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-2 text-body-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
-                        <Settings className="h-4 w-4 mr-2" />
-                        Profile Settings
+                        <div className="flex items-center space-x-2">
+                          <User className="h-4 w-4" />
+                          <span>Profile Settings</span>
+                        </div>
                       </Link>
                       <button
                         onClick={() => {
                           setIsUserMenuOpen(false);
                           handleLogout();
                         }}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex items-center w-full component-spacing text-body-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
                       >
                         <LogOut className="h-4 w-4 mr-2" />
                         Sign Out
@@ -238,7 +224,7 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                 </div>
               </>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Link to="/auth/login">
                   <Button variant="outline" size="sm">
                     Sign In
@@ -253,10 +239,11 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             )}
 
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            <div className="lg:hidden">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                className="component-spacing rounded-md text-gray-600 hover:text-primary-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all duration-200"
+                aria-label="Toggle mobile menu"
               >
                 {isMobileMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -270,57 +257,95 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
+          <div className="lg:hidden animate-slide-down">
+            <div className="container-responsive py-2 stack-sm bg-white border-t border-gray-200 shadow-md">
+              {/* Mobile Search */}
+              <div className="py-2">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search properties..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={handleSearch}
+                    className="input-field pl-10"
+                  />
+                </div>
+              </div>
+              
+              {/* Mobile Navigation Items */}
               {navigationItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    item.current
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  className={`block px-3 py-2 rounded-md text-body transition-colors duration-200 ${
+                    location.pathname === item.href
+                      ? 'text-primary-600 bg-primary-50'
+                      : 'text-gray-700 hover:text-primary-600 hover:bg-gray-100'
                   }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
-              
-              {/* Mobile Search */}
-              <div className="px-3 py-2">
-                <form onSubmit={handleSearch} className="flex items-center">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search properties..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    type="submit"
-                    className="ml-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    <Search className="h-4 w-4" />
-                  </button>
-                </form>
-              </div>
 
-              {!user && (
-                <div className="px-3 py-2 space-y-2">
+              {user ? (
+                <div className="pt-4 pb-3 border-t border-gray-200">
+                  <div className="flex items-center px-3">
+                    <div className="w-10 h-10 bg-primary-600 rounded-full flex-center">
+                      <span className="text-label text-white">
+                        {user.firstName?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                    <div className="ml-3">
+                      <div className="text-body font-medium text-gray-800">{user.firstName} {user.lastName}</div>
+                      <div className="text-caption">{user.email}</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 stack-sm">
+                    <Link
+                      to="/dashboard"
+                      className="block px-3 py-2 rounded-md text-body text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/profile"
+                      className="block px-3 py-2 rounded-md text-body text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors duration-200"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-3 py-2 rounded-md text-body text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-4 pb-3 border-t border-gray-200 stack-sm">
                   <Link
                     to="/auth/login"
-                    className="block w-full text-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="block px-3 py-2 rounded-md text-body text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors duration-200"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Sign In
+                    Sign in
                   </Link>
                   <Link
                     to="/auth/register"
-                    className="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                    className="block px-3 py-2 rounded-md text-body text-primary-600 hover:bg-primary-50 transition-colors duration-200"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Sign Up
+                    Sign up
                   </Link>
                 </div>
               )}

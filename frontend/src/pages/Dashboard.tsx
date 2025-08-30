@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, CardBadge, CardStats } from '../components/ui/Card';
 import {
   Home,
   Plus,
@@ -262,7 +263,7 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="container-responsive component-spacing">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -293,81 +294,102 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="container-responsive section-spacing">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Properties</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalProperties}</p>
+        <div className="grid-dashboard-stats mb-8">
+          <Card variant="elevated" size="md" interactive>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardDescription className="text-sm font-medium text-gray-600 mb-1">
+                    Total Properties
+                  </CardDescription>
+                  <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                    {stats.totalProperties}
+                  </CardTitle>
+                  <CardBadge variant="secondary" size="sm">
+                    {stats.activeListings} active listings
+                  </CardBadge>
+                </div>
+                <div className="bg-blue-100 rounded-full p-3 flex-shrink-0 ml-4">
+                  <Home className="h-6 w-6 text-blue-600" />
+                </div>
               </div>
-              <div className="bg-blue-100 rounded-full p-3">
-                <Home className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <span className="text-sm text-gray-600">{stats.activeListings} active listings</span>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
+          <Card variant="elevated" size="md" interactive>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardDescription className="text-sm font-medium text-gray-600 mb-1">
+                    Total Views
+                  </CardDescription>
+                  <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                    {stats.totalViews.toLocaleString()}
+                  </CardTitle>
+                  <CardBadge variant="success" size="sm">
+                    +{stats.viewsChange}% from last month
+                  </CardBadge>
+                </div>
+                <div className="bg-green-100 rounded-full p-3 flex-shrink-0 ml-4">
+                  <Eye className="h-6 w-6 text-green-600" />
+                </div>
               </div>
-              <div className="bg-green-100 rounded-full p-3">
-                <Eye className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center">
-              <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-600">+{stats.viewsChange}% from last month</span>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Enquiries</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalEnquiries}</p>
+          <Card variant="elevated" size="md" interactive>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardDescription className="text-sm font-medium text-gray-600 mb-1">
+                    Total Enquiries
+                  </CardDescription>
+                  <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                    {stats.totalEnquiries}
+                  </CardTitle>
+                  <CardBadge variant="destructive" size="sm">
+                    {stats.enquiriesChange}% from last month
+                  </CardBadge>
+                </div>
+                <div className="bg-yellow-100 rounded-full p-3 flex-shrink-0 ml-4">
+                  <MessageSquare className="h-6 w-6 text-yellow-600" />
+                </div>
               </div>
-              <div className="bg-yellow-100 rounded-full p-3">
-                <MessageSquare className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center">
-              <ArrowDownRight className="h-4 w-4 text-red-500 mr-1" />
-              <span className="text-sm text-red-600">{stats.enquiriesChange}% from last month</span>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
-                <p className="text-3xl font-bold text-gray-900">£{stats.monthlyRevenue.toLocaleString()}</p>
+          <Card variant="elevated" size="md" interactive>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardDescription className="text-sm font-medium text-gray-600 mb-1">
+                    Monthly Revenue
+                  </CardDescription>
+                  <CardTitle className="text-3xl font-bold text-gray-900 mb-2">
+                    £{stats.monthlyRevenue.toLocaleString()}
+                  </CardTitle>
+                  <CardBadge variant="success" size="sm">
+                    +{stats.revenueChange}% from last month
+                  </CardBadge>
+                </div>
+                <div className="bg-purple-100 rounded-full p-3 flex-shrink-0 ml-4">
+                  <PoundSterling className="h-6 w-6 text-purple-600" />
+                </div>
               </div>
-              <div className="bg-purple-100 rounded-full p-3">
-                <PoundSterling className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center">
-              <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-600">+{stats.revenueChange}% from last month</span>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Properties Section */}
-            <div className="bg-white rounded-lg shadow-sm">
-              <div className="p-6 border-b border-gray-200">
+            <Card variant="outlined" size="lg">
+              <CardHeader className="p-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">My Properties</h2>
+                  <CardTitle className="text-lg font-semibold text-gray-900">My Properties</CardTitle>
                   <div className="flex items-center space-x-4">
                     <select
                       value={filterStatus}
@@ -383,14 +405,14 @@ const Dashboard: React.FC = () => {
                     </select>
                     <div className="flex items-center space-x-2">
                       <Button
-                        variant={viewMode === 'grid' ? 'default' : 'outline'}
+                        variant={viewMode === 'grid' ? 'primary' : 'outline'}
                         size="sm"
                         onClick={() => setViewMode('grid')}
                       >
                         <Grid className="h-4 w-4" />
                       </Button>
                       <Button
-                        variant={viewMode === 'list' ? 'default' : 'outline'}
+                        variant={viewMode === 'list' ? 'primary' : 'outline'}
                         size="sm"
                         onClick={() => setViewMode('list')}
                       >
@@ -399,11 +421,11 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </CardHeader>
 
-              <div className="p-6">
+              <CardContent className="p-6">
                 {viewMode === 'grid' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid-listing-cards">
                     {filteredProperties.map(property => (
                       <PropertyCard key={property.id} property={property} />
                     ))}
@@ -415,107 +437,135 @@ const Dashboard: React.FC = () => {
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Performance Chart */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">Performance Overview</h3>
-              <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
-                <div className="text-center text-gray-600">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-4" />
-                  <p>Performance charts coming soon</p>
-                  <p className="text-sm">Views, enquiries, and revenue trends</p>
+            <Card variant="outlined" size="lg">
+              <CardHeader className="p-6 pb-4">
+                <CardTitle className="text-lg font-semibold">Performance Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100">
+                  <div className="text-center text-gray-600">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p className="font-medium">Performance charts coming soon</p>
+                    <p className="text-sm">Views, enquiries, and revenue trends</p>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <Link to="/properties/add">
-                  <Button className="w-full justify-start">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add New Property
-                  </Button>
-                </Link>
-                <Link to="/properties">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Search className="h-4 w-4 mr-2" />
-                    Search Properties
-                  </Button>
-                </Link>
-                <Link to="/reports">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Generate Report
-                  </Button>
-                </Link>
-                <Link to="/market-analysis">
-                  <Button variant="outline" className="w-full justify-start">
-                    <TrendingUp className="h-4 w-4 mr-2" />
-                    Market Analysis
-                  </Button>
-                </Link>
-              </div>
-            </div>
+            <Card variant="outlined" size="md">
+              <CardHeader className="p-6 pb-4">
+                <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="space-y-3">
+                  <Link to="/properties/add">
+                    <Button className="w-full justify-start">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Property
+                    </Button>
+                  </Link>
+                  <Link to="/properties">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Search className="h-4 w-4 mr-2" />
+                      Search Properties
+                    </Button>
+                  </Link>
+                  <Link to="/reports">
+                    <Button variant="outline" className="w-full justify-start">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Generate Report
+                    </Button>
+                  </Link>
+                  <Link to="/market-analysis">
+                    <Button variant="outline" className="w-full justify-start">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Market Analysis
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-              <div className="space-y-4">
-                {activities.slice(0, 5).map(activity => (
-                  <div key={activity.id} className="flex items-start space-x-3">
-                    <div className="bg-blue-100 rounded-full p-2 flex-shrink-0">
-                      {getActivityIcon(activity.type)}
+            <Card variant="outlined" size="md">
+              <CardHeader className="p-6 pb-4">
+                <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="px-6">
+                <div className="space-y-4">
+                  {activities.slice(0, 5).map(activity => (
+                    <div key={activity.id} className="flex items-start space-x-3">
+                      <div className="bg-blue-100 rounded-full p-2 flex-shrink-0">
+                        {getActivityIcon(activity.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                        <p className="text-sm text-gray-600 truncate">{activity.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                      <p className="text-sm text-gray-600 truncate">{activity.description}</p>
-                      <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4">
+                  ))}
+                </div>
+              </CardContent>
+              <CardFooter className="px-6 pb-6 pt-4">
                 <Link to="/activity" className="text-sm text-blue-600 hover:text-blue-800 flex items-center">
                   View all activity
                   <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
-              </div>
-            </div>
+              </CardFooter>
+            </Card>
 
             {/* Upcoming Tasks */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">Upcoming Tasks</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
-                  <AlertCircle className="h-5 w-5 text-yellow-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Property inspection due</p>
-                    <p className="text-xs text-gray-600">Modern 2-Bed Apartment - Tomorrow</p>
-                  </div>
+            <Card variant="outlined" size="md">
+              <CardHeader className="p-6 pb-4">
+                <CardTitle className="text-lg font-semibold">Upcoming Tasks</CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="space-y-3">
+                  <Card variant="ghost" size="sm" className="bg-yellow-50 border-yellow-200">
+                    <CardContent className="p-3">
+                      <div className="flex items-center space-x-3">
+                        <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Property inspection due</p>
+                          <p className="text-xs text-gray-600">Modern 2-Bed Apartment - Tomorrow</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card variant="ghost" size="sm" className="bg-blue-50 border-blue-200">
+                    <CardContent className="p-3">
+                      <div className="flex items-center space-x-3">
+                        <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Client viewing</p>
+                          <p className="text-xs text-gray-600">Victorian Terrace - Friday 2PM</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card variant="ghost" size="sm" className="bg-green-50 border-green-200">
+                    <CardContent className="p-3">
+                      <div className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-900">Contract review</p>
+                          <p className="text-xs text-gray-600">Luxury Penthouse - Next week</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Client viewing</p>
-                    <p className="text-xs text-gray-600">Victorian Terrace - Friday 2PM</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Contract review</p>
-                    <p className="text-xs text-gray-600">Luxury Penthouse - Next week</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -526,63 +576,80 @@ const Dashboard: React.FC = () => {
 // Property Card Component
 const PropertyCard: React.FC<{ property: Property }> = ({ property }) => {
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+    <Card variant="outlined" size="md" interactive className="overflow-hidden group">
       <div className="relative">
         <img
           src={property.image}
           alt={property.title}
-          className="w-full h-40 object-cover"
+          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="absolute top-2 left-2">
-          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(property.status)}`}>
+        <div className="absolute top-3 left-3">
+          <CardBadge 
+            variant={property.status === 'active' ? 'success' : property.status === 'pending' ? 'warning' : 'secondary'}
+            size="sm"
+          >
             {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-          </span>
+          </CardBadge>
         </div>
-        <div className="absolute top-2 right-2">
-          <span className={`px-2 py-1 rounded text-xs font-medium text-white ${
-            property.type === 'sale' ? 'bg-green-600' : 'bg-blue-600'
-          }`}>
+        <div className="absolute top-3 right-3">
+          <CardBadge 
+            variant={property.type === 'sale' ? 'success' : 'info'}
+            size="sm"
+          >
             For {property.type === 'sale' ? 'Sale' : 'Rent'}
-          </span>
+          </CardBadge>
         </div>
       </div>
       
-      <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-1 truncate">{property.title}</h3>
-        <p className="text-gray-600 text-sm mb-2 flex items-center">
-          <MapPin className="h-3 w-3 mr-1" />
+      <CardContent className="p-4">
+        <CardTitle className="text-lg font-semibold text-gray-900 mb-1 truncate">
+          {property.title}
+        </CardTitle>
+        <CardDescription className="text-gray-600 text-sm mb-3 flex items-center">
+          <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
           {property.location}
-        </p>
+        </CardDescription>
         
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-lg font-bold text-gray-900">
+        <div className="mb-4">
+          <span className="text-xl font-bold text-gray-900">
             £{property.price.toLocaleString()}
-            {property.type === 'rent' && <span className="text-sm text-gray-600">/month</span>}
+            {property.type === 'rent' && <span className="text-sm text-gray-600 font-normal">/month</span>}
           </span>
         </div>
         
-        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
-          <span className="flex items-center">
-            <Bed className="h-3 w-3 mr-1" />
-            {property.bedrooms}
-          </span>
-          <span className="flex items-center">
-            <Bath className="h-3 w-3 mr-1" />
-            {property.bathrooms}
-          </span>
-          <span className="flex items-center">
-            <Square className="h-3 w-3 mr-1" />
-            {property.sqft} sqft
-          </span>
+        <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
+          <div className="flex items-center justify-center">
+            <Bed className="h-4 w-4 mr-1" />
+            <span>{property.bedrooms}</span>
+          </div>
+          <div className="flex items-center justify-center">
+            <Bath className="h-4 w-4 mr-1" />
+            <span>{property.bathrooms}</span>
+          </div>
+          <div className="flex items-center justify-center">
+            <Square className="h-4 w-4 mr-1" />
+            <span>{property.sqft}</span>
+          </div>
         </div>
         
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-          <span>{property.views} views</span>
-          <span>{property.enquiries} enquiries</span>
-          <span>{property.daysOnMarket} days</span>
-        </div>
-        
-        <div className="flex space-x-2">
+        <CardStats className="grid grid-cols-3 gap-2 text-xs text-gray-500 mb-4">
+          <div className="text-center">
+            <div className="font-medium">{property.views}</div>
+            <div>views</div>
+          </div>
+          <div className="text-center">
+            <div className="font-medium">{property.enquiries}</div>
+            <div>enquiries</div>
+          </div>
+          <div className="text-center">
+            <div className="font-medium">{property.daysOnMarket}</div>
+            <div>days</div>
+          </div>
+        </CardStats>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0">
+        <div className="flex space-x-2 w-full">
           <Link to={`/property/${property.id}`} className="flex-1">
             <Button size="sm" className="w-full">
               <Eye className="h-3 w-3 mr-1" />
@@ -596,86 +663,100 @@ const PropertyCard: React.FC<{ property: Property }> = ({ property }) => {
             <Trash2 className="h-3 w-3" />
           </Button>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 
 // Property List Item Component
 const PropertyListItem: React.FC<{ property: Property }> = ({ property }) => {
   return (
-    <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-shrink-0">
-          <img
-            src={property.image}
-            alt={property.title}
-            className="w-20 h-16 object-cover rounded"
-          />
-          <div className="absolute -top-1 -right-1">
-            <span className={`px-1 py-0.5 rounded text-xs font-medium ${getStatusColor(property.status)}`}>
-              {property.status}
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="font-semibold text-gray-900 truncate">{property.title}</h3>
-              <p className="text-gray-600 text-sm flex items-center">
-                <MapPin className="h-3 w-3 mr-1" />
-                {property.location}
-              </p>
-            </div>
-            <div className="text-right">
-              <span className="text-lg font-bold text-gray-900">
-                £{property.price.toLocaleString()}
-                {property.type === 'rent' && <span className="text-sm text-gray-600">/month</span>}
-              </span>
+    <Card variant="outlined" size="sm" interactive>
+      <CardContent className="p-4">
+        <div className="flex items-center space-x-4">
+          <div className="relative flex-shrink-0">
+            <img
+              src={property.image}
+              alt={property.title}
+              className="w-20 h-16 object-cover rounded-lg"
+            />
+            <div className="absolute -top-1 -right-1">
+              <CardBadge 
+                variant={property.status === 'active' ? 'success' : property.status === 'pending' ? 'warning' : 'secondary'}
+                size="xs"
+              >
+                {property.status}
+              </CardBadge>
             </div>
           </div>
           
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center space-x-4 text-sm text-gray-600">
-              <span className="flex items-center">
-                <Bed className="h-3 w-3 mr-1" />
-                {property.bedrooms} beds
-              </span>
-              <span className="flex items-center">
-                <Bath className="h-3 w-3 mr-1" />
-                {property.bathrooms} baths
-              </span>
-              <span className="flex items-center">
-                <Square className="h-3 w-3 mr-1" />
-                {property.sqft} sqft
-              </span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1 min-w-0 mr-4">
+                <CardTitle className="text-base font-semibold text-gray-900 truncate mb-1">
+                  {property.title}
+                </CardTitle>
+                <CardDescription className="text-gray-600 text-sm flex items-center">
+                  <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                  {property.location}
+                </CardDescription>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <span className="text-lg font-bold text-gray-900">
+                  £{property.price.toLocaleString()}
+                  {property.type === 'rent' && <span className="text-sm text-gray-600 font-normal">/month</span>}
+                </span>
+                <CardBadge 
+                  variant={property.type === 'sale' ? 'success' : 'info'}
+                  size="xs"
+                  className="ml-2"
+                >
+                  {property.type === 'sale' ? 'Sale' : 'Rent'}
+                </CardBadge>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-4 text-xs text-gray-500">
-              <span>{property.views} views</span>
-              <span>{property.enquiries} enquiries</span>
-              <span>{property.daysOnMarket} days</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4 text-sm text-gray-600">
+                <span className="flex items-center">
+                  <Bed className="h-3 w-3 mr-1" />
+                  {property.bedrooms}
+                </span>
+                <span className="flex items-center">
+                  <Bath className="h-3 w-3 mr-1" />
+                  {property.bathrooms}
+                </span>
+                <span className="flex items-center">
+                  <Square className="h-3 w-3 mr-1" />
+                  {property.sqft} sqft
+                </span>
+              </div>
+              
+              <CardStats className="flex items-center space-x-3 text-xs text-gray-500">
+                <span>{property.views} views</span>
+                <span>{property.enquiries} enquiries</span>
+                <span>{property.daysOnMarket} days</span>
+              </CardStats>
             </div>
           </div>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Link to={`/property/${property.id}`}>
-            <Button size="sm">
-              <Eye className="h-3 w-3 mr-1" />
-              View
+          
+          <div className="flex items-center space-x-2 flex-shrink-0">
+            <Link to={`/property/${property.id}`}>
+              <Button size="sm">
+                <Eye className="h-3 w-3 mr-1" />
+                View
+              </Button>
+            </Link>
+            <Button variant="outline" size="sm">
+              <Edit className="h-3 w-3" />
             </Button>
-          </Link>
-          <Button variant="outline" size="sm">
-            <Edit className="h-3 w-3" />
-          </Button>
-          <Button variant="outline" size="sm">
-            <Trash2 className="h-3 w-3" />
-          </Button>
+            <Button variant="outline" size="sm">
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

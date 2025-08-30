@@ -733,7 +733,7 @@ const PropertySearch: React.FC<PropertySearchProps> = ({
               </Button>
               
               <Button
-                variant="default"
+                variant="primary"
                 size="sm"
                 onClick={() => onPropertySelect?.(property)}
               >

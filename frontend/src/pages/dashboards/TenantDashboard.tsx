@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Calendar,
   AlertTriangle,
+  AlertCircle,
   CheckCircle,
   Clock,
   Plus,
@@ -30,7 +31,20 @@ import {
   TrendingUp,
   TrendingDown,
   PieChart,
-  Zap
+  Zap,
+  Calculator,
+  Users,
+  Heart,
+  Star,
+  Camera,
+  FileImage,
+  Percent,
+  PoundSterling,
+  Activity,
+  Target,
+  Award,
+  Eye,
+  X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -46,10 +60,16 @@ interface TenantStats {
   maintenanceRequests: number;
   totalPaid: number;
   daysUntilLeaseEnd: number;
+  daysUntilPayment: number;
   paymentHistory: number;
   avgMonthlyUtilities: number;
   onTimePayments: number;
   totalSavings: number;
+  creditScore: number;
+  renewalEligible: boolean;
+  communityRating: number;
+  energyEfficiency: string;
+  monthlyBudget: number;
 }
 
 interface Property {
@@ -110,6 +130,51 @@ interface Document {
   url: string;
 }
 
+interface UtilityBill {
+  id: string;
+  type: 'electricity' | 'gas' | 'water' | 'internet' | 'council_tax';
+  provider: string;
+  amount: number;
+  dueDate: string;
+  period: string;
+  status: 'paid' | 'pending' | 'overdue';
+  usage: number;
+  unit: string;
+  previousReading?: number;
+  currentReading?: number;
+}
+
+interface LeaseRenewal {
+  id: string;
+  currentLeaseEnd: string;
+  renewalDeadline: string;
+  proposedRent: number;
+  renewalTerms: string[];
+  status: 'pending' | 'offered' | 'accepted' | 'declined';
+  landlordNotes?: string;
+}
+
+interface CommunityPost {
+  id: string;
+  author: string;
+  title: string;
+  content: string;
+  category: 'general' | 'maintenance' | 'events' | 'recommendations';
+  date: string;
+  likes: number;
+  replies: number;
+  isLiked: boolean;
+}
+
+interface Neighbor {
+  id: string;
+  name: string;
+  apartment: string;
+  rating: number;
+  isVerified: boolean;
+  lastSeen: string;
+}
+
 const TenantDashboard: React.FC = () => {
   const { user } = useAuthStore();
   const [stats, setStats] = useState<TenantStats>({
@@ -119,19 +184,30 @@ const TenantDashboard: React.FC = () => {
     maintenanceRequests: 0,
     totalPaid: 0,
     daysUntilLeaseEnd: 0,
+    daysUntilPayment: 0,
     paymentHistory: 0,
     avgMonthlyUtilities: 0,
     onTimePayments: 0,
-    totalSavings: 0
+    totalSavings: 0,
+    creditScore: 0,
+    renewalEligible: false,
+    communityRating: 0,
+    energyEfficiency: '',
+    monthlyBudget: 0
   });
   const [property, setProperty] = useState<Property | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'payments' | 'maintenance' | 'documents' | 'property' | 'analytics' | 'utilities'>('overview');
+  const [utilityBills, setUtilityBills] = useState<UtilityBill[]>([]);
+  const [leaseRenewal, setLeaseRenewal] = useState<LeaseRenewal | null>(null);
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
+  const [neighbors, setNeighbors] = useState<Neighbor[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'payments' | 'maintenance' | 'documents' | 'property' | 'analytics' | 'utilities' | 'community'>('overview');
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedUtilityPeriod, setSelectedUtilityPeriod] = useState('current');
 
   useEffect(() => {
     loadDashboardData();
@@ -180,7 +256,12 @@ const TenantDashboard: React.FC = () => {
         paymentHistory: 8,
         avgMonthlyUtilities: 180,
         onTimePayments: 8,
-        totalSavings: 240
+        totalSavings: 240,
+        creditScore: 742,
+        renewalEligible: true,
+        communityRating: 4.8,
+        energyEfficiency: 'B',
+        monthlyBudget: 1500
       });
 
       setPayments([
@@ -266,6 +347,98 @@ const TenantDashboard: React.FC = () => {
           url: '#'
         }
       ]);
+
+      setUtilityBills([
+        {
+          id: 'u1',
+          type: 'electricity',
+          provider: 'British Gas',
+          amount: 89.50,
+          dueDate: '2024-02-15',
+          period: 'January 2024',
+          status: 'pending',
+          usage: 450,
+          unit: 'kWh',
+          previousReading: 12450,
+          currentReading: 12900
+        },
+        {
+          id: 'u2',
+          type: 'gas',
+          provider: 'British Gas',
+          amount: 67.20,
+          dueDate: '2024-02-15',
+          period: 'January 2024',
+          status: 'pending',
+          usage: 320,
+          unit: 'kWh'
+        },
+        {
+          id: 'u3',
+          type: 'water',
+          provider: 'United Utilities',
+          amount: 45.80,
+          dueDate: '2024-02-20',
+          period: 'Q4 2023',
+          status: 'paid',
+          usage: 15,
+          unit: 'm³'
+        }
+      ]);
+
+      setLeaseRenewal({
+        id: 'lr1',
+        currentLeaseEnd: '2024-05-31',
+        renewalDeadline: '2024-03-31',
+        proposedRent: 1250,
+        renewalTerms: ['12-month lease extension', '£50 monthly rent increase', 'Updated energy efficiency requirements'],
+        status: 'offered',
+        landlordNotes: 'We value you as a tenant and would like to offer a renewal with a modest increase to cover rising costs.'
+      });
+
+      setCommunityPosts([
+        {
+          id: 'cp1',
+          author: 'Sarah M. (Apt 3B)',
+          title: 'Building Wi-Fi Issues',
+          content: 'Has anyone else been experiencing slow internet speeds lately? Wondering if it\'s a building-wide issue.',
+          category: 'maintenance',
+          date: '2024-01-25',
+          likes: 5,
+          replies: 3,
+          isLiked: false
+        },
+        {
+          id: 'cp2',
+          author: 'Mike R. (Apt 1A)',
+          title: 'Neighborhood Watch Meeting',
+          content: 'Monthly neighborhood watch meeting this Saturday at 7 PM in the community room. All welcome!',
+          category: 'events',
+          date: '2024-01-24',
+          likes: 12,
+          replies: 8,
+          isLiked: true
+        }
+      ]);
+
+      setNeighbors([
+        {
+          id: 'n1',
+          name: 'Sarah Mitchell',
+          apartment: '3B',
+          rating: 4.8,
+          isVerified: true,
+          lastSeen: '2024-01-25'
+        },
+        {
+          id: 'n2',
+          name: 'Mike Rodriguez',
+          apartment: '1A',
+          rating: 4.9,
+          isVerified: true,
+          lastSeen: '2024-01-24'
+        }
+      ]);
     } catch (error) {
       showToast.error('Failed to load dashboard data');
     } finally {
@@ -325,104 +498,332 @@ const TenantDashboard: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="container-responsive component-spacing">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+      <div className="stack-lg">
+        <h1 className="text-heading-1">
           Welcome back, {user?.firstName}!
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-body-lg text-gray-600">
           Manage your tenancy and stay updated with your property.
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+      {/* Enhanced Stats Cards */}
+      <div className="grid-responsive gap-md stack-lg">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="card-compact">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Home className="h-6 w-6 text-blue-600" />
+                <Home className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Current Rent</p>
-                <p className="text-2xl font-bold text-gray-900">£{stats.currentRent}</p>
-                <p className="text-xs text-gray-500">per month</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-label text-gray-600">Current Rent</p>
+                <p className="text-heading-3">£{stats.currentRent}</p>
+                <p className="text-caption text-blue-600 flex items-center">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  per month
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="card-compact">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CreditCard className="h-6 w-6 text-green-600" />
+              <div className={`p-2 rounded-lg ${
+                stats.daysUntilPayment <= 3 ? 'bg-red-100' : 'bg-green-100'
+              }`}>
+                <CreditCard className={`h-5 w-5 sm:h-6 sm:w-6 ${
+                  stats.daysUntilPayment <= 3 ? 'text-red-600' : 'text-green-600'
+                }`} />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Next Payment</p>
-                <p className="text-lg font-bold text-gray-900">{new Date(stats.nextPaymentDue).toLocaleDateString()}</p>
-                <p className="text-xs text-gray-500">due date</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-label text-gray-600">Next Payment</p>
+                <p className="text-heading-4">{new Date(stats.nextPaymentDue).toLocaleDateString()}</p>
+                <p className={`text-caption flex items-center ${
+                  stats.daysUntilPayment <= 3 ? 'text-red-600' : 'text-green-600'
+                }`}>
+                  <Clock className="h-3 w-3 mr-1" />
+                  {stats.daysUntilPayment <= 3 ? `Due in ${stats.daysUntilPayment} days` : 'On time'}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="card-compact">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-purple-600" />
+              <div className={`p-2 rounded-lg ${
+                stats.daysUntilLeaseEnd <= 60 ? 'bg-orange-100' : 'bg-purple-100'
+              }`}>
+                <Calendar className={`h-5 w-5 sm:h-6 sm:w-6 ${
+                  stats.daysUntilLeaseEnd <= 60 ? 'text-orange-600' : 'text-purple-600'
+                }`} />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Lease Ends</p>
-                <p className="text-lg font-bold text-gray-900">{stats.daysUntilLeaseEnd}</p>
-                <p className="text-xs text-gray-500">days remaining</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-label text-gray-600">Lease Ends</p>
+                <p className="text-heading-4">{stats.daysUntilLeaseEnd}</p>
+                <p className={`text-caption flex items-center ${
+                  stats.daysUntilLeaseEnd <= 60 ? 'text-orange-600' : 'text-purple-600'
+                }`}>
+                  <Calendar className="h-3 w-3 mr-1" />
+                  {stats.daysUntilLeaseEnd <= 60 ? 'Renewal needed' : 'days remaining'}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="card-compact">
             <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Wrench className="h-6 w-6 text-orange-600" />
+              <div className={`p-2 rounded-lg ${
+                stats.maintenanceRequests > 0 ? 'bg-orange-100' : 'bg-green-100'
+              }`}>
+                <Wrench className={`h-5 w-5 sm:h-6 sm:w-6 ${
+                  stats.maintenanceRequests > 0 ? 'text-orange-600' : 'text-green-600'
+                }`} />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Maintenance</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.maintenanceRequests}</p>
-                <p className="text-xs text-gray-500">active requests</p>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-label text-gray-600">Maintenance</p>
+                <p className="text-heading-3">{stats.maintenanceRequests}</p>
+                <p className={`text-caption flex items-center ${
+                  stats.maintenanceRequests > 0 ? 'text-orange-600' : 'text-green-600'
+                }`}>
+                  <Activity className="h-3 w-3 mr-1" />
+                  {stats.maintenanceRequests > 0 ? 'active requests' : 'all resolved'}
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="card-compact">
             <div className="flex items-center">
               <div className="p-2 bg-indigo-100 rounded-lg">
                 <Banknote className="h-6 w-6 text-indigo-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Paid</p>
-                <p className="text-2xl font-bold text-gray-900">£{stats.totalPaid.toLocaleString()}</p>
-                <p className="text-xs text-gray-500">this tenancy</p>
+                <p className="text-label text-gray-600">Total Paid</p>
+                <p className="text-heading-3">£{stats.totalPaid.toLocaleString()}</p>
+                <p className="text-caption text-indigo-600 flex items-center">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  this tenancy
+                </p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="card-compact">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
                 <Shield className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Deposit</p>
-                <p className="text-2xl font-bold text-gray-900">£{stats.currentRent * 1.5}</p>
-                <p className="text-xs text-gray-500">protected</p>
+                <p className="text-label text-gray-600">Deposit</p>
+                <p className="text-heading-3">£{stats.currentRent * 1.5}</p>
+                <p className="text-caption text-yellow-600 flex items-center">
+                  <Shield className="h-3 w-3 mr-1" />
+                  protected
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Smart Notifications */}
+      <div className="stack-md section-spacing">
+        {/* Lease Renewal Notification */}
+        {stats.daysUntilLeaseEnd <= 90 && (
+          <Card className="border-orange-200 bg-orange-50">
+            <CardContent className="card-spacious">
+              <div className="flex items-start space-x-4">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <AlertTriangle className="h-6 w-6 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-heading-4 text-orange-900 stack-sm">
+                    Lease Renewal Notice
+                  </h3>
+                  <p className="text-body text-orange-800 stack-md">
+                    Your lease expires in {stats.daysUntilLeaseEnd} days. 
+                    {stats.renewalEligible 
+                      ? 'You are eligible for renewal. Contact your landlord to discuss renewal terms.' 
+                      : 'Please contact your landlord to discuss your options.'}
+                  </p>
+                  <div className="flex gap-sm">
+                    <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
+                      <Phone className="h-4 w-4 mr-2" />
+                      Contact Landlord
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-orange-300 text-orange-700">
+                      <FileText className="h-4 w-4 mr-2" />
+                      View Lease Terms
+                    </Button>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="text-orange-600">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Payment Reminder */}
+        {stats.daysUntilPayment <= 3 && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="card-spacious">
+              <div className="flex items-start space-x-4">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <AlertCircle className="h-6 w-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-heading-4 text-red-900 stack-sm">
+                    Payment Due Soon
+                  </h3>
+                  <p className="text-body text-red-800 stack-md">
+                    Your rent payment of £{stats.currentRent.toLocaleString()} is due on {new Date(stats.nextPaymentDue).toLocaleDateString()} 
+                    ({stats.daysUntilPayment} {stats.daysUntilPayment === 1 ? 'day' : 'days'} remaining).
+                  </p>
+                  <div className="flex gap-sm">
+                    <Button 
+                      size="sm" 
+                      className="bg-red-600 hover:bg-red-700"
+                      onClick={() => setShowPaymentModal(true)}
+                    >
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Pay Now
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-red-300 text-red-700">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Set Reminder
+                    </Button>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="text-red-600">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Maintenance Alert */}
+        {stats.maintenanceRequests > 0 && (
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardContent className="card-spacious">
+              <div className="flex items-start space-x-4">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Wrench className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-heading-4 text-yellow-900 stack-sm">
+                    Active Maintenance Requests
+                  </h3>
+                  <p className="text-body text-yellow-800 stack-md">
+                    You have {stats.maintenanceRequests} active maintenance {stats.maintenanceRequests === 1 ? 'request' : 'requests'}. 
+                    Track progress and communicate with your landlord.
+                  </p>
+                  <div className="flex gap-sm">
+                    <Button 
+                      size="sm" 
+                      className="bg-yellow-600 hover:bg-yellow-700"
+                      onClick={() => setActiveTab('maintenance')}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Requests
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-yellow-300 text-yellow-700"
+                      onClick={() => setShowMaintenanceModal(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Report New Issue
+                    </Button>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="text-yellow-600">
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Enhanced KPI Cards */}
+      <div className="grid-responsive gap-md section-spacing">
+        <Card>
+          <CardContent className="card-compact">
+            <div className="flex items-center">
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
+              </div>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-label text-gray-600">Credit Score</p>
+                <p className="text-heading-3">{stats.creditScore}</p>
+                <p className="text-caption text-emerald-600">Excellent</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="card-compact">
+            <div className="flex items-center">
+              <div className={`p-2 rounded-lg ${
+                stats.renewalEligible ? 'bg-green-100' : 'bg-red-100'
+              }`}>
+                <Award className={`h-5 w-5 sm:h-6 sm:w-6 ${
+                  stats.renewalEligible ? 'text-green-600' : 'text-red-600'
+                }`} />
+              </div>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-label text-gray-600">Renewal Status</p>
+                <p className="text-heading-4">
+                  {stats.renewalEligible ? 'Eligible' : 'Not Eligible'}
+                </p>
+                <p className="text-caption text-gray-500">for lease renewal</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Star className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+              </div>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Community Rating</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.communityRating}</p>
+                <p className="text-xs text-blue-600">★★★★★</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+              </div>
+              <div className="ml-3 sm:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Energy Rating</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{stats.energyEfficiency}</p>
+                <p className="text-xs text-green-600">Very Efficient</p>
               </div>
             </div>
           </CardContent>
@@ -431,7 +832,7 @@ const TenantDashboard: React.FC = () => {
 
       {/* Navigation Tabs */}
       <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex flex-wrap gap-2 sm:gap-0 sm:space-x-4 lg:space-x-8">
           {[
             { id: 'overview', label: 'Overview', icon: Home },
             { id: 'payments', label: 'Payments', icon: CreditCard },
@@ -439,21 +840,23 @@ const TenantDashboard: React.FC = () => {
             { id: 'documents', label: 'Documents', icon: FileText },
             { id: 'property', label: 'Property Info', icon: MapPin },
             { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-            { id: 'utilities', label: 'Utilities', icon: Zap }
+            { id: 'utilities', label: 'Utilities', icon: Zap },
+            { id: 'community', label: 'Community', icon: Users }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`flex items-center py-2 px-1 sm:px-2 border-b-2 font-medium text-xs sm:text-sm min-w-0 ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Icon className="h-4 w-4 mr-2" />
-                {tab.label}
+                <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             );
           })}
@@ -1365,6 +1768,184 @@ const TenantDashboard: React.FC = () => {
                   <div key={index} className="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                     <span className="text-sm text-gray-700">{tip}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Community Tab */}
+      {activeTab === 'community' && (
+        <div className="space-y-6">
+          {/* Community Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Community Rating</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.communityRating}/5</p>
+                    <div className="flex items-center mt-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`h-4 w-4 ${
+                          i < Math.floor(stats.communityRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                        }`} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="p-3 bg-yellow-100 rounded-full">
+                    <Star className="h-6 w-6 text-yellow-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Neighbors</p>
+                    <p className="text-2xl font-bold text-gray-900">{neighbors.length}</p>
+                    <p className="text-sm text-green-600">Connected</p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-full">
+                    <Users className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Community Posts</p>
+                    <p className="text-2xl font-bold text-gray-900">{communityPosts.length}</p>
+                    <p className="text-sm text-blue-600">This week</p>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-full">
+                    <MessageSquare className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Community Posts */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Community Forum</span>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Post
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {communityPosts.map((post) => (
+                  <div key={post.id} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="font-medium text-gray-900">{post.author}</h4>
+                            <span className="text-sm text-gray-500">{post.date}</span>
+                          </div>
+                          <h3 className="font-semibold text-gray-900 mt-1">{post.title}</h3>
+                          <p className="text-gray-700 mt-2">{post.content}</p>
+                          <div className="flex items-center space-x-4 mt-3">
+                            <button className="flex items-center space-x-1 text-gray-500 hover:text-blue-600">
+                              <Heart className="h-4 w-4" />
+                              <span className="text-sm">{post.likes}</span>
+                            </button>
+                            <button className="flex items-center space-x-1 text-gray-500 hover:text-blue-600">
+                              <MessageSquare className="h-4 w-4" />
+                              <span className="text-sm">{post.replies}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        post.category === 'maintenance' ? 'bg-red-100 text-red-800' :
+                        post.category === 'community' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Neighbors */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Neighbors</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {neighbors.map((neighbor) => (
+                  <div key={neighbor.id} className="flex items-center space-x-4 p-4 border rounded-lg">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                      <User className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">{neighbor.name}</h4>
+                      <p className="text-sm text-gray-500">{neighbor.unit}</p>
+                      <div className="flex items-center mt-1">
+                        <div className={`w-2 h-2 rounded-full mr-2 ${
+                          neighbor.status === 'online' ? 'bg-green-400' : 'bg-gray-400'
+                        }`} />
+                        <span className="text-xs text-gray-500">
+                          {neighbor.status === 'online' ? 'Online' : 'Offline'}
+                        </span>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Building Amenities */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Building Amenities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { name: 'Gym', status: 'available', hours: '6 AM - 10 PM' },
+                  { name: 'Laundry Room', status: 'busy', hours: '24/7' },
+                  { name: 'Rooftop Terrace', status: 'available', hours: '8 AM - 8 PM' },
+                  { name: 'Parking Garage', status: 'available', hours: '24/7' },
+                  { name: 'Mail Room', status: 'available', hours: '9 AM - 6 PM' },
+                  { name: 'Community Room', status: 'reserved', hours: '9 AM - 9 PM' }
+                ].map((amenity, index) => (
+                  <div key={index} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-gray-900">{amenity.name}</h4>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        amenity.status === 'available' ? 'bg-green-100 text-green-800' :
+                        amenity.status === 'busy' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {amenity.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500">{amenity.hours}</p>
                   </div>
                 ))}
               </div>

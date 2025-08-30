@@ -13,6 +13,8 @@ import {
   Permission
 } from '../types';
 import { authService } from '../services/authService';
+import { supabase } from '../lib/supabase';
+import { messagingService } from '../services/messaging.service';
 
 interface AuthState {
   user: User | null;
@@ -38,6 +40,7 @@ interface AuthState {
   verifyEmail: (data: EmailVerification) => Promise<void>;
   resendVerification: (email: string) => Promise<void>;
   getCurrentUser: () => Promise<void>;
+  initializeAuth: () => Promise<void>;
   hasPermission: (permission: Permission) => boolean;
   hasRole: (role: UserRole) => boolean;
   canAccessRoute: (route: string) => boolean;
@@ -71,6 +74,13 @@ export const useAuthStore = create<AuthState>()(
             twoFactorEnabled: response.user.twoFactorEnabled || false,
             permissions: response.user.permissions || []
           });
+          
+          // Initialize messaging service with auth
+          try {
+            await messagingService.reinitializeWithAuth();
+          } catch (error) {
+            console.error('Failed to initialize messaging service:', error);
+          }
         } catch (error: any) {
           set({
             error: error.message || 'Login failed',
@@ -123,6 +133,14 @@ export const useAuthStore = create<AuthState>()(
           twoFactorEnabled: false,
           permissions: []
         });
+        
+        // Disconnect messaging service
+        try {
+          messagingService.disconnectWebSocket();
+        } catch (error) {
+          console.error('Failed to disconnect messaging service:', error);
+        }
+        
         // Clear any stored tokens
         localStorage.removeItem('auth-storage');
       },
@@ -231,21 +249,98 @@ export const useAuthStore = create<AuthState>()(
       },
 
       getCurrentUser: async () => {
-        const { token } = get();
-        if (!token) return;
-        
         try {
           const user = await authService.getCurrentUser();
-          set({ 
-            user,
-            isEmailVerified: user?.emailVerified || false,
-            twoFactorEnabled: user?.twoFactorEnabled || false,
-            permissions: user?.permissions || []
-          });
+          if (user) {
+            set({ 
+              user,
+              isAuthenticated: true,
+              isEmailVerified: user?.emailVerified || false,
+              twoFactorEnabled: user?.twoFactorEnabled || false,
+              permissions: user?.permissions || []
+            });
+          } else {
+            await get().logout();
+          }
         } catch (error) {
           // If getting current user fails, logout
           await get().logout();
         }
+      },
+
+      // Initialize Supabase auth listener
+      initializeAuth: async () => {
+        // Get initial session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          const user = await authService.getCurrentUser();
+          if (user) {
+            set({
+              user,
+              token: session.access_token,
+              refreshToken: session.refresh_token,
+              isAuthenticated: true,
+              isEmailVerified: user.emailVerified || false,
+              twoFactorEnabled: user.twoFactorEnabled || false,
+              permissions: user.permissions || []
+            });
+            
+            // Initialize messaging service with auth
+            try {
+              await messagingService.reinitializeWithAuth();
+            } catch (error) {
+              console.error('Failed to initialize messaging service:', error);
+            }
+          }
+        }
+
+        // Listen for auth changes
+        supabase.auth.onAuthStateChange(async (event: string, session: any) => {
+          if (event === 'SIGNED_IN' && session?.user) {
+            const user = await authService.getCurrentUser();
+            if (user) {
+              set({
+                user,
+                token: session.access_token,
+                refreshToken: session.refresh_token,
+                isAuthenticated: true,
+                isEmailVerified: user.emailVerified || false,
+                twoFactorEnabled: user.twoFactorEnabled || false,
+                permissions: user.permissions || []
+              });
+              
+              // Initialize messaging service with auth
+              try {
+                await messagingService.reinitializeWithAuth();
+              } catch (error) {
+                console.error('Failed to initialize messaging service:', error);
+              }
+            }
+          } else if (event === 'SIGNED_OUT') {
+            set({
+              user: null,
+              token: null,
+              refreshToken: null,
+              isAuthenticated: false,
+              isEmailVerified: false,
+              twoFactorEnabled: false,
+              permissions: []
+            });
+            
+            // Disconnect messaging service
+            try {
+              messagingService.disconnectWebSocket();
+            } catch (error) {
+              console.error('Failed to disconnect messaging service:', error);
+            }
+          } else if (event === 'TOKEN_REFRESHED' && session) {
+            set({
+              token: session.access_token,
+              refreshToken: session.refresh_token
+            });
+          }
+        });
       },
 
       hasPermission: (permission: Permission) => {

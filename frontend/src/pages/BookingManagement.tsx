@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, MapPin, User, Phone, Mail, Eye, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Video, Home, Bell, Filter, Search, ChevronLeft, ChevronRight, Plus, Download, Upload, Settings, RefreshCw, Zap, Award, Target } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, Phone, Mail, Eye, Edit, Trash2, CheckCircle, XCircle, AlertCircle, Video, Home, Bell, Filter, Search, ChevronLeft, ChevronRight, ChevronDown, Plus, Download, Upload, Settings, RefreshCw, Zap, Award, Target, FileText } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -382,156 +382,180 @@ const BookingManagement: React.FC = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Booking Management</h1>
-              <p className="text-gray-600 mt-1">Manage property viewings and appointments</p>
-            </div>
-            <div className="flex gap-3 mt-4 lg:mt-0">
-              <div className="flex border border-gray-300 rounded-md">
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-3 py-2 text-sm ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-                >
-                  List
-                </button>
-                <button
-                  onClick={() => setViewMode('calendar')}
-                  className={`px-3 py-2 text-sm ${viewMode === 'calendar' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700'}`}
-                >
-                  Calendar
-                </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Booking Management</h1>
+                <p className="text-gray-600 mt-1">Manage property viewings and appointments</p>
               </div>
-              <Button onClick={() => setShowBookingModal(true)}>
-                <Calendar className="h-4 w-4 mr-2" />
-                New Booking
-              </Button>
+              <div className="flex gap-3 mt-4 lg:mt-0">
+                <div className="flex border border-gray-300 rounded-md shadow-inner">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-3 py-2 text-sm transition-all duration-200 ${viewMode === 'list' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    List
+                  </button>
+                  <button
+                    onClick={() => setViewMode('calendar')}
+                    className={`px-3 py-2 text-sm transition-all duration-200 ${viewMode === 'calendar' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    Calendar
+                  </button>
+                </div>
+                <Button onClick={() => setShowBookingModal(true)} className="transition-all duration-200 hover:scale-105 shadow-lg">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  New Booking
+                </Button>
+              </div>
             </div>
-          </div>
         </div>
       </div>
 
       {/* Stats */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6">
+          <Card className="p-6 hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Calendar className="h-6 w-6 text-blue-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Today's Bookings</p>
-                <p className="text-2xl font-bold text-gray-900">{todayBookings.length}</p>
+                <p className="text-sm font-medium text-blue-600">Today's Bookings</p>
+                <p className="text-2xl font-bold text-blue-700">{todayBookings.length}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-br from-green-50 to-green-100 border-green-200">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
                 <Clock className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Upcoming</p>
-                <p className="text-2xl font-bold text-gray-900">{upcomingBookings.length}</p>
+                <p className="text-sm font-medium text-green-600">Upcoming</p>
+                <p className="text-2xl font-bold text-green-700">{upcomingBookings.length}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
                 <AlertCircle className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">{pendingBookings.length}</p>
+                <p className="text-sm font-medium text-yellow-600">Pending</p>
+                <p className="text-2xl font-bold text-yellow-700">{pendingBookings.length}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="p-6 hover:shadow-lg transition-all duration-200 hover:scale-105 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <CheckCircle className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Bookings</p>
-                <p className="text-2xl font-bold text-gray-900">{bookings.length}</p>
+                <p className="text-sm font-medium text-purple-600">Total Bookings</p>
+                <p className="text-2xl font-bold text-purple-700">{bookings.length}</p>
               </div>
             </div>
           </Card>
         </div>
 
         {/* Enhanced Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search bookings, clients, properties..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+        <Card className="mb-6 shadow-lg border-0 bg-gradient-to-r from-gray-50 to-white">
+          <div className="p-6">
+            <div className="form-group">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <Filter className="w-5 h-5 mr-2 text-blue-600" />
+                Filter Bookings
+              </h3>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search bookings, clients, properties..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <Input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="w-full input-field focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  />
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="rescheduled">Rescheduled</option>
+                </select>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                >
+                  <option value="all">All Types</option>
+                  <option value="viewing">Viewing</option>
+                  <option value="virtual_viewing">Virtual Viewing</option>
+                  <option value="valuation">Valuation</option>
+                  <option value="inspection">Inspection</option>
+                </select>
+                
+                <button
+                  onClick={() => setShowConflicts(!showConflicts)}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-200 hover:scale-105 ${
+                    showConflicts 
+                      ? 'bg-red-50 border-red-200 text-red-700' 
+                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Filter className="h-4 w-4 inline mr-2" />
+                  {showConflicts ? 'Hide Conflicts' : 'Show Conflicts'}
+                </button>
+                
+                <button
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                  className={`px-4 py-2 rounded-lg border transition-all duration-200 hover:scale-105 ${
+                    autoRefresh 
+                      ? 'bg-green-50 border-green-200 text-green-700' 
+                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <RefreshCw className={`h-4 w-4 inline mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
+                  Auto Refresh
+                </button>
+              </div>
+              <div className="flex justify-end mt-4 space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setTypeFilter('all');
+                    setSelectedDate('');
+                    setSearchTerm('');
+                  }}
+                  className="btn-secondary transition-all duration-200 hover:scale-105"
+                >
+                  Clear Filters
+                </Button>
+              </div>
             </div>
           </div>
-          <div className="flex-1">
-            <Input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="rescheduled">Rescheduled</option>
-          </select>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All Types</option>
-            <option value="viewing">Viewing</option>
-            <option value="virtual_viewing">Virtual Viewing</option>
-            <option value="valuation">Valuation</option>
-            <option value="inspection">Inspection</option>
-          </select>
-          
-          <button
-            onClick={() => setShowConflicts(!showConflicts)}
-            className={`px-4 py-2 rounded-lg border transition-colors ${
-              showConflicts 
-                ? 'bg-red-50 border-red-200 text-red-700' 
-                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <Filter className="h-4 w-4 inline mr-2" />
-            {showConflicts ? 'Hide Conflicts' : 'Show Conflicts'}
-          </button>
-          
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`px-4 py-2 rounded-lg border transition-colors ${
-              autoRefresh 
-                ? 'bg-green-50 border-green-200 text-green-700' 
-                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <RefreshCw className={`h-4 w-4 inline mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-            Auto Refresh
-          </button>
-        </div>
+        </Card>
 
         {/* Calendar/List View */}
         {viewMode === 'calendar' ? (
@@ -615,7 +639,7 @@ const BookingManagement: React.FC = () => {
           /* Bookings List */
           <div className="space-y-6">
             {filteredBookings.map((booking) => (
-            <Card key={booking.id} className={`overflow-hidden ${booking.conflictDetected ? 'border-red-200 bg-red-50' : ''}`}>
+            <Card key={booking.id} className={`overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] border-0 bg-gradient-to-r from-white to-gray-50 ${booking.conflictDetected ? 'border-red-200 bg-gradient-to-r from-red-50 to-red-100' : ''}`}>
               <div className="p-6">
                 {/* Conflict Alert */}
                 {booking.conflictDetected && (
@@ -630,117 +654,153 @@ const BookingManagement: React.FC = () => {
                   </div>
                 )}
                 
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-6">
                   <div className="flex items-start gap-4">
-                    <img
-                      src={booking.propertyImage}
-                      alt={booking.propertyTitle}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
+                    <div className="relative group">
+                      <img
+                        src={booking.propertyImage}
+                        alt={booking.propertyTitle}
+                        className="w-24 h-24 object-cover rounded-xl shadow-md transition-transform duration-200 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-xl transition-all duration-200"></div>
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-3">
                         <div className="flex items-center gap-2">
-                          {getTypeIcon(booking.type)}
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <div className="p-2 bg-blue-100 rounded-lg transition-transform duration-200 hover:scale-110">
+                            {getTypeIcon(booking.type)}
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-900">
                             {booking.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                           </h3>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
+                        <Badge className={`${getStatusColor(booking.status)} px-3 py-1 font-semibold shadow-sm`}>
                           {booking.status.replace('_', ' ').toUpperCase()}
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(booking.priority)}`}>
+                        </Badge>
+                        <Badge className={`${getPriorityColor(booking.priority)} px-3 py-1 font-semibold shadow-sm`}>
                           {booking.priority.toUpperCase()}
-                        </span>
+                        </Badge>
                         {booking.autoReminder && (
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <Badge className="bg-blue-100 text-blue-800 px-3 py-1 font-semibold shadow-sm">
                             <Bell className="h-3 w-3 inline mr-1" />
                             Auto Reminder
-                          </span>
+                          </Badge>
                         )}
                       </div>
-                      <h4 className="text-md font-medium text-gray-900 mb-1">
+                      <h4 className="text-lg font-bold text-gray-900 mb-2">
                         {booking.propertyTitle}
                       </h4>
-                      <div className="flex items-center text-gray-600 text-sm mb-2">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {booking.propertyAddress}
+                      <div className="flex items-center text-gray-600 text-sm mb-3">
+                        <MapPin className="h-4 w-4 mr-2 text-blue-500" />
+                        <span className="font-medium">{booking.propertyAddress}</span>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {new Date(booking.scheduledDate).toLocaleDateString()}
+                      <div className="flex items-center gap-6 text-sm">
+                        <div className="flex items-center bg-gray-100 px-3 py-2 rounded-lg">
+                          <Calendar className="h-4 w-4 mr-2 text-green-500" />
+                          <span className="font-semibold text-gray-800">{new Date(booking.scheduledDate).toLocaleDateString()}</span>
                         </div>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {booking.scheduledTime} ({booking.duration} min)
+                        <div className="flex items-center bg-gray-100 px-3 py-2 rounded-lg">
+                          <Clock className="h-4 w-4 mr-2 text-purple-500" />
+                          <span className="font-semibold text-gray-800">{booking.scheduledTime} ({booking.duration} min)</span>
                         </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-3">
                     {!booking.reminderSent && booking.autoReminder && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => sendAutomatedReminder(booking.id)}
-                        className="text-blue-600 hover:text-blue-700"
+                        className="btn-secondary transition-all duration-200 hover:scale-105 shadow-md"
                       >
-                        <Bell className="h-4 w-4 mr-1" />
+                        <Bell className="h-4 w-4 mr-2" />
                         Send Reminder
                       </Button>
                     )}
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-4 w-4" />
-                    </Button>
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => handleDeleteBooking(booking.id)}
+                      className="btn-secondary transition-all duration-200 hover:scale-105 shadow-md"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="destructive"
+                      onClick={() => handleDeleteBooking(booking.id)}
+                      className="transition-all duration-200 hover:scale-105 shadow-md"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
                     </Button>
                   </div>
                 </div>
 
                 {/* Client Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{booking.clientName}</p>
-                      <p className="text-xs text-gray-600">Client</p>
+                <div className="bg-gray-50 p-4 rounded-lg border mb-6">
+                  <h5 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                    <User className="h-4 w-4 mr-2 text-blue-500" />
+                    Client Information
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="form-group">
+                      <div className="flex items-center gap-3 p-3 bg-white rounded-lg border hover:shadow-md transition-shadow duration-200">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <User className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{booking.clientName}</p>
+                          <p className="text-xs text-gray-500 font-medium">Client</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-900">{booking.clientEmail}</p>
-                      <p className="text-xs text-gray-600">Email</p>
+                    <div className="form-group">
+                      <div className="flex items-center gap-3 p-3 bg-white rounded-lg border hover:shadow-md transition-shadow duration-200">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <Mail className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{booking.clientEmail}</p>
+                          <p className="text-xs text-gray-500 font-medium">Email</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-900">{booking.clientPhone}</p>
-                      <p className="text-xs text-gray-600">Phone</p>
+                    <div className="form-group">
+                      <div className="flex items-center gap-3 p-3 bg-white rounded-lg border hover:shadow-md transition-shadow duration-200">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <Phone className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{booking.clientPhone}</p>
+                          <p className="text-xs text-gray-500 font-medium">Phone</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Notes and Special Requirements */}
                 {(booking.notes || booking.specialRequirements) && (
-                  <div className="mb-4">
+                  <div className="mb-6">
                     {booking.notes && (
-                      <div className="mb-2">
-                        <p className="text-sm font-medium text-gray-700">Notes:</p>
-                        <p className="text-sm text-gray-600">{booking.notes}</p>
+                      <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm font-semibold text-blue-700 mb-2 flex items-center">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Notes:
+                        </p>
+                        <p className="text-sm text-blue-800 leading-relaxed">{booking.notes}</p>
                       </div>
                     )}
                     {booking.specialRequirements && (
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Special Requirements:</p>
-                        <p className="text-sm text-gray-600">{booking.specialRequirements}</p>
+                      <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                        <p className="text-sm font-semibold text-amber-700 mb-2 flex items-center">
+                          <AlertCircle className="h-4 w-4 mr-2" />
+                          Special Requirements:
+                        </p>
+                        <p className="text-sm text-amber-800 leading-relaxed">{booking.specialRequirements}</p>
                       </div>
                     )}
                   </div>
@@ -800,29 +860,34 @@ const BookingManagement: React.FC = () => {
                 )}
 
                 {/* Status Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className={`flex items-center gap-1 ${
-                      booking.reminderSent ? 'text-green-600' : 'text-gray-400'
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 border-t border-gray-200 gap-4">
+                  <div className="flex flex-wrap items-center gap-3 text-sm">
+                    <span className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                      booking.reminderSent 
+                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                        : 'bg-gray-100 text-gray-500 border border-gray-200'
                     }`}>
-                      <CheckCircle className="h-4 w-4" />
+                      <CheckCircle className="h-3.5 w-3.5" />
                       Reminder {booking.reminderSent ? 'Sent' : 'Pending'}
                     </span>
-                    <span className={`flex items-center gap-1 ${
-                      booking.confirmationSent ? 'text-green-600' : 'text-gray-400'
+                    <span className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                      booking.confirmationSent 
+                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                        : 'bg-gray-100 text-gray-500 border border-gray-200'
                     }`}>
-                      <CheckCircle className="h-4 w-4" />
+                      <CheckCircle className="h-3.5 w-3.5" />
                       Confirmation {booking.confirmationSent ? 'Sent' : 'Pending'}
                     </span>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {booking.status === 'pending' && (
                       <Button 
                         size="sm" 
                         onClick={() => handleStatusChange(booking.id, 'confirmed')}
+                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                       >
-                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <CheckCircle className="h-4 w-4 mr-1.5" />
                         Confirm
                       </Button>
                     )}
@@ -830,8 +895,9 @@ const BookingManagement: React.FC = () => {
                       <Button 
                         size="sm" 
                         onClick={() => handleStatusChange(booking.id, 'completed')}
+                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                       >
-                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <CheckCircle className="h-4 w-4 mr-1.5" />
                         Complete
                       </Button>
                     )}
@@ -840,11 +906,33 @@ const BookingManagement: React.FC = () => {
                         size="sm" 
                         variant="outline"
                         onClick={() => handleStatusChange(booking.id, 'cancelled')}
+                        className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
                       >
-                        <XCircle className="h-4 w-4 mr-1" />
+                        <XCircle className="h-4 w-4 mr-1.5" />
                         Cancel
                       </Button>
                     )}
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedBookingForReminder(booking)
+                        setShowReminderModal(true)
+                      }}
+                      className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                    >
+                      <Bell className="h-4 w-4 mr-1.5" />
+                      Remind
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setEditingBooking(booking)}
+                      className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200"
+                    >
+                      <Edit className="h-4 w-4 mr-1.5" />
+                      Edit
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -972,184 +1060,283 @@ const BookingManagement: React.FC = () => {
             );
           })()}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Booking Type
-              </label>
-              <select
-                value={bookingForm.type}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, type: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="viewing">Property Viewing</option>
-                <option value="virtual_viewing">Virtual Viewing</option>
-                <option value="valuation">Property Valuation</option>
-                <option value="inspection">Property Inspection</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Duration (minutes)
-              </label>
-              <Input
-                type="number"
-                value={bookingForm.duration}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                min="15"
-                step="15"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Client Name
-            </label>
-            <Input
-              type="text"
-              value={bookingForm.clientName}
-              onChange={(e) => setBookingForm(prev => ({ ...prev, clientName: e.target.value }))}
-              placeholder="Enter client name"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <Input
-                type="email"
-                value={bookingForm.clientEmail}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, clientEmail: e.target.value }))}
-                placeholder="client@email.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Phone
-              </label>
-              <Input
-                type="tel"
-                value={bookingForm.clientPhone}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, clientPhone: e.target.value }))}
-                placeholder="+44 7xxx xxx xxx"
-              />
+          {/* Booking Details Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+              Booking Details
+            </h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <Home className="h-4 w-4 mr-2 text-blue-600" />
+                  Booking Type
+                </label>
+                <div className="relative">
+                  <select
+                    value={bookingForm.type}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, type: e.target.value }))}
+                    className="input-field pl-10 appearance-none bg-white transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                  >
+                    <option value="viewing">Property Viewing</option>
+                    <option value="virtual_viewing">Virtual Viewing</option>
+                    <option value="valuation">Property Valuation</option>
+                    <option value="inspection">Property Inspection</option>
+                  </select>
+                  <Eye className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <Clock className="h-4 w-4 mr-2 text-blue-600" />
+                  Duration (minutes)
+                </label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    value={bookingForm.duration}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                    min="15"
+                    step="15"
+                    className="input-field pl-10 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                    placeholder="60"
+                  />
+                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date
-              </label>
-              <Input
-                type="date"
-                value={bookingForm.scheduledDate}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, scheduledDate: e.target.value }))}
-                min={new Date().toISOString().split('T')[0]}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Time
-              </label>
-              <Input
-                type="time"
-                value={bookingForm.scheduledTime}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, scheduledTime: e.target.value }))}
-              />
-            </div>
-          </div>
+          {/* Client Information Section */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <User className="h-5 w-5 mr-2 text-green-600" />
+              Client Information
+            </h3>
+            <div className="space-y-4">
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <User className="h-4 w-4 mr-2 text-green-600" />
+                  Client Name
+                </label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={bookingForm.clientName}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, clientName: e.target.value }))}
+                    placeholder="Enter client full name"
+                    className="input-field pl-10 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                  />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Notes
-            </label>
-            <textarea
-              value={bookingForm.notes}
-              onChange={(e) => setBookingForm(prev => ({ ...prev, notes: e.target.value }))}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Additional notes about the booking"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Special Requirements
-            </label>
-            <textarea
-              value={bookingForm.specialRequirements}
-              onChange={(e) => setBookingForm(prev => ({ ...prev, specialRequirements: e.target.value }))}
-              rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Any special requirements or accessibility needs"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Priority Level
-            </label>
-            <select
-              value={bookingForm.priority || 'medium'}
-              onChange={(e) => setBookingForm(prev => ({ ...prev, priority: e.target.value as any }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="low">Low Priority</option>
-              <option value="medium">Medium Priority</option>
-              <option value="high">High Priority</option>
-              <option value="urgent">Urgent</option>
-            </select>
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-700">Automated Settings</h4>
-            
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="autoReminder"
-                checked={bookingForm.autoReminder !== false}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, autoReminder: e.target.checked }))}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="autoReminder" className="text-sm text-gray-700">
-                Enable automated reminders
-              </label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="followUpRequired"
-                checked={bookingForm.followUpRequired === true}
-                onChange={(e) => setBookingForm(prev => ({ ...prev, followUpRequired: e.target.checked }))}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="followUpRequired" className="text-sm text-gray-700">
-                Require follow-up after completion
-              </label>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="form-group">
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                    <Mail className="h-4 w-4 mr-2 text-green-600" />
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type="email"
+                      value={bookingForm.clientEmail}
+                      onChange={(e) => setBookingForm(prev => ({ ...prev, clientEmail: e.target.value }))}
+                      placeholder="client@email.com"
+                      className="input-field pl-10 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                    />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                    <Phone className="h-4 w-4 mr-2 text-green-600" />
+                    Phone Number
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type="tel"
+                      value={bookingForm.clientPhone}
+                      onChange={(e) => setBookingForm(prev => ({ ...prev, clientPhone: e.target.value }))}
+                      placeholder="+44 7xxx xxx xxx"
+                      className="input-field pl-10 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                    />
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              variant="outline"
+          {/* Scheduling Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Calendar className="h-5 w-5 mr-2 text-blue-600" />
+              Scheduling
+            </h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <Calendar className="h-4 w-4 mr-2 text-blue-600" />
+                  Date
+                </label>
+                <div className="relative">
+                  <Input
+                    type="date"
+                    value={bookingForm.scheduledDate}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="input-field pl-10 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                  />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <Clock className="h-4 w-4 mr-2 text-blue-600" />
+                  Time
+                </label>
+                <div className="relative">
+                  <Input
+                    type="time"
+                    value={bookingForm.scheduledTime}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                    className="input-field pl-10 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                  />
+                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Information Section */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-xl border border-purple-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-purple-600" />
+              Additional Information
+            </h3>
+            <div className="space-y-4">
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <FileText className="h-4 w-4 mr-2 text-purple-600" />
+                  Notes
+                </label>
+                <div className="relative">
+                  <textarea
+                    value={bookingForm.notes}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, notes: e.target.value }))}
+                    rows={3}
+                    className="input-field pl-10 pt-3 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400 resize-none"
+                    placeholder="Additional notes about the booking, client preferences, or important details"
+                  />
+                  <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <AlertCircle className="h-4 w-4 mr-2 text-purple-600" />
+                  Special Requirements
+                </label>
+                <div className="relative">
+                  <textarea
+                    value={bookingForm.specialRequirements}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, specialRequirements: e.target.value }))}
+                    rows={2}
+                    className="input-field pl-10 pt-3 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400 resize-none"
+                    placeholder="Any special requirements, accessibility needs, or specific instructions"
+                  />
+                  <AlertCircle className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Priority & Settings Section */}
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Target className="h-5 w-5 mr-2 text-orange-600" />
+              Priority & Settings
+            </h3>
+            <div className="space-y-4">
+              <div className="form-group">
+                <label className="flex items-center text-sm font-medium text-gray-700 mb-3">
+                  <Target className="h-4 w-4 mr-2 text-orange-600" />
+                  Priority Level
+                </label>
+                <div className="relative">
+                  <select
+                    value={bookingForm.priority || 'medium'}
+                    onChange={(e) => setBookingForm(prev => ({ ...prev, priority: e.target.value as any }))}
+                    className="input-field pl-10 transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-gray-400 appearance-none bg-white"
+                  >
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                  <Target className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-gray-700 flex items-center">
+                  <Settings className="h-4 w-4 mr-2 text-orange-600" />
+                  Automated Settings
+                </h4>
+                
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-orange-100 hover:border-orange-200 transition-colors">
+                    <input
+                      type="checkbox"
+                      id="autoReminder"
+                      checked={bookingForm.autoReminder !== false}
+                      onChange={(e) => setBookingForm(prev => ({ ...prev, autoReminder: e.target.checked }))}
+                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 h-4 w-4"
+                    />
+                    <label htmlFor="autoReminder" className="text-sm text-gray-700 flex items-center cursor-pointer">
+                      <Bell className="h-4 w-4 mr-2 text-orange-600" />
+                      Enable automated reminders
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-orange-100 hover:border-orange-200 transition-colors">
+                    <input
+                      type="checkbox"
+                      id="followUpRequired"
+                      checked={bookingForm.followUpRequired === true}
+                      onChange={(e) => setBookingForm(prev => ({ ...prev, followUpRequired: e.target.checked }))}
+                      className="rounded border-gray-300 text-orange-600 focus:ring-orange-500 h-4 w-4"
+                    />
+                    <label htmlFor="followUpRequired" className="text-sm text-gray-700 flex items-center cursor-pointer">
+                      <CheckCircle className="h-4 w-4 mr-2 text-orange-600" />
+                      Require follow-up after completion
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 pt-6 border-t border-gray-200">
+            <button
+              type="button"
               onClick={() => setShowBookingModal(false)}
-              className="flex-1"
+              className="btn-secondary flex-1 flex items-center justify-center gap-2 py-3 text-base font-medium transition-all duration-200 hover:scale-105"
             >
+              <XCircle className="h-5 w-5" />
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
+              type="button"
               onClick={handleSubmitBooking}
-              className="flex-1"
               disabled={!bookingForm.clientName || !bookingForm.clientEmail || !bookingForm.scheduledDate || !bookingForm.scheduledTime}
+              className="btn-primary flex-1 flex items-center justify-center gap-2 py-3 text-base font-medium transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
+              <Calendar className="h-5 w-5" />
               Create Booking
-            </Button>
+            </button>
           </div>
         </div>
       </Modal>

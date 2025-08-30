@@ -4,6 +4,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
+import { Search as SearchComponent } from '../components/ui/search';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Separator } from '../components/ui/separator';
@@ -105,15 +106,13 @@ function ConversationList({
             <Plus className="w-4 h-4" />
           </Button>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Search conversations..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        <Input
+          variant="search"
+          placeholder="Search conversations..."
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          size="default"
+        />
       </div>
       
       <ScrollArea className="flex-1">
@@ -529,18 +528,36 @@ function MessageInput({
       
       <div className="flex items-end space-x-2">
         <div className="flex-1">
-          <Textarea
-            ref={textareaRef}
+          <Input
             value={message}
             onChange={(e) => {
               setMessage(e.target.value);
               handleInputChange(e.target.value);
             }}
             onBlur={handleInputBlur}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Type a message..."
-            className="min-h-[40px] max-h-32 resize-none"
-            rows={1}
+            size="lg"
+            className="min-h-[48px]"
+            rightIcon={
+              <div className="flex items-center space-x-1">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-1 h-6 w-6"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="p-1 h-6 w-6"
+                >
+                  <Smile className="w-4 h-4" />
+                </Button>
+              </div>
+            }
           />
         </div>
         
@@ -552,14 +569,6 @@ function MessageInput({
             onChange={handleFileSelect}
             className="hidden"
           />
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 h-10 w-10"
-          >
-            <Paperclip className="w-4 h-4" />
-          </Button>
           
           <Button
             size="sm"

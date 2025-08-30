@@ -132,7 +132,7 @@ const ForgotPassword: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+      <div className="max-w-md w-full space-y-8 animate-fade-in">
         <div className="bg-white rounded-lg shadow-xl p-8">
           {/* Header */}
           <div className="text-center mb-8">
@@ -142,40 +142,41 @@ const ForgotPassword: React.FC = () => {
                 PropertyMasters UK
               </span>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Forgot Password?
+            <h2 className="text-heading-2 mb-2">
+              Reset your password
             </h2>
-            <p className="text-gray-600">
-              Enter your email address and we'll send you instructions to reset your password.
+            <p className="text-body-sm">
+              Enter your email address and we'll send you a link to reset your password
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+          <form onSubmit={handleSubmit} className="form-section">
+            <div className="form-group">
               <Input
                 id="email"
                 name="email"
                 type="email"
-                label="Email Address"
-                placeholder="Enter your email address"
+                label="Email address"
+                placeholder="Enter your email"
                 value={values.email}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touched.email ? errors.email : ''}
                 leftIcon={<Mail className="h-4 w-4" />}
                 required
+                className={`input-field transition-all duration-300 ${touched.email && errors.email ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
               />
             </div>
 
             <div>
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className={`w-full btn-primary transform transition-all duration-200 ${isLoading ? 'scale-95' : 'hover:scale-105'} ${!isValid || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 loading={isLoading}
                 disabled={!isValid || isLoading}
               >
-                Send Reset Instructions
+                {isLoading ? 'Sending reset link...' : 'Send reset link'}
               </Button>
             </div>
           </form>

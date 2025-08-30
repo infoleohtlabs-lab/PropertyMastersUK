@@ -320,19 +320,20 @@ const Settings: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="page-container">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-              <p className="text-gray-600 mt-1">Manage your account and system preferences</p>
+      <div className="page-header">
+        <div className="page-header-content">
+          <div className="page-header-main">
+            <div className="page-title-section">
+              <h1 className="page-title">Settings</h1>
+              <p className="page-description">Manage your account and system preferences</p>
             </div>
-            <div className="flex gap-3 mt-4 lg:mt-0">
+            <div className="page-actions">
               <Button
                 variant="outline"
                 onClick={() => setShowExportModal(true)}
+                className="btn-secondary"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Export Data
@@ -340,6 +341,7 @@ const Settings: React.FC = () => {
               <Button
                 onClick={handleSaveSettings}
                 disabled={loading}
+                className={`btn-primary ${loading ? 'btn-loading' : ''}`}
               >
                 {loading ? (
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -353,22 +355,18 @@ const Settings: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="page-content">
+        <div className="settings-layout">
           {/* Sidebar Navigation */}
-          <div className="lg:w-64">
-            <nav className="space-y-1">
+          <div className="settings-sidebar">
+            <nav className="settings-nav">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
+                    className={`nav-item ${activeTab === tab.id ? 'nav-item-active' : ''}`}
                   >
                     <Icon className="h-4 w-4" />
                     {tab.label}
@@ -379,35 +377,38 @@ const Settings: React.FC = () => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="settings-main">
             {/* Profile Settings */}
             {activeTab === 'profile' && (
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">Profile Information</h2>
+              <Card className="form-container">
+                <div className="section-header">
+                  <h2 className="section-title">Profile Information</h2>
+                  <p className="section-description">Update your personal information and preferences</p>
+                </div>
                 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-6">
-                    <div className="relative">
+                <div className="form-section">
+                  <div className="profile-header">
+                    <div className="avatar-container">
                       <img
                         src={userSettings.profile.avatar || `https://ui-avatars.com/api/?name=${userSettings.profile.firstName}+${userSettings.profile.lastName}&background=random`}
                         alt="Profile"
-                        className="w-20 h-20 rounded-full object-cover"
+                        className="avatar-image"
                       />
-                      <button className="absolute bottom-0 right-0 p-1 bg-blue-600 text-white rounded-full hover:bg-blue-700">
+                      <button className="avatar-upload-btn focus-ring">
                         <Upload className="h-3 w-3" />
                       </button>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">
+                    <div className="profile-info">
+                      <h3 className="profile-name">
                         {userSettings.profile.firstName} {userSettings.profile.lastName}
                       </h3>
-                      <p className="text-gray-600">{userSettings.profile.email}</p>
+                      <p className="profile-email">{userSettings.profile.email}</p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label className="form-label required">
                         First Name
                       </label>
                       <Input
@@ -417,11 +418,13 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, firstName: e.target.value }
                         }))}
+                        className="form-input focus-ring"
+                        placeholder="Enter your first name"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label required">
                         Last Name
                       </label>
                       <Input
@@ -431,11 +434,13 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, lastName: e.target.value }
                         }))}
+                        className="form-input focus-ring"
+                        placeholder="Enter your last name"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label required">
                         Email Address
                       </label>
                       <Input
@@ -445,11 +450,13 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, email: e.target.value }
                         }))}
+                        className="form-input focus-ring"
+                        placeholder="Enter your email address"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Phone Number
                       </label>
                       <Input
@@ -459,11 +466,13 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, phone: e.target.value }
                         }))}
+                        className="form-input focus-ring"
+                        placeholder="Enter your phone number"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Timezone
                       </label>
                       <select
@@ -472,7 +481,7 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, timezone: e.target.value }
                         }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="form-select focus-ring"
                       >
                         <option value="Europe/London">London (GMT)</option>
                         <option value="Europe/Paris">Paris (CET)</option>
@@ -482,8 +491,8 @@ const Settings: React.FC = () => {
                       </select>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Language
                       </label>
                       <select
@@ -492,7 +501,7 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, language: e.target.value }
                         }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="form-select focus-ring"
                       >
                         <option value="en">English</option>
                         <option value="fr">French</option>
@@ -502,8 +511,8 @@ const Settings: React.FC = () => {
                       </select>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Date Format
                       </label>
                       <select
@@ -512,7 +521,7 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, dateFormat: e.target.value }
                         }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="form-select focus-ring"
                       >
                         <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                         <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -520,8 +529,8 @@ const Settings: React.FC = () => {
                       </select>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Currency
                       </label>
                       <select
@@ -530,19 +539,19 @@ const Settings: React.FC = () => {
                           ...prev,
                           profile: { ...prev.profile, currency: e.target.value }
                         }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="form-select focus-ring"
                       >
                         <option value="GBP">British Pound (£)</option>
-                        <option value="USD">US Dollar ($)</option>
                         <option value="EUR">Euro (€)</option>
                       </select>
                     </div>
                   </div>
 
-                  <div className="pt-4">
+                  <div className="form-actions">
                     <Button
                       variant="outline"
                       onClick={() => setShowPasswordModal(true)}
+                      className="btn-secondary focus-ring"
                     >
                       <Key className="h-4 w-4 mr-2" />
                       Change Password
@@ -554,18 +563,21 @@ const Settings: React.FC = () => {
 
             {/* Notification Settings */}
             {activeTab === 'notifications' && (
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">Notification Preferences</h2>
+              <Card className="form-container">
+                <div className="section-header">
+                  <h2 className="section-title">Notification Preferences</h2>
+                  <p className="section-description">Manage how you receive notifications and updates</p>
+                </div>
                 
-                <div className="space-y-8">
+                <div className="form-section">
                   {/* Email Notifications */}
-                  <div>
-                    <h3 className="text-md font-medium text-gray-900 mb-4">Email Notifications</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Enable Email Notifications</p>
-                          <p className="text-sm text-gray-500">Receive notifications via email</p>
+                  <div className="settings-group">
+                    <h3 className="settings-group-title">Email Notifications</h3>
+                    <div className="settings-list">
+                      <div className="setting-item">
+                        <div className="setting-info">
+                          <p className="setting-label">Enable Email Notifications</p>
+                          <p className="setting-description">Receive notifications via email</p>
                         </div>
                         <input
                           type="checkbox"
@@ -577,12 +589,12 @@ const Settings: React.FC = () => {
                               email: { ...prev.notifications.email, enabled: e.target.checked }
                             }
                           }))}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="form-checkbox focus-ring"
                         />
                       </div>
                       
                       {userSettings.notifications.email.enabled && (
-                        <div className="ml-4 space-y-3 border-l-2 border-gray-200 pl-4">
+                        <div className="settings-sub-list">
                           {[
                             { key: 'marketing', label: 'Marketing emails', desc: 'Promotional content and updates' },
                             { key: 'updates', label: 'System updates', desc: 'Important system announcements' },
@@ -590,10 +602,10 @@ const Settings: React.FC = () => {
                             { key: 'payments', label: 'Payment notifications', desc: 'Payment confirmations and reminders' },
                             { key: 'viewings', label: 'Viewing notifications', desc: 'Property viewing confirmations and reminders' },
                           ].map((item) => (
-                            <div key={item.key} className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium text-gray-700">{item.label}</p>
-                                <p className="text-sm text-gray-500">{item.desc}</p>
+                            <div key={item.key} className="setting-item">
+                              <div className="setting-info">
+                                <p className="setting-label">{item.label}</p>
+                                <p className="setting-description">{item.desc}</p>
                               </div>
                               <input
                                 type="checkbox"
@@ -608,7 +620,7 @@ const Settings: React.FC = () => {
                                     }
                                   }
                                 }))}
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                className="form-checkbox focus-ring"
                               />
                             </div>
                           ))}
@@ -618,13 +630,13 @@ const Settings: React.FC = () => {
                   </div>
 
                   {/* SMS Notifications */}
-                  <div>
-                    <h3 className="text-md font-medium text-gray-900 mb-4">SMS Notifications</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Enable SMS Notifications</p>
-                          <p className="text-sm text-gray-500">Receive notifications via SMS</p>
+                  <div className="settings-group">
+                    <h3 className="settings-group-title">SMS Notifications</h3>
+                    <div className="settings-list">
+                      <div className="setting-item">
+                        <div className="setting-info">
+                          <p className="setting-label">Enable SMS Notifications</p>
+                          <p className="setting-description">Receive notifications via SMS</p>
                         </div>
                         <input
                           type="checkbox"
@@ -636,21 +648,21 @@ const Settings: React.FC = () => {
                               sms: { ...prev.notifications.sms, enabled: e.target.checked }
                             }
                           }))}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="form-checkbox focus-ring"
                         />
                       </div>
                       
                       {userSettings.notifications.sms.enabled && (
-                        <div className="ml-4 space-y-3 border-l-2 border-gray-200 pl-4">
+                        <div className="settings-sub-list">
                           {[
                             { key: 'urgent', label: 'Urgent notifications', desc: 'Emergency and urgent matters' },
                             { key: 'reminders', label: 'Reminders', desc: 'Appointment and payment reminders' },
                             { key: 'confirmations', label: 'Confirmations', desc: 'Booking and payment confirmations' },
                           ].map((item) => (
-                            <div key={item.key} className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium text-gray-700">{item.label}</p>
-                                <p className="text-sm text-gray-500">{item.desc}</p>
+                            <div key={item.key} className="setting-item">
+                              <div className="setting-info">
+                                <p className="setting-label">{item.label}</p>
+                                <p className="setting-description">{item.desc}</p>
                               </div>
                               <input
                                 type="checkbox"
@@ -665,7 +677,7 @@ const Settings: React.FC = () => {
                                     }
                                   }
                                 }))}
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                className="form-checkbox focus-ring"
                               />
                             </div>
                           ))}
@@ -675,13 +687,13 @@ const Settings: React.FC = () => {
                   </div>
 
                   {/* Push Notifications */}
-                  <div>
-                    <h3 className="text-md font-medium text-gray-900 mb-4">Push Notifications</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-700">Enable Push Notifications</p>
-                          <p className="text-sm text-gray-500">Receive push notifications on your devices</p>
+                  <div className="settings-group">
+                    <h3 className="settings-group-title">Push Notifications</h3>
+                    <div className="settings-list">
+                      <div className="setting-item">
+                        <div className="setting-info">
+                          <p className="setting-label">Enable Push Notifications</p>
+                          <p className="setting-description">Receive push notifications on your devices</p>
                         </div>
                         <input
                           type="checkbox"
@@ -693,21 +705,21 @@ const Settings: React.FC = () => {
                               push: { ...prev.notifications.push, enabled: e.target.checked }
                             }
                           }))}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="form-checkbox focus-ring"
                         />
                       </div>
                       
                       {userSettings.notifications.push.enabled && (
-                        <div className="ml-4 space-y-3 border-l-2 border-gray-200 pl-4">
+                        <div className="settings-sub-list">
                           {[
                             { key: 'desktop', label: 'Desktop notifications', desc: 'Show notifications on desktop' },
                             { key: 'mobile', label: 'Mobile notifications', desc: 'Show notifications on mobile app' },
                             { key: 'browser', label: 'Browser notifications', desc: 'Show notifications in browser' },
                           ].map((item) => (
-                            <div key={item.key} className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium text-gray-700">{item.label}</p>
-                                <p className="text-sm text-gray-500">{item.desc}</p>
+                            <div key={item.key} className="setting-item">
+                              <div className="setting-info">
+                                <p className="setting-label">{item.label}</p>
+                                <p className="setting-description">{item.desc}</p>
                               </div>
                               <input
                                 type="checkbox"
@@ -722,7 +734,7 @@ const Settings: React.FC = () => {
                                     }
                                   }
                                 }))}
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                className="form-checkbox focus-ring"
                               />
                             </div>
                           ))}
@@ -736,10 +748,12 @@ const Settings: React.FC = () => {
 
             {/* Privacy Settings */}
             {activeTab === 'privacy' && (
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">Privacy Settings</h2>
+              <Card className="form-container">
+                <div className="section-header">
+                  <h2 className="section-title">Privacy Settings</h2>
+                </div>
                 
-                <div className="space-y-6">
+                <div className="settings-list">
                   {[
                     { 
                       key: 'profileVisible', 
@@ -767,10 +781,10 @@ const Settings: React.FC = () => {
                       desc: 'Allow sharing of anonymized data for analytics' 
                     },
                   ].map((item) => (
-                    <div key={item.key} className="flex items-center justify-between py-4 border-b border-gray-200 last:border-b-0">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">{item.label}</p>
-                        <p className="text-sm text-gray-500">{item.desc}</p>
+                    <div key={item.key} className="setting-item">
+                      <div className="setting-info">
+                        <p className="setting-label">{item.label}</p>
+                        <p className="setting-description">{item.desc}</p>
                       </div>
                       <input
                         type="checkbox"
@@ -782,7 +796,7 @@ const Settings: React.FC = () => {
                             [item.key]: e.target.checked 
                           }
                         }))}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="form-checkbox focus-ring"
                       />
                     </div>
                   ))}
@@ -792,24 +806,26 @@ const Settings: React.FC = () => {
 
             {/* Security Settings */}
             {activeTab === 'security' && (
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">Security Settings</h2>
+              <Card className="form-container">
+                <div className="section-header">
+                  <h2 className="section-title">Security Settings</h2>
+                </div>
                 
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between py-4 border-b border-gray-200">
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Two-Factor Authentication</p>
-                      <p className="text-sm text-gray-500">Add an extra layer of security to your account</p>
+                <div className="settings-list">
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">Two-Factor Authentication</p>
+                      <p className="setting-description">Add an extra layer of security to your account</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-sm ${
-                        userSettings.security.twoFactorEnabled ? 'text-green-600' : 'text-gray-500'
+                    <div className="setting-actions">
+                      <span className={`setting-status ${
+                        userSettings.security.twoFactorEnabled ? 'status-enabled' : 'status-disabled'
                       }`}>
                         {userSettings.security.twoFactorEnabled ? 'Enabled' : 'Disabled'}
                       </span>
                       <Button
                         size="sm"
-                        variant={userSettings.security.twoFactorEnabled ? 'outline' : 'default'}
+                        variant={userSettings.security.twoFactorEnabled ? 'outline' : 'primary'}
                         onClick={() => setUserSettings(prev => ({
                           ...prev,
                           security: { 
@@ -817,16 +833,17 @@ const Settings: React.FC = () => {
                             twoFactorEnabled: !prev.security.twoFactorEnabled 
                           }
                         }))}
+                        className="focus-ring"
                       >
                         {userSettings.security.twoFactorEnabled ? 'Disable' : 'Enable'}
                       </Button>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between py-4 border-b border-gray-200">
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Login Alerts</p>
-                      <p className="text-sm text-gray-500">Get notified when someone logs into your account</p>
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">Login Alerts</p>
+                      <p className="setting-description">Get notified when someone logs into your account</p>
                     </div>
                     <input
                       type="checkbox"
@@ -838,16 +855,14 @@ const Settings: React.FC = () => {
                           loginAlerts: e.target.checked 
                         }
                       }))}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="form-checkbox focus-ring"
                     />
                   </div>
 
-                  <div className="py-4 border-b border-gray-200">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Session Timeout</p>
-                        <p className="text-sm text-gray-500">Automatically log out after inactivity</p>
-                      </div>
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">Session Timeout</p>
+                      <p className="setting-description">Automatically log out after inactivity</p>
                     </div>
                     <select
                       value={userSettings.security.sessionTimeout}
@@ -858,7 +873,7 @@ const Settings: React.FC = () => {
                           sessionTimeout: parseInt(e.target.value) 
                         }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="form-select focus-ring"
                     >
                       <option value={15}>15 minutes</option>
                       <option value={30}>30 minutes</option>
@@ -868,12 +883,10 @@ const Settings: React.FC = () => {
                     </select>
                   </div>
 
-                  <div className="py-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Password Expiry</p>
-                        <p className="text-sm text-gray-500">Require password change after specified days</p>
-                      </div>
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">Password Expiry</p>
+                      <p className="setting-description">Require password change after specified days</p>
                     </div>
                     <select
                       value={userSettings.security.passwordExpiry}
@@ -884,7 +897,7 @@ const Settings: React.FC = () => {
                           passwordExpiry: parseInt(e.target.value) 
                         }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="form-select focus-ring"
                     >
                       <option value={30}>30 days</option>
                       <option value={60}>60 days</option>
@@ -902,12 +915,14 @@ const Settings: React.FC = () => {
             {activeTab === 'system' && (
               <div className="space-y-6">
                 {/* General Settings */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-6">General System Settings</h2>
+                <Card className="form-container">
+                  <div className="section-header">
+                    <h2 className="section-title">General System Settings</h2>
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label className="form-label">
                         Site Name
                       </label>
                       <Input
@@ -917,11 +932,13 @@ const Settings: React.FC = () => {
                           ...prev,
                           general: { ...prev.general, siteName: e.target.value }
                         }))}
+                        className="form-input focus-ring"
+                        placeholder="Enter site name"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Contact Email
                       </label>
                       <Input
@@ -931,11 +948,13 @@ const Settings: React.FC = () => {
                           ...prev,
                           general: { ...prev.general, contactEmail: e.target.value }
                         }))}
+                        className="form-input focus-ring"
+                        placeholder="Enter contact email"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Support Phone
                       </label>
                       <Input
@@ -945,11 +964,13 @@ const Settings: React.FC = () => {
                           ...prev,
                           general: { ...prev.general, supportPhone: e.target.value }
                         }))}
+                        className="form-input focus-ring"
+                        placeholder="Enter support phone"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         Default Currency
                       </label>
                       <select
@@ -958,17 +979,16 @@ const Settings: React.FC = () => {
                           ...prev,
                           general: { ...prev.general, currency: e.target.value }
                         }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="form-select focus-ring"
                       >
                         <option value="GBP">British Pound (£)</option>
-                        <option value="USD">US Dollar ($)</option>
                         <option value="EUR">Euro (€)</option>
                       </select>
                     </div>
                   </div>
 
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label">
                       Site Description
                     </label>
                     <textarea
@@ -978,12 +998,13 @@ const Settings: React.FC = () => {
                         ...prev,
                         general: { ...prev.general, siteDescription: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="form-textarea focus-ring"
+                      placeholder="Enter site description"
                     />
                   </div>
 
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label">
                       Address
                     </label>
                     <textarea
@@ -993,18 +1014,19 @@ const Settings: React.FC = () => {
                         ...prev,
                         general: { ...prev.general, address: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="form-textarea focus-ring"
+                      placeholder="Enter address"
                     />
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between py-4 border-t border-gray-200">
-                    <div>
-                      <p className="text-sm font-medium text-gray-700">Maintenance Mode</p>
-                      <p className="text-sm text-gray-500">Temporarily disable public access to the site</p>
+                  <div className="setting-item border-t">
+                    <div className="setting-info">
+                      <p className="setting-label">Maintenance Mode</p>
+                      <p className="setting-description">Temporarily disable public access to the site</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-sm ${
-                        systemSettings.general.maintenanceMode ? 'text-red-600' : 'text-green-600'
+                    <div className="setting-actions">
+                      <span className={`setting-status ${
+                        systemSettings.general.maintenanceMode ? 'status-error' : 'status-success'
                       }`}>
                         {systemSettings.general.maintenanceMode ? 'Enabled' : 'Disabled'}
                       </span>
@@ -1015,19 +1037,21 @@ const Settings: React.FC = () => {
                           ...prev,
                           general: { ...prev.general, maintenanceMode: e.target.checked }
                         }))}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="form-checkbox focus-ring"
                       />
                     </div>
                   </div>
                 </Card>
 
                 {/* Email Settings */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-6">Email Configuration</h2>
+                <Card className="form-container">
+                  <div className="section-header">
+                    <h2 className="section-title">Email Configuration</h2>
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label className="form-label">
                         SMTP Host
                       </label>
                       <Input
@@ -1038,11 +1062,12 @@ const Settings: React.FC = () => {
                           email: { ...prev.email, smtpHost: e.target.value }
                         }))}
                         placeholder="smtp.gmail.com"
+                        className="form-input focus-ring"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         SMTP Port
                       </label>
                       <Input
@@ -1053,11 +1078,12 @@ const Settings: React.FC = () => {
                           email: { ...prev.email, smtpPort: parseInt(e.target.value) }
                         }))}
                         placeholder="587"
+                        className="form-input focus-ring"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         SMTP Username
                       </label>
                       <Input
@@ -1068,11 +1094,12 @@ const Settings: React.FC = () => {
                           email: { ...prev.email, smtpUser: e.target.value }
                         }))}
                         placeholder="your-email@gmail.com"
+                        className="form-input focus-ring"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         SMTP Password
                       </label>
                       <Input
@@ -1083,11 +1110,12 @@ const Settings: React.FC = () => {
                           email: { ...prev.email, smtpPassword: e.target.value }
                         }))}
                         placeholder="••••••••"
+                        className="form-input focus-ring"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         From Email
                       </label>
                       <Input
@@ -1098,11 +1126,12 @@ const Settings: React.FC = () => {
                           email: { ...prev.email, fromEmail: e.target.value }
                         }))}
                         placeholder="noreply@propertymastersuk.com"
+                        className="form-input focus-ring"
                       />
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label">
                         From Name
                       </label>
                       <Input
@@ -1113,35 +1142,42 @@ const Settings: React.FC = () => {
                           email: { ...prev.email, fromName: e.target.value }
                         }))}
                         placeholder="Property Masters UK"
+                        className="form-input focus-ring"
                       />
                     </div>
                   </div>
                 </Card>
 
                 {/* Payment Settings */}
-                <Card className="p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-6">Payment Configuration</h2>
+                <Card className="form-container">
+                  <div className="section-header">
+                    <h2 className="section-title">Payment Configuration</h2>
+                  </div>
                   
-                  <div className="space-y-6">
+                  <div className="settings-list">
                     {/* Stripe Settings */}
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-md font-medium text-gray-900">Stripe</h3>
-                        <input
-                          type="checkbox"
-                          checked={systemSettings.payment.stripeEnabled}
-                          onChange={(e) => setSystemSettings(prev => ({
-                            ...prev,
-                            payment: { ...prev.payment, stripeEnabled: e.target.checked }
-                          }))}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                    <div className="settings-group">
+                      <div className="setting-item">
+                        <div className="setting-info">
+                          <h3 className="settings-group-title">Stripe</h3>
+                        </div>
+                        <div className="setting-actions">
+                          <input
+                            type="checkbox"
+                            checked={systemSettings.payment.stripeEnabled}
+                            onChange={(e) => setSystemSettings(prev => ({
+                              ...prev,
+                              payment: { ...prev.payment, stripeEnabled: e.target.checked }
+                            }))}
+                            className="form-checkbox focus-ring"
+                          />
+                        </div>
                       </div>
                       
                       {systemSettings.payment.stripeEnabled && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="form-grid mt-4">
+                          <div className="form-group">
+                            <label className="form-label">
                               Public Key
                             </label>
                             <Input
@@ -1152,11 +1188,12 @@ const Settings: React.FC = () => {
                                 payment: { ...prev.payment, stripePublicKey: e.target.value }
                               }))}
                               placeholder="pk_test_..."
+                              className="form-input focus-ring"
                             />
                           </div>
                           
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <div className="form-group">
+                            <label className="form-label">
                               Secret Key
                             </label>
                             <Input
@@ -1167,6 +1204,7 @@ const Settings: React.FC = () => {
                                 payment: { ...prev.payment, stripeSecretKey: e.target.value }
                               }))}
                               placeholder="sk_test_..."
+                              className="form-input focus-ring"
                             />
                           </div>
                         </div>
@@ -1174,24 +1212,28 @@ const Settings: React.FC = () => {
                     </div>
 
                     {/* PayPal Settings */}
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-md font-medium text-gray-900">PayPal</h3>
-                        <input
-                          type="checkbox"
-                          checked={systemSettings.payment.paypalEnabled}
-                          onChange={(e) => setSystemSettings(prev => ({
-                            ...prev,
-                            payment: { ...prev.payment, paypalEnabled: e.target.checked }
-                          }))}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
+                    <div className="settings-group">
+                      <div className="setting-item">
+                        <div className="setting-info">
+                          <h3 className="settings-group-title">PayPal</h3>
+                        </div>
+                        <div className="setting-actions">
+                          <input
+                            type="checkbox"
+                            checked={systemSettings.payment.paypalEnabled}
+                            onChange={(e) => setSystemSettings(prev => ({
+                              ...prev,
+                              payment: { ...prev.payment, paypalEnabled: e.target.checked }
+                            }))}
+                            className="form-checkbox focus-ring"
+                          />
+                        </div>
                       </div>
                       
                       {systemSettings.payment.paypalEnabled && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="form-grid mt-4">
+                          <div className="form-group">
+                            <label className="form-label">
                               Client ID
                             </label>
                             <Input
@@ -1202,11 +1244,12 @@ const Settings: React.FC = () => {
                                 payment: { ...prev.payment, paypalClientId: e.target.value }
                               }))}
                               placeholder="PayPal Client ID"
+                              className="form-input focus-ring"
                             />
                           </div>
                           
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <div className="form-group">
+                            <label className="form-label">
                               Client Secret
                             </label>
                             <Input
@@ -1217,26 +1260,29 @@ const Settings: React.FC = () => {
                                 payment: { ...prev.payment, paypalClientSecret: e.target.value }
                               }))}
                               placeholder="PayPal Client Secret"
+                              className="form-input focus-ring"
                             />
                           </div>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between py-4 border-t border-gray-200">
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">Test Mode</p>
-                        <p className="text-sm text-gray-500">Use sandbox/test environment for payments</p>
+                    <div className="setting-item border-t">
+                      <div className="setting-info">
+                        <p className="setting-label">Test Mode</p>
+                        <p className="setting-description">Use sandbox/test environment for payments</p>
                       </div>
-                      <input
-                        type="checkbox"
-                        checked={systemSettings.payment.testMode}
-                        onChange={(e) => setSystemSettings(prev => ({
-                          ...prev,
-                          payment: { ...prev.payment, testMode: e.target.checked }
-                        }))}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
+                      <div className="setting-actions">
+                        <input
+                          type="checkbox"
+                          checked={systemSettings.payment.testMode}
+                          onChange={(e) => setSystemSettings(prev => ({
+                            ...prev,
+                            payment: { ...prev.payment, testMode: e.target.checked }
+                          }))}
+                          className="form-checkbox focus-ring"
+                        />
+                      </div>
                     </div>
                   </div>
                 </Card>
@@ -1245,12 +1291,14 @@ const Settings: React.FC = () => {
 
             {/* Integrations Settings */}
             {activeTab === 'integrations' && (
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-6">Third-Party Integrations</h2>
+              <div className="form-container">
+                <div className="section-header">
+                  <h2 className="section-title">Third-Party Integrations</h2>
+                </div>
                 
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="settings-list">
+                  <div className="form-group">
+                    <label className="form-label">
                       Google Maps API Key
                     </label>
                     <Input
@@ -1261,8 +1309,9 @@ const Settings: React.FC = () => {
                         integrations: { ...prev.integrations, googleMapsApiKey: e.target.value }
                       }))}
                       placeholder="Enter Google Maps API key"
+                      className="form-input focus-ring"
                     />
-                    <p className="text-sm text-gray-500 mt-1">Required for map functionality and location services</p>
+                    <p className="setting-description">Required for map functionality and location services</p>
                   </div>
 
                   <div className="flex items-center justify-between py-4 border-t border-gray-200">

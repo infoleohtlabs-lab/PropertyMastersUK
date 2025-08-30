@@ -750,7 +750,7 @@ const Notifications: React.FC = () => {
                   {selectedNotification.actions.map((action, index) => (
                     <Button
                       key={index}
-                      variant={action.variant === 'primary' ? 'default' : 'outline'}
+                      variant={action.variant === 'primary' ? 'primary' : 'outline'}
                       onClick={() => handleNotificationAction(selectedNotification.id, action.action)}
                     >
                       {action.label}

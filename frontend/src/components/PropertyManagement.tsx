@@ -74,6 +74,7 @@ import {
   Crown,
   Gem
 } from 'lucide-react';
+import { formatCurrency } from '../utils';
 
 interface Property {
   id: string;
@@ -529,14 +530,7 @@ const PropertyManagement: React.FC = () => {
     setFilteredProperties(filtered);
   }, [properties, searchTerm, filters]);
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  
 
   const formatNumber = (num: number): string => {
     return new Intl.NumberFormat('en-GB').format(num);

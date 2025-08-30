@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Building2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Building2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { showToast } from '../../components/ui/Toast';
@@ -21,61 +21,52 @@ const Login: React.FC = () => {
     values,
     errors,
     touched,
+    isValid,
     handleChange,
     handleBlur,
-    isValid,
-    validateField
-  } = useFormValidation<LoginCredentials>({
-    email: '',
-    password: '',
-    rememberMe: false
-  }, {
-    email: (value) => {
-      if (!value) return 'Email is required';
-      if (!validateEmail(value)) return 'Please enter a valid email address';
-      return '';
+    handleSubmit,
+    setFieldError,
+  } = useFormValidation({
+    initialValues: {
+      email: '',
+      password: '',
+      rememberMe: false,
     },
-    password: (value) => {
-      if (!value) return 'Password is required';
-      if (value.length < 6) return 'Password must be at least 6 characters';
-      return '';
+    validationRules: {
+      email: {
+        required: true,
+        email: true,
+      },
+      password: {
+        required: true,
+        minLength: 6,
+      },
     },
-    rememberMe: () => ''
+    onSubmit: async (formValues) => {
+      try {
+        await login(formValues);
+        showToast.success('Welcome back!');
+        navigate(from, { replace: true });
+      } catch (error: any) {
+        showToast.error(error.message || 'Login failed. Please try again.');
+      }
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate all fields
-    const emailError = validateField('email', values.email);
-    const passwordError = validateField('password', values.password);
-    
-    if (emailError || passwordError || !isValid) {
-      showToast.error('Please fix the errors before submitting');
-      return;
-    }
 
-    try {
-      await login(values);
-      showToast.success('Welcome back!');
-      navigate(from, { replace: true });
-    } catch (error: any) {
-      showToast.error(error.message || 'Login failed. Please try again.');
-    }
-  };
 
   const handleDemoLogin = async (role: 'agent' | 'landlord' | 'tenant' | 'admin' | 'solicitor' | 'buyer') => {
-    const demoCredentials = {
-      agent: { email: 'john.agent@propertymastersuk.com', password: 'password123' },
-      landlord: { email: 'sarah.landlord@gmail.com', password: 'password123' },
-      tenant: { email: 'mike.tenant@gmail.com', password: 'password123' },
-      admin: { email: 'admin@propertymastersuk.com', password: 'password123' },
-      solicitor: { email: 'solicitor@propertymastersuk.com', password: 'password123' },
-      buyer: { email: 'emma.buyer@gmail.com', password: 'password123' }
+    const credentials = {
+      agent: { email: 'agent@propertymasters.com', password: 'PropertyTest2024!' },
+      landlord: { email: 'landlord@propertymasters.com', password: 'PropertyTest2024!' },
+      tenant: { email: 'tenant@propertymasters.com', password: 'PropertyTest2024!' },
+      admin: { email: 'admin@propertymasters.com', password: 'PropertyTest2024!' },
+      solicitor: { email: 'solicitor@propertymasters.com', password: 'PropertyTest2024!' },
+      buyer: { email: 'buyer@propertymasters.com', password: 'PropertyTest2024!' }
     };
 
     try {
-      await login(demoCredentials[role]);
+      await login(credentials[role]);
       showToast.success(`Welcome back, demo ${role}!`);
       navigate(from, { replace: true });
     } catch (error: any) {
@@ -84,7 +75,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto animate-fade-in">
       {/* Logo and Title */}
       <div className="text-center mb-8">
         <div className="flex justify-center items-center space-x-2 mb-4">
@@ -93,17 +84,17 @@ const Login: React.FC = () => {
             PropertyMasters UK
           </span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <h2 className="text-heading-2 mb-2">
           Welcome back
         </h2>
-        <p className="text-gray-600">
+        <p className="text-body-sm">
           Sign in to your account to continue
         </p>
       </div>
 
       {/* Login Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
+      <form onSubmit={handleSubmit} className="form-section">
+        <div className="form-group">
           <Input
             id="email"
             name="email"
@@ -116,34 +107,47 @@ const Login: React.FC = () => {
             error={touched.email ? errors.email : ''}
             leftIcon={<Mail className="h-4 w-4" />}
             required
+            className={`input-field transition-all duration-300 ${touched.email && errors.email ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
           />
         </div>
 
-        <div>
-          <Input
-            id="password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            label="Password"
-            placeholder="Enter your password"
-            value={values.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.password ? errors.password : ''}
-            leftIcon={<Lock className="h-4 w-4" />}
-            required
-          />
+        <div className="form-group">
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              label="Password"
+              placeholder="Enter your password"
+              value={values.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touched.password ? errors.password : ''}
+              leftIcon={<Lock className="h-4 w-4" />}
+              required
+              className={`input-field transition-all duration-300 ${touched.password && errors.password ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <input
               id="remember-me"
-              name="remember-me"
+              name="rememberMe"
               type="checkbox"
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              checked={values.rememberMe}
+              onChange={(e) => handleChange({ target: { name: 'rememberMe', value: e.target.checked } } as any)}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded transition-colors duration-200"
             />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="remember-me" className="ml-2 block text-label">
               Remember me
             </label>
           </div>
@@ -151,7 +155,7 @@ const Login: React.FC = () => {
           <div className="text-sm">
             <Link
               to="/auth/forgot-password"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200"
             >
               Forgot your password?
             </Link>
@@ -161,11 +165,11 @@ const Login: React.FC = () => {
         <div>
           <Button
             type="submit"
-            className="w-full"
+            className={`w-full btn-primary transform transition-all duration-200 ${isLoading ? 'scale-95' : 'hover:scale-105'} ${!isValid || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             loading={isLoading}
             disabled={!isValid || isLoading}
           >
-            Sign in
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
         </div>
       </form>

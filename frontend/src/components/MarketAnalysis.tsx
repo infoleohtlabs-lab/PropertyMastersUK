@@ -23,7 +23,8 @@ import {
   Percent,
   LineChart
 } from 'lucide-react';
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, Area, AreaChart } from 'recharts';
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, Area, AreaChart } from 'recharts';
+import { formatCurrency } from '../utils';
 
 interface MarketData {
   area: string;
@@ -177,14 +178,7 @@ const MarketAnalysis: React.FC = () => {
     { type: 'Bungalow', averagePrice: 480000, count: 280, priceChange: 2.9 }
   ];
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+
 
   const formatNumber = (num: number): string => {
     return new Intl.NumberFormat('en-GB').format(num);

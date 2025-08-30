@@ -40,6 +40,7 @@ import {
   Send,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatCurrency } from '../../utils';
 
 interface Lead {
   id: string;
@@ -245,12 +246,7 @@ const LeadManagement: React.FC = () => {
     return icons[status as keyof typeof icons] || <AlertCircle className="w-4 h-4" />;
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-    }).format(amount);
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {

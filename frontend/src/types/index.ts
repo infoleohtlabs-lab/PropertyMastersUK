@@ -50,8 +50,53 @@ export interface Property {
     shops: number;
     parks: number;
   };
+  priceHistory?: PriceHistoryEntry[];
+  marketData?: {
+    priceHistory?: PriceHistoryEntry[];
+    averagePrice?: number;
+    priceChange?: number;
+    daysOnMarket?: number;
+    demandLevel?: 'low' | 'medium' | 'high';
+    comparableProperties?: Property[];
+  };
+  priceChange?: {
+    amount: number;
+    percentage: number;
+    direction: 'up' | 'down' | 'stable';
+  };
+  // Additional properties for compatibility
+  council?: {
+    taxBand: string;
+  };
+  energyRating?: {
+    current: string;
+  };
+  legalInfo?: {
+    tenure: string;
+    groundRent?: number;
+    serviceCharge?: number;
+    leaseYearsRemaining?: number;
+  };
   createdAt: string;
   updatedAt: string;
+}
+
+// Price History Entry interface
+export interface PriceHistoryEntry {
+  date: string;
+  price: number;
+  event: string;
+  change?: number;
+  changePercent?: number;
+}
+
+// Legacy PriceHistory interface for backward compatibility
+export interface PriceHistory {
+  date: string;
+  price: number;
+  event?: string;
+  change?: number;
+  changePercent?: number;
 }
 
 export enum PropertyType {
@@ -150,6 +195,39 @@ export interface SearchResult<T> {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+// Lead Management Types
+export interface Lead {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
+  phone: string;
+  source: string;
+  propertyInterest: string;
+  budget: number;
+  budgetMin?: number;
+  budgetMax?: number;
+  interest?: string;
+  timeline?: string;
+  status: 'new' | 'contacted' | 'qualified' | 'viewing' | 'offer' | 'closed' | 'lost';
+  priority: 'low' | 'medium' | 'high';
+  dateCreated: string;
+  lastContact?: string;
+  nextFollowUp?: string;
+  notes: string;
+  score: number;
+  type?: 'BUYER' | 'SELLER' | 'TENANT' | 'LANDLORD' | 'INVESTOR';
+  requirements?: string;
+  company?: string;
+  jobTitle?: string;
+  assignedAgent?: string;
+  interestedProperty?: string;
+  createdAt?: string;
+  lastContactDate?: string;
+  nextFollowUpDate?: string;
 }
 
 // Auth types are re-exported from auth.ts

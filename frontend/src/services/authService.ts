@@ -1,102 +1,157 @@
-import { User, AuthResponse, LoginCredentials, RegisterData, UserRole } from '../types';
+import { supabase } from '../lib/supabase';
+import { 
+  User, 
+  UserRole, 
+  LoginCredentials, 
+  RegisterData, 
+  AuthResponse,
+  PasswordResetRequest,
+  PasswordReset,
+  PasswordChange,
+  Permission,
+  DEFAULT_ROLE_PERMISSIONS
+} from '../types/auth';
+import { getUserProfile, createUserProfile } from './userService';
+import type { AuthError } from '@supabase/supabase-js';
 
 class AuthService {
-  private baseURL = (import.meta.env.VITE_API_URL || 'http://localhost:3001') + '/api';
+  // Convert Supabase user to our User type
+  private async convertSupabaseUser(supabaseUser: any, userProfile?: any): Promise<User> {
+    const profile = userProfile || await getUserProfile(supabaseUser.id);
+    
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email,
+      firstName: profile?.first_name || '',
+      lastName: profile?.last_name || '',
+      role: profile?.role || UserRole.BUYER,
+      avatar: supabaseUser.user_metadata?.avatar_url,
+      phone: profile?.phone || supabaseUser.phone,
+      isEmailVerified: supabaseUser.email_confirmed_at !== null,
+      emailVerified: supabaseUser.email_confirmed_at !== null,
+      isActive: true,
+      createdAt: supabaseUser.created_at,
+      updatedAt: supabaseUser.updated_at || supabaseUser.created_at,
+      lastLogin: supabaseUser.last_sign_in_at,
+      permissions: this.getRolePermissions(profile?.role || UserRole.BUYER)
+    };
+  }
+
+  private getRolePermissions(role: UserRole): Permission[] {
+    return DEFAULT_ROLE_PERMISSIONS[role] || [];
+  }
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
+      if (error) {
+        throw new Error(error.message);
       }
 
-      const data = await response.json();
-      
-      // Store token in localStorage
-      if (data.access_token) {
-        localStorage.setItem('auth_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
+      if (!data.user || !data.session) {
+        throw new Error('Login failed - no user data received');
       }
+
+      // Get user profile from our users table
+      const userProfile = await getUserProfile(data.user.id);
+      const user = await this.convertSupabaseUser(data.user, userProfile);
+
+      // Store tokens in localStorage for compatibility
+      localStorage.setItem('auth_token', data.session.access_token);
+      localStorage.setItem('refresh_token', data.session.refresh_token);
 
       return {
-        token: data.access_token,
-        refreshToken: data.refresh_token,
-        user: data.user
+        token: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+        user,
+        expiresIn: data.session.expires_in || 3600
       };
     } catch (error: any) {
-      throw new Error(error.message || 'Network error occurred');
+      throw new Error(error.message || 'Login failed');
     }
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            role: data.role,
+            phone: data.phone
+          }
+        }
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
+      if (error) {
+        throw new Error(error.message);
       }
 
-      const result = await response.json();
-      
-      // Store token in localStorage
-      if (result.access_token) {
-        localStorage.setItem('auth_token', result.access_token);
-        localStorage.setItem('refresh_token', result.refresh_token);
+      if (!authData.user) {
+        throw new Error('Registration failed - no user data received');
+      }
+
+      // Create user profile in our users table
+      const userProfile = await createUserProfile({
+        id: authData.user.id,
+        email: data.email,
+        role: data.role,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone
+      });
+
+      const user = await this.convertSupabaseUser(authData.user, userProfile);
+
+      // Store tokens if session exists
+      if (authData.session) {
+        localStorage.setItem('auth_token', authData.session.access_token);
+        localStorage.setItem('refresh_token', authData.session.refresh_token);
       }
 
       return {
-        token: result.access_token,
-        refreshToken: result.refresh_token,
-        user: result.user
+        token: authData.session?.access_token || '',
+        refreshToken: authData.session?.refresh_token || '',
+        user,
+        expiresIn: authData.session?.expires_in || 3600
       };
     } catch (error: any) {
-      throw new Error(error.message || 'Network error occurred');
+      throw new Error(error.message || 'Registration failed');
     }
   }
 
   async refreshToken(token: string): Promise<AuthResponse> {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
-      
-      const response = await fetch(`${this.baseURL}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ refreshToken }),
-      });
+      const { data, error } = await supabase.auth.refreshSession();
 
-      if (!response.ok) {
+      if (error) {
         throw new Error('Token refresh failed');
       }
 
-      const data = await response.json();
-      
-      // Update stored tokens
-      if (data.token) {
-        localStorage.setItem('auth_token', data.token);
-        if (data.refreshToken) {
-          localStorage.setItem('refresh_token', data.refreshToken);
-        }
+      if (!data.session || !data.user) {
+        throw new Error('Token refresh failed - no session data');
       }
 
-      return data;
+      const userProfile = await getUserProfile(data.user.id);
+      const user = await this.convertSupabaseUser(data.user, userProfile);
+
+      // Update stored tokens
+      localStorage.setItem('auth_token', data.session.access_token);
+      localStorage.setItem('refresh_token', data.session.refresh_token);
+
+      return {
+        token: data.session.access_token,
+        refreshToken: data.session.refresh_token,
+        user,
+        expiresIn: data.session.expires_in || 3600
+      };
     } catch (error: any) {
       throw new Error(error.message || 'Token refresh failed');
     }
@@ -104,17 +159,8 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      const token = localStorage.getItem('auth_token');
-      
-      if (token) {
-        await fetch(`${this.baseURL}/auth/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-      }
-    } catch (error) {
+      await supabase.auth.signOut();
+    } catch (error: any) {
       console.error('Logout error:', error);
     } finally {
       // Always clear local storage
@@ -126,25 +172,15 @@ class AuthService {
 
   async getCurrentUser(): Promise<User | null> {
     try {
-      const token = localStorage.getItem('auth_token');
-      
-      if (!token) {
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (error || !user) {
         return null;
       }
 
-      const response = await fetch(`${this.baseURL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get current user');
-      }
-
-      const user = await response.json();
-      return user;
-    } catch (error) {
+      const userProfile = await getUserProfile(user.id);
+      return await this.convertSupabaseUser(user, userProfile);
+    } catch (error: any) {
       console.error('Get current user error:', error);
       return null;
     }
@@ -152,99 +188,73 @@ class AuthService {
 
   async forgotPassword(email: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseURL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send reset email');
+      if (error) {
+        throw new Error(error.message);
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Network error occurred');
+      throw new Error(error.message || 'Failed to send reset email');
     }
   }
 
   async resetPassword(token: string, password: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseURL}/auth/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, password }),
+      const { error } = await supabase.auth.updateUser({
+        password: password
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to reset password');
+      if (error) {
+        throw new Error(error.message);
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Network error occurred');
+      throw new Error(error.message || 'Failed to reset password');
     }
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
-      const token = localStorage.getItem('auth_token');
-      
-      const response = await fetch(`${this.baseURL}/auth/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ currentPassword, newPassword }),
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to change password');
+      if (error) {
+        throw new Error(error.message);
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Network error occurred');
+      throw new Error(error.message || 'Failed to change password');
     }
   }
 
   async verifyEmail(token: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseURL}/auth/verify-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: 'email'
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Email verification failed');
+      if (error) {
+        throw new Error(error.message);
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Network error occurred');
+      throw new Error(error.message || 'Email verification failed');
     }
   }
 
   async resendVerificationEmail(email: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseURL}/auth/resend-verification`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to resend verification email');
+      if (error) {
+        throw new Error(error.message);
       }
     } catch (error: any) {
-      throw new Error(error.message || 'Network error occurred');
+      throw new Error(error.message || 'Failed to resend verification email');
     }
   }
 
@@ -288,29 +298,30 @@ class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Date.now() / 1000;
       return payload.exp < currentTime;
-    } catch (error) {
+    } catch (error: any) {
       return true;
     }
   }
 
   async ensureValidToken(): Promise<string | null> {
-    const token = this.getToken();
+    const { data: { session } } = await supabase.auth.getSession();
     
-    if (!token) {
+    if (!session) {
       return null;
     }
 
-    if (this.isTokenExpired(token)) {
+    // Check if token is expired
+    if (session.expires_at && session.expires_at * 1000 < Date.now()) {
       try {
-        const response = await this.refreshToken(token);
+        const response = await this.refreshToken(session.access_token);
         return response.token;
-      } catch (error) {
+      } catch (error: any) {
         await this.logout();
         return null;
       }
     }
 
-    return token;
+    return session.access_token;
   }
 }
 

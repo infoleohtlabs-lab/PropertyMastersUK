@@ -38,6 +38,7 @@ import {
 import FinancialDashboard from './FinancialDashboard';
 import BookingManagement from './BookingManagement';
 import DocumentManagement from './DocumentManagement';
+import { formatCurrency } from '../utils';
 
 // Interfaces
 interface LandlordMetrics {
@@ -422,12 +423,7 @@ const LandlordDashboard: React.FC = () => {
   }, []);
 
   // Utility functions
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount);
-  };
+  
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB');

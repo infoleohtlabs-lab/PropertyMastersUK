@@ -42,6 +42,7 @@ import {
   MoreVertical
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatCurrency } from '../utils';
 import FinancialDashboard from './FinancialDashboard';
 import BookingManagement from './BookingManagement';
 import DocumentManagement from './DocumentManagement';
@@ -305,12 +306,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ userId }) => {
     loadAuditLogs();
   }, []);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount);
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {

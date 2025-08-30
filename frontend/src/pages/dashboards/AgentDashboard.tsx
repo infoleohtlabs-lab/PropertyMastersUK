@@ -4,6 +4,7 @@ import {
   Building2,
   Users,
   TrendingUp,
+  TrendingDown,
   Calendar,
   MessageSquare,
   FileText,
@@ -30,19 +31,34 @@ import {
   Edit,
   Trash2,
   Camera,
-  Video
+  Video,
+  Bell,
+  CheckCircle,
+  AlertCircle,
+  PoundSterling,
+  PieChart,
+  Activity,
+  CalendarDays,
+  UserPlus,
+  PhoneCall,
+  Send,
+  ArrowUpRight,
+  ArrowDownRight,
+  Percent
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useAuthStore } from '../../stores/authStore';
 import { showToast } from '../../components/ui/Toast';
+import { formatCurrency } from '../../utils';
 
 interface DashboardStats {
   totalProperties: number;
   activeListings: number;
   totalClients: number;
   monthlyCommission: number;
+  totalCommission: number;
   viewingsScheduled: number;
   pendingOffers: number;
   monthlyTarget: number;
@@ -78,6 +94,31 @@ interface Client {
   lastContact: string;
   totalValue: number;
   properties: number;
+  nextFollowUp?: string;
+  communicationHistory: number;
+}
+
+interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  source: 'website' | 'referral' | 'social' | 'advertising';
+  stage: 'new' | 'contacted' | 'qualified' | 'viewing' | 'offer' | 'closed';
+  value: number;
+  dateCreated: string;
+  lastActivity: string;
+  notes: string;
+}
+
+interface Communication {
+  id: string;
+  clientId: string;
+  type: 'call' | 'email' | 'meeting' | 'message';
+  subject: string;
+  date: string;
+  status: 'completed' | 'scheduled' | 'pending';
+  notes?: string;
 }
 
 interface Viewing {
@@ -97,6 +138,7 @@ const AgentDashboard: React.FC = () => {
     activeListings: 0,
     totalClients: 0,
     monthlyCommission: 0,
+    totalCommission: 0,
     viewingsScheduled: 0,
     pendingOffers: 0,
     monthlyTarget: 0,
@@ -109,9 +151,16 @@ const AgentDashboard: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [viewings, setViewings] = useState<Viewing[]>([]);
-  const [activeTab, setActiveTab] = useState<'overview' | 'properties' | 'clients' | 'viewings' | 'analytics' | 'performance'>('overview');
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [communications, setCommunications] = useState<Communication[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'properties' | 'clients' | 'viewings' | 'analytics' | 'performance' | 'leads' | 'calendar'>('overview');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedDateRange, setSelectedDateRange] = useState('30d');
+  const [leadPipelineView, setLeadPipelineView] = useState('kanban');
+  const [analyticsView, setAnalyticsView] = useState('overview');
+  const [communicationFilter, setCommunicationFilter] = useState('all');
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     loadDashboardData();
@@ -126,6 +175,7 @@ const AgentDashboard: React.FC = () => {
         activeListings: 38,
         totalClients: 127,
         monthlyCommission: 15750,
+        totalCommission: 45200,
         viewingsScheduled: 12,
         pendingOffers: 8,
         monthlyTarget: 20000,
@@ -177,7 +227,9 @@ const AgentDashboard: React.FC = () => {
           status: 'active',
           lastContact: '2024-01-20',
           totalValue: 850000,
-          properties: 3
+          properties: 3,
+          nextFollowUp: '2024-01-25',
+          communicationHistory: 12
         },
         {
           id: '2',
@@ -188,7 +240,56 @@ const AgentDashboard: React.FC = () => {
           status: 'active',
           lastContact: '2024-01-18',
           totalValue: 2100000,
-          properties: 5
+          properties: 5,
+          nextFollowUp: '2024-01-22',
+          communicationHistory: 28
+        }
+      ]);
+
+      setLeads([
+        {
+          id: '1',
+          name: 'Emma Wilson',
+          email: 'emma.wilson@email.com',
+          phone: '+44 7700 900789',
+          source: 'website',
+          stage: 'qualified',
+          value: 750000,
+          dateCreated: '2024-01-15',
+          lastActivity: '2024-01-20',
+          notes: 'Interested in 3-bed properties in North London'
+        },
+        {
+          id: '2',
+          name: 'James Brown',
+          email: 'james.brown@email.com',
+          phone: '+44 7700 900321',
+          source: 'referral',
+          stage: 'viewing',
+          value: 1200000,
+          dateCreated: '2024-01-10',
+          lastActivity: '2024-01-19',
+          notes: 'Looking for luxury apartment in Central London'
+        }
+      ]);
+
+      setCommunications([
+        {
+          id: '1',
+          clientId: '1',
+          type: 'call',
+          subject: 'Property viewing follow-up',
+          date: '2024-01-20',
+          status: 'completed',
+          notes: 'Discussed property details and next steps'
+        },
+        {
+          id: '2',
+          clientId: '2',
+          type: 'email',
+          subject: 'Market update and new listings',
+          date: '2024-01-22',
+          status: 'scheduled'
         }
       ]);
 
@@ -229,11 +330,11 @@ const AgentDashboard: React.FC = () => {
     }
   };
 
-  const formatCurrency = (amount: number, type: 'sale' | 'rent') => {
+  const formatCurrencyWithType = (amount: number, type: 'sale' | 'rent') => {
     if (type === 'rent') {
-      return `£${amount.toLocaleString()}/month`;
+      return `${formatCurrency(amount)}/month`;
     }
-    return `£${amount.toLocaleString()}`;
+    return formatCurrency(amount);
   };
 
   if (loading) {
@@ -245,98 +346,98 @@ const AgentDashboard: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+      <div className="mb-6 lg:mb-8">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
           Welcome back, {user?.firstName}!
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-600 mt-2 text-sm lg:text-base">
           Here's what's happening with your properties and clients today.
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 lg:gap-6 mb-6 lg:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 lg:p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Building2 className="h-6 w-6 text-blue-600" />
+                <Building2 className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Properties</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalProperties}</p>
+              <div className="ml-3 lg:ml-4">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Total Properties</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">{stats.totalProperties}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 lg:p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Home className="h-6 w-6 text-green-600" />
+                <Home className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Listings</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeListings}</p>
+              <div className="ml-3 lg:ml-4">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Active Listings</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">{stats.activeListings}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 lg:p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-6 w-6 text-purple-600" />
+                <Users className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Clients</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalClients}</p>
+              <div className="ml-3 lg:ml-4">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Total Clients</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">{stats.totalClients}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 lg:p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <Banknote className="h-6 w-6 text-yellow-600" />
+                <Banknote className="h-5 w-5 lg:h-6 lg:w-6 text-yellow-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Monthly Commission</p>
-                <p className="text-2xl font-bold text-gray-900">£{stats.monthlyCommission.toLocaleString()}</p>
+              <div className="ml-3 lg:ml-4">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Monthly Commission</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">£{stats.monthlyCommission.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 lg:p-6">
             <div className="flex items-center">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-indigo-600" />
+                <Calendar className="h-5 w-5 lg:h-6 lg:w-6 text-indigo-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Viewings Scheduled</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.viewingsScheduled}</p>
+              <div className="ml-3 lg:ml-4">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Viewings Scheduled</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">{stats.viewingsScheduled}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 lg:p-6">
             <div className="flex items-center">
               <div className="p-2 bg-orange-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-orange-600" />
+                <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 text-orange-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending Offers</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pendingOffers}</p>
+              <div className="ml-3 lg:ml-4">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Pending Offers</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">{stats.pendingOffers}</p>
               </div>
             </div>
           </CardContent>
@@ -345,12 +446,14 @@ const AgentDashboard: React.FC = () => {
 
       {/* Navigation Tabs */}
       <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
+        <nav className="-mb-px flex flex-wrap gap-2 lg:gap-0 lg:space-x-8">
           {[
             { id: 'overview', label: 'Overview', icon: TrendingUp },
             { id: 'properties', label: 'Properties', icon: Building2 },
             { id: 'clients', label: 'Clients', icon: Users },
+            { id: 'leads', label: 'Leads', icon: UserPlus },
             { id: 'viewings', label: 'Viewings', icon: Calendar },
+            { id: 'calendar', label: 'Calendar', icon: CalendarDays },
             { id: 'analytics', label: 'Analytics', icon: BarChart3 },
             { id: 'performance', label: 'Performance', icon: Target }
           ].map((tab) => {
@@ -359,14 +462,15 @@ const AgentDashboard: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`flex items-center py-2 px-2 lg:px-1 border-b-2 font-medium text-xs lg:text-sm transition-colors duration-200 ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Icon className="h-4 w-4 mr-2" />
-                {tab.label}
+                <Icon className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.slice(0, 4)}</span>
               </button>
             );
           })}
@@ -378,55 +482,56 @@ const AgentDashboard: React.FC = () => {
         <div className="space-y-6">
           {/* Quick Actions */}
           <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
+            <CardHeader className="pb-3 lg:pb-6">
+              <CardTitle className="text-base lg:text-lg">Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Link to="/maintenance" className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+                <Link to="/maintenance" className="flex items-center justify-center p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="text-center">
-                    <Wrench className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-900">Maintenance</span>
+                    <Wrench className="h-6 w-6 lg:h-8 lg:w-8 text-blue-600 mx-auto mb-2" />
+                    <span className="text-xs lg:text-sm font-medium text-gray-900">Maintenance</span>
                     <ExternalLink className="h-3 w-3 text-gray-400 ml-1 inline" />
                   </div>
                 </Link>
-                <Link to="/communications" className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link to="/communications" className="flex items-center justify-center p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="text-center">
-                    <MessageSquare className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-900">Communications</span>
+                    <MessageSquare className="h-6 w-6 lg:h-8 lg:w-8 text-green-600 mx-auto mb-2" />
+                    <span className="text-xs lg:text-sm font-medium text-gray-900">Communications</span>
                     <ExternalLink className="h-3 w-3 text-gray-400 ml-1 inline" />
                   </div>
                 </Link>
-                <Link to="/finances" className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <Link to="/finances" className="flex items-center justify-center p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="text-center">
-                    <Banknote className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-900">Financial Reports</span>
+                    <Banknote className="h-6 w-6 lg:h-8 lg:w-8 text-purple-600 mx-auto mb-2" />
+                    <span className="text-xs lg:text-sm font-medium text-gray-900">Financial Reports</span>
                     <ExternalLink className="h-3 w-3 text-gray-400 ml-1 inline" />
                   </div>
                 </Link>
-                <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <button className="flex items-center justify-center p-3 lg:p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="text-center">
-                    <Plus className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-900">Add Property</span>
+                    <Plus className="h-6 w-6 lg:h-8 lg:w-8 text-gray-600 mx-auto mb-2" />
+                    <span className="text-xs lg:text-sm font-medium text-gray-900">Add Property</span>
                   </div>
                 </button>
               </div>
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
             {/* Recent Properties */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+              <CardHeader className="pb-3 lg:pb-6">
+                <CardTitle className="flex items-center justify-between text-base lg:text-lg">
                   <span>Recent Properties</span>
-                  <Button variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Property
+                  <Button variant="outline" size="sm" className="text-xs lg:text-sm">
+                    <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-1 lg:mr-2" />
+                    <span className="hidden sm:inline">Add Property</span>
+                    <span className="sm:hidden">Add</span>
                   </Button>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="space-y-4">
                   {properties.slice(0, 3).map((property) => (
                     <div key={property.id} className="flex items-center space-x-4 p-3 border rounded-lg">
@@ -440,8 +545,8 @@ const AgentDashboard: React.FC = () => {
                         <p className="text-sm text-gray-600">{property.address}</p>
                         <div className="flex items-center space-x-4 mt-1">
                           <span className="text-sm font-medium text-blue-600">
-                            {formatCurrency(property.price, property.type)}
-                          </span>
+                          {formatCurrencyWithType(property.price, property.type)}
+                        </span>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(property.status)}`}>
                             {property.status.replace('_', ' ')}
                           </span>
@@ -459,10 +564,10 @@ const AgentDashboard: React.FC = () => {
 
             {/* Upcoming Viewings */}
             <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Viewings</CardTitle>
+              <CardHeader className="pb-3 lg:pb-6">
+                <CardTitle className="text-base lg:text-lg">Upcoming Viewings</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <div className="space-y-4">
                   {viewings.slice(0, 3).map((viewing) => (
                     <div key={viewing.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -537,7 +642,7 @@ const AgentDashboard: React.FC = () => {
                   <p className="text-gray-600 text-sm mb-3">{property.address}</p>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xl font-bold text-blue-600">
-                      {formatCurrency(property.price, property.type)}
+                      {formatCurrencyWithType(property.price, property.type)}
                     </span>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(property.status)}`}>
                       {property.status.replace('_', ' ')}
@@ -741,18 +846,80 @@ const AgentDashboard: React.FC = () => {
 
       {activeTab === 'analytics' && (
         <div className="space-y-6">
-          {/* Performance Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Analytics Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h2>
+            <div className="flex space-x-2">
+              <select 
+                value={selectedDateRange} 
+                onChange={(e) => setSelectedDateRange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              >
+                <option value="7d">Last 7 days</option>
+                <option value="30d">Last 30 days</option>
+                <option value="90d">Last 90 days</option>
+                <option value="1y">Last year</option>
+              </select>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+            </div>
+          </div>
+
+          {/* Analytics Navigation */}
+          <div className="flex space-x-4 mb-6">
+            <button
+              onClick={() => setAnalyticsView('overview')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                analyticsView === 'overview' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setAnalyticsView('performance')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                analyticsView === 'performance' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Performance
+            </button>
+            <button
+              onClick={() => setAnalyticsView('market')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                analyticsView === 'market' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Market Insights
+            </button>
+            <button
+              onClick={() => setAnalyticsView('forecasting')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                analyticsView === 'forecasting' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Forecasting
+            </button>
+          </div>
+
+          {/* Enhanced Performance Metrics */}
+          {analyticsView === 'overview' && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <Target className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div className="ml-4">
+                <div className="flex items-center justify-between">
+                  <div>
                     <p className="text-sm font-medium text-gray-600">Monthly Target</p>
                     <p className="text-2xl font-bold text-gray-900">£{stats.monthlyTarget.toLocaleString()}</p>
-                    <p className="text-sm text-green-600">{stats.achievementRate}% achieved</p>
+                    <div className="flex items-center mt-1">
+                      <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+                      <p className="text-sm text-green-600">{stats.achievementRate}% achieved</p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <Target className="h-6 w-6 text-green-600" />
                   </div>
                 </div>
               </CardContent>
@@ -760,14 +927,17 @@ const AgentDashboard: React.FC = () => {
 
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Award className="h-6 w-6 text-blue-600" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Commission</p>
+                    <p className="text-2xl font-bold text-gray-900">£{stats.totalCommission.toLocaleString()}</p>
+                    <div className="flex items-center mt-1">
+                      <TrendingUp className="h-4 w-4 text-blue-600 mr-1" />
+                      <p className="text-sm text-blue-600">+12.5% this month</p>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalSales}</p>
-                    <p className="text-sm text-blue-600">This month</p>
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <PoundSterling className="h-6 w-6 text-blue-600" />
                   </div>
                 </div>
               </CardContent>
@@ -775,14 +945,17 @@ const AgentDashboard: React.FC = () => {
 
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <TrendingUp className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div className="ml-4">
+                <div className="flex items-center justify-between">
+                  <div>
                     <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
                     <p className="text-2xl font-bold text-gray-900">{stats.conversionRate}%</p>
-                    <p className="text-sm text-purple-600">+2.3% from last month</p>
+                    <div className="flex items-center mt-1">
+                      <TrendingUp className="h-4 w-4 text-purple-600 mr-1" />
+                      <p className="text-sm text-purple-600">+2.3% from last month</p>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <TrendingUp className="h-6 w-6 text-purple-600" />
                   </div>
                 </div>
               </CardContent>
@@ -790,14 +963,17 @@ const AgentDashboard: React.FC = () => {
 
             <Card>
               <CardContent className="p-6">
-                <div className="flex items-center">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
-                    <Star className="h-6 w-6 text-yellow-600" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Response Time</p>
+                    <p className="text-2xl font-bold text-gray-900">1.8h</p>
+                    <div className="flex items-center mt-1">
+                      <TrendingDown className="h-4 w-4 text-green-600 mr-1" />
+                      <p className="text-sm text-green-600">-0.5h improvement</p>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Client Satisfaction</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.clientSatisfaction}/5</p>
-                    <p className="text-sm text-yellow-600">Based on 45 reviews</p>
+                  <div className="p-3 bg-orange-100 rounded-lg">
+                    <Clock className="h-6 w-6 text-orange-600" />
                   </div>
                 </div>
               </CardContent>
@@ -881,6 +1057,844 @@ const AgentDashboard: React.FC = () => {
                   <div className="text-sm text-gray-600">Asking Price Achieved</div>
                   <div className="text-xs text-green-600 mt-1">+1.2% from last month</div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Real-time Activity Feed */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Activity className="h-5 w-5 mr-2 text-blue-600" />
+                Real-time Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">New lead inquiry received</p>
+                    <p className="text-xs text-gray-500">Sarah Johnson interested in 3-bed house in Hampstead</p>
+                  </div>
+                  <span className="text-xs text-gray-500">2 min ago</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Property viewing scheduled</p>
+                    <p className="text-xs text-gray-500">Michael Chen - Tomorrow 2:00 PM</p>
+                  </div>
+                  <span className="text-xs text-gray-500">5 min ago</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Follow-up reminder</p>
+                    <p className="text-xs text-gray-500">Contact Emma Wilson about offer feedback</p>
+                  </div>
+                  <span className="text-xs text-gray-500">10 min ago</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+            </>
+          )}
+
+          {/* Performance Analytics View */}
+          {analyticsView === 'performance' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
+                      Sales Performance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">This Month</span>
+                        <span className="text-lg font-bold text-green-600">£{stats.monthlyCommission.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Last Month</span>
+                        <span className="text-lg font-bold text-gray-900">£{(stats.monthlyCommission * 0.85).toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Growth</span>
+                        <span className="text-lg font-bold text-green-600">+17.6%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Users className="h-5 w-5 mr-2 text-blue-600" />
+                      Client Metrics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Active Clients</span>
+                        <span className="text-lg font-bold text-blue-600">{stats.totalClients}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">New This Month</span>
+                        <span className="text-lg font-bold text-gray-900">12</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Satisfaction</span>
+                        <span className="text-lg font-bold text-yellow-600">{stats.clientSatisfaction}/5.0</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Target className="h-5 w-5 mr-2 text-purple-600" />
+                      Goal Progress
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Monthly Target</span>
+                          <span>{stats.achievementRate}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-purple-600 h-2 rounded-full" style={{width: `${stats.achievementRate}%`}}></div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Annual Target</span>
+                          <span>65%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full" style={{width: '65%'}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Performance Charts */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Monthly Performance Trend</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                      <div className="text-center">
+                        <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-600">Performance trend chart</p>
+                        <p className="text-sm text-gray-500">Commission and sales over time</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Lead Conversion Funnel</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Leads Generated</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-32 bg-gray-200 rounded-full h-3">
+                            <div className="bg-blue-600 h-3 rounded-full" style={{width: '100%'}}></div>
+                          </div>
+                          <span className="text-sm text-gray-600">156</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Qualified</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-32 bg-gray-200 rounded-full h-3">
+                            <div className="bg-green-600 h-3 rounded-full" style={{width: '75%'}}></div>
+                          </div>
+                          <span className="text-sm text-gray-600">117</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Viewings</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-32 bg-gray-200 rounded-full h-3">
+                            <div className="bg-yellow-600 h-3 rounded-full" style={{width: '45%'}}></div>
+                          </div>
+                          <span className="text-sm text-gray-600">70</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Offers</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-32 bg-gray-200 rounded-full h-3">
+                            <div className="bg-orange-600 h-3 rounded-full" style={{width: '30%'}}></div>
+                          </div>
+                          <span className="text-sm text-gray-600">47</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Closed</span>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-32 bg-gray-200 rounded-full h-3">
+                            <div className="bg-purple-600 h-3 rounded-full" style={{width: '25%'}}></div>
+                          </div>
+                          <span className="text-sm text-gray-600">38</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* Market Insights View */}
+          {analyticsView === 'market' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Home className="h-5 w-5 mr-2 text-blue-600" />
+                      Market Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Avg. Property Value</span>
+                        <span className="font-medium">£{stats.averagePropertyValue.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Market Growth</span>
+                        <span className="font-medium text-green-600">+5.2%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Days on Market</span>
+                        <span className="font-medium">28 days</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                      Area Performance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Hampstead</span>
+                        <span className="font-medium text-green-600">+8.1%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Canary Wharf</span>
+                        <span className="font-medium text-blue-600">+3.4%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Kensington</span>
+                        <span className="font-medium text-purple-600">+6.7%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <TrendingUp className="h-5 w-5 mr-2 text-purple-600" />
+                      Price Trends
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">1-Bed Flats</span>
+                        <span className="font-medium">£425k</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">2-Bed Houses</span>
+                        <span className="font-medium">£675k</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">3-Bed Houses</span>
+                        <span className="font-medium">£950k</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Market Analysis Charts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Market Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                    <div className="text-center">
+                      <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-600">Market trends visualization</p>
+                      <p className="text-sm text-gray-500">Price movements and market indicators</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Forecasting View */}
+          {analyticsView === 'forecasting' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Target className="h-5 w-5 mr-2 text-blue-600" />
+                      Revenue Forecast
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Next Month</span>
+                        <span className="text-lg font-bold text-blue-600">£18,500</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Next Quarter</span>
+                        <span className="text-lg font-bold text-green-600">£52,000</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Annual Projection</span>
+                        <span className="text-lg font-bold text-purple-600">£195,000</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
+                      Growth Predictions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Client Growth</span>
+                        <span className="text-lg font-bold text-green-600">+15%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Market Share</span>
+                        <span className="text-lg font-bold text-blue-600">+8%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Commission Rate</span>
+                        <span className="text-lg font-bold text-purple-600">+12%</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Forecasting Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>12-Month Revenue Forecast</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                    <div className="text-center">
+                      <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-600">Revenue forecasting chart</p>
+                      <p className="text-sm text-gray-500">Projected earnings and growth trends</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'leads' && (
+        <div className="space-y-6">
+          {/* Lead Pipeline Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-blue-600" />
+                  Lead Pipeline Overview
+                </div>
+                <div className="flex space-x-2">
+                  <Button 
+                    size="sm" 
+                    variant={leadPipelineView === 'kanban' ? 'primary' : 'outline'}
+                    onClick={() => setLeadPipelineView('kanban')}
+                  >
+                    <LayoutGrid className="h-4 w-4 mr-1" />
+                    Kanban
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant={leadPipelineView === 'list' ? 'primary' : 'outline'}
+                    onClick={() => setLeadPipelineView('list')}
+                  >
+                    <List className="h-4 w-4 mr-1" />
+                    List
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                {[
+                  { stage: 'new', count: 8, color: 'bg-gray-100 text-gray-800', trend: '+2 this week' },
+                  { stage: 'contacted', count: 12, color: 'bg-blue-100 text-blue-800', trend: '75% response rate' },
+                  { stage: 'qualified', count: 6, color: 'bg-yellow-100 text-yellow-800', trend: '50% conversion' },
+                  { stage: 'viewing', count: 4, color: 'bg-purple-100 text-purple-800', trend: '67% from qualified' },
+                  { stage: 'offer', count: 3, color: 'bg-orange-100 text-orange-800', trend: '75% from viewings' },
+                  { stage: 'closed', count: 2, color: 'bg-green-100 text-green-800', trend: '67% close rate' }
+                ].map((stage) => (
+                  <Card key={stage.stage}>
+                    <CardContent className="p-4 text-center">
+                      <div className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${stage.color} mb-2`}>
+                        {stage.stage.charAt(0).toUpperCase() + stage.stage.slice(1)}
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900">{stage.count}</div>
+                      <div className="text-sm text-gray-600">leads</div>
+                      <div className="text-xs text-gray-500 mt-1">{stage.trend}</div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lead Management - Kanban View */}
+          {leadPipelineView === 'kanban' && (
+            <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+              {/* New Leads Column */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-gray-600">New (8)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 bg-white border rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Sarah Johnson</h4>
+                      <span className="text-xs text-gray-500">2h ago</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">3-bed house in Hampstead</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">High Priority</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                        <Phone className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-white border rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Michael Chen</h4>
+                      <span className="text-xs text-gray-500">4h ago</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">2-bed flat in Canary Wharf</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Medium</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                        <Mail className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Contacted Column */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-blue-600">Contacted (12)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 bg-white border rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Emma Wilson</h4>
+                      <span className="text-xs text-gray-500">1d ago</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">4-bed house in Kensington</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Responded</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                        <MessageSquare className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Qualified Column */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-yellow-600">Qualified (6)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 bg-white border rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">David Brown</h4>
+                      <span className="text-xs text-gray-500">2d ago</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">3-bed townhouse in Chelsea</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Pre-approved</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                        <Calendar className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Viewing Column */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-purple-600">Viewing (4)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 bg-white border rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Lisa Taylor</h4>
+                      <span className="text-xs text-gray-500">Tomorrow 2PM</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">2-bed flat in Shoreditch</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Confirmed</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                        <MapPin className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Offer Column */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-orange-600">Offer (3)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 bg-white border rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">James Miller</h4>
+                      <span className="text-xs text-gray-500">3d ago</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">1-bed flat in Greenwich</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">£450k offer</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                        <Clock className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Closed Column */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-green-600">Closed (2)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 bg-white border rounded-lg shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-sm">Robert Davis</h4>
+                      <span className="text-xs text-gray-500">1w ago</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-2">Studio in King's Cross</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">£325k sold</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                        <CheckCircle className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Lead Management - List View */}
+          {leadPipelineView === 'list' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Lead Management</span>
+                  <div className="flex space-x-2">
+                    <Input placeholder="Search leads..." className="w-64" />
+                    <Button variant="outline" size="sm">
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filter
+                    </Button>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Lead
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {leads.map((lead) => (
+                    <div key={lead.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div>
+                            <h4 className="font-medium text-gray-900">{lead.name}</h4>
+                            <p className="text-sm text-gray-600">{lead.email} • {lead.phone}</p>
+                          </div>
+                          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            lead.stage === 'new' ? 'bg-gray-100 text-gray-800' :
+                            lead.stage === 'contacted' ? 'bg-blue-100 text-blue-800' :
+                            lead.stage === 'qualified' ? 'bg-yellow-100 text-yellow-800' :
+                            lead.stage === 'viewing' ? 'bg-purple-100 text-purple-800' :
+                            lead.stage === 'offer' ? 'bg-orange-100 text-orange-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            {lead.stage}
+                          </div>
+                        </div>
+                        <div className="mt-2 text-sm text-gray-600">
+                          <span className="font-medium">Value:</span> {formatCurrency(lead.value)} • 
+                          <span className="font-medium">Source:</span> {lead.source} • 
+                          <span className="font-medium">Last Activity:</span> {new Date(lead.lastActivity).toLocaleDateString()}
+                        </div>
+                        <div className="mt-1 text-sm text-gray-500">{lead.notes}</div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <Phone className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Mail className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Calendar className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Lead Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
+                  Lead Source Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Website</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{width: '65%'}}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">65%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Referrals</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{width: '25%'}}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">25%</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Social Media</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                        <div className="bg-purple-600 h-2 rounded-full" style={{width: '10%'}}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">10%</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="h-5 w-5 mr-2 text-orange-600" />
+                  Response Time Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Average Response Time</span>
+                    <span className="text-lg font-bold text-green-600">12 minutes</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">First Contact Rate</span>
+                    <span className="text-lg font-bold text-blue-600">94%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Follow-up Rate</span>
+                    <span className="text-lg font-bold text-purple-600">87%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Conversion Rate</span>
+                    <span className="text-lg font-bold text-emerald-600">23%</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'calendar' && (
+        <div className="space-y-6">
+          {/* Calendar Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">Calendar & Appointments</h2>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm">
+                <Calendar className="h-4 w-4 mr-2" />
+                Today
+              </Button>
+              <Button size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Schedule Viewing
+              </Button>
+            </div>
+          </div>
+
+          {/* Upcoming Appointments */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Today's Schedule</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4 p-3 border-l-4 border-blue-500 bg-blue-50 rounded">
+                    <div className="flex-shrink-0">
+                      <Clock className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">Property Viewing</div>
+                      <div className="text-sm text-gray-600">14:00 - Modern 3-Bed House in Hampstead</div>
+                      <div className="text-xs text-gray-500">with Sarah Johnson</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4 p-3 border-l-4 border-green-500 bg-green-50 rounded">
+                    <div className="flex-shrink-0">
+                      <PhoneCall className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">Client Call</div>
+                      <div className="text-sm text-gray-600">16:30 - Follow-up with Michael Chen</div>
+                      <div className="text-xs text-gray-500">Portfolio review discussion</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>This Week's Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Total Appointments</span>
+                    <span className="text-lg font-bold text-blue-600">18</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Property Viewings</span>
+                    <span className="text-lg font-bold text-green-600">12</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Client Meetings</span>
+                    <span className="text-lg font-bold text-purple-600">4</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Follow-up Calls</span>
+                    <span className="text-lg font-bold text-orange-600">8</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Communication Tracking */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Communications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {communications.map((comm) => (
+                  <div key={comm.id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                    <div className={`p-2 rounded-lg ${
+                      comm.type === 'call' ? 'bg-blue-100' :
+                      comm.type === 'email' ? 'bg-green-100' :
+                      comm.type === 'meeting' ? 'bg-purple-100' :
+                      'bg-gray-100'
+                    }`}>
+                      {comm.type === 'call' && <Phone className="h-4 w-4 text-blue-600" />}
+                      {comm.type === 'email' && <Mail className="h-4 w-4 text-green-600" />}
+                      {comm.type === 'meeting' && <Users className="h-4 w-4 text-purple-600" />}
+                      {comm.type === 'message' && <MessageSquare className="h-4 w-4 text-gray-600" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-900">{comm.subject}</div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(comm.date).toLocaleDateString()} • 
+                        {comm.status === 'completed' ? 'Completed' : comm.status === 'scheduled' ? 'Scheduled' : 'Pending'}
+                      </div>
+                      {comm.notes && <div className="text-xs text-gray-600 mt-1">{comm.notes}</div>}
+                    </div>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      comm.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      comm.status === 'scheduled' ? 'bg-blue-100 text-blue-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {comm.status}
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

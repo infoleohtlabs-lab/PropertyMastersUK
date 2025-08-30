@@ -590,19 +590,19 @@ const AdvancedSearch: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Advanced Property Search</h1>
-        <p className="text-gray-600">Find your perfect property with our comprehensive search filters</p>
+    <div className="container-responsive">
+      <div className="section-spacing">
+        <h1 className="text-heading-xl mb-2">Advanced Property Search</h1>
+        <p className="text-body-lg text-gray-600">Find your perfect property with our comprehensive search filters</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-responsive">
         {/* Filters Sidebar */}
         <div className={`lg:col-span-1 ${showFilters ? 'block' : 'hidden lg:block'}`}>
           <Card className="sticky top-4">
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Search Filters</CardTitle>
+              <div className="flex-between">
+                <CardTitle className="text-heading-md">Search Filters</CardTitle>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" onClick={clearFilters}>
                     <X className="w-4 h-4" />
@@ -613,7 +613,7 @@ const AdvancedSearch: React.FC = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <CardContent className="stack-md max-h-[calc(100vh-200px)] overflow-y-auto">
               {/* Basic Search */}
               <div>
                 <button
@@ -624,9 +624,9 @@ const AdvancedSearch: React.FC = () => {
                   {expandedFilters.includes('basic') ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {expandedFilters.includes('basic') && (
-                  <div className="space-y-4">
+                  <div className="stack-sm">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Search Keywords</label>
+                      <label className="text-label text-gray-700 mb-1 block">Search Keywords</label>
                       <Input
                         placeholder="Property title, description..."
                         value={filters.query}
@@ -634,7 +634,7 @@ const AdvancedSearch: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <label className="text-label text-gray-700 mb-1 block">Location</label>
                       <Input
                         placeholder="City, postcode, area..."
                         value={filters.location}
@@ -642,7 +642,7 @@ const AdvancedSearch: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+                      <label className="text-label text-gray-700 mb-1 block">Property Type</label>
                       <select
                         value={filters.priceType}
                         onChange={(e) => updateFilter('priceType', e.target.value)}
@@ -667,10 +667,10 @@ const AdvancedSearch: React.FC = () => {
                   {expandedFilters.includes('price') ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {expandedFilters.includes('price') && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="stack-sm">
+                    <div className="grid grid-cols-2 gap-responsive">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Min Price</label>
+                        <label className="text-label text-gray-700 mb-1 block">Min Price</label>
                         <Input
                           type="number"
                           placeholder="0"
@@ -679,7 +679,7 @@ const AdvancedSearch: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Max Price</label>
+                        <label className="text-label text-gray-700 mb-1 block">Max Price</label>
                         <Input
                           type="number"
                           placeholder="No max"
@@ -702,10 +702,10 @@ const AdvancedSearch: React.FC = () => {
                   {expandedFilters.includes('details') ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {expandedFilters.includes('details') && (
-                  <div className="space-y-4">
+                  <div className="stack-sm">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Property Types</label>
-                      <div className="space-y-2">
+                      <label className="text-label text-gray-700 mb-2 block">Property Types</label>
+                      <div className="stack-xs">
                         {propertyTypes.map(type => (
                           <label key={type} className="flex items-center">
                             <input
@@ -714,14 +714,14 @@ const AdvancedSearch: React.FC = () => {
                               onChange={() => toggleArrayFilter('propertyTypes', type)}
                               className="mr-2"
                             />
-                            <span className="text-sm capitalize">{type}</span>
+                            <span className="text-body-sm capitalize">{type}</span>
                           </label>
                         ))}
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-responsive">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Min Bedrooms</label>
+                        <label className="text-label text-gray-700 mb-1 block">Min Bedrooms</label>
                         <select
                           value={filters.minBedrooms}
                           onChange={(e) => updateFilter('minBedrooms', parseInt(e.target.value))}
@@ -734,7 +734,7 @@ const AdvancedSearch: React.FC = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Max Bedrooms</label>
+                        <label className="text-label text-gray-700 mb-1 block">Max Bedrooms</label>
                         <select
                           value={filters.maxBedrooms}
                           onChange={(e) => updateFilter('maxBedrooms', parseInt(e.target.value))}
@@ -761,8 +761,8 @@ const AdvancedSearch: React.FC = () => {
                   {expandedFilters.includes('features') ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {expandedFilters.includes('features') && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                  <div className="stack-sm">
+                    <div className="grid grid-cols-2 gap-responsive">
                       <label className="flex items-center">
                         <input
                           type="checkbox"
@@ -771,7 +771,7 @@ const AdvancedSearch: React.FC = () => {
                           className="mr-2"
                         />
                         <Car className="w-4 h-4 mr-1" />
-                        <span className="text-sm">Parking</span>
+                        <span className="text-body-sm">Parking</span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -781,7 +781,7 @@ const AdvancedSearch: React.FC = () => {
                           className="mr-2"
                         />
                         <Trees className="w-4 h-4 mr-1" />
-                        <span className="text-sm">Garden</span>
+                        <span className="text-body-sm">Garden</span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -791,7 +791,7 @@ const AdvancedSearch: React.FC = () => {
                           className="mr-2"
                         />
                         <Heart className="w-4 h-4 mr-1" />
-                        <span className="text-sm">Pet Friendly</span>
+                        <span className="text-body-sm">Pet Friendly</span>
                       </label>
                       <label className="flex items-center">
                         <input
@@ -801,7 +801,7 @@ const AdvancedSearch: React.FC = () => {
                           className="mr-2"
                         />
                         <Video className="w-4 h-4 mr-1" />
-                        <span className="text-sm">Virtual Tour</span>
+                        <span className="text-body-sm">Virtual Tour</span>
                       </label>
                     </div>
                   </div>
@@ -827,7 +827,7 @@ const AdvancedSearch: React.FC = () => {
                         className="mr-2"
                       />
                       <Star className="w-4 h-4 mr-1" />
-                      <span className="text-sm">Featured Properties</span>
+                      <span className="text-body-sm">Featured Properties</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -837,7 +837,7 @@ const AdvancedSearch: React.FC = () => {
                         className="mr-2"
                       />
                       <Zap className="w-4 h-4 mr-1" />
-                      <span className="text-sm">Premium Listings</span>
+                      <span className="text-body-sm">Premium Listings</span>
                     </label>
                   </div>
                 )}
@@ -864,8 +864,8 @@ const AdvancedSearch: React.FC = () => {
         {/* Results */}
         <div className="lg:col-span-3">
           {/* Results Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-responsive component-spacing">
+            <div className="flex items-center gap-responsive">
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(true)}
@@ -875,19 +875,19 @@ const AdvancedSearch: React.FC = () => {
                 Filters
               </Button>
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-heading-lg text-gray-900">
                   {searchResults.total} Properties Found
                 </h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-body-sm text-gray-600">
                   Page {searchResults.currentPage} of {searchResults.pages}
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-responsive">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input-field text-body-sm"
               >
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
@@ -896,22 +896,34 @@ const AdvancedSearch: React.FC = () => {
                 <option value="bedrooms-desc">Most Bedrooms</option>
                 <option value="sqft-desc">Largest First</option>
               </select>
-              <div className="flex border border-gray-300 rounded-md">
+              <div className="flex border border-gray-300 rounded-md overflow-hidden">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                  className={`px-3 py-2 text-body-sm ${
+                    viewMode === 'grid'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
                 >
                   <Grid className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                  className={`px-3 py-2 text-body-sm ${
+                    viewMode === 'list'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('map')}
-                  className={`p-2 ${viewMode === 'map' ? 'bg-blue-100 text-blue-600' : 'text-gray-600'}`}
+                  className={`px-3 py-2 text-body-sm ${
+                    viewMode === 'map'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
                 >
                   <Map className="w-4 h-4" />
                 </button>
@@ -921,14 +933,14 @@ const AdvancedSearch: React.FC = () => {
 
           {/* Property Results */}
           {viewMode === 'grid' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid-responsive">
               {filteredProperties.map((property) => (
                 <Card key={property.id} className="hover:shadow-lg transition-shadow">
                   <div className="relative">
                     <img
                       src={property.images[0]}
                       alt={property.title}
-                      className="w-full h-48 object-cover rounded-t-lg"
+                      className="w-full h-48 object-cover rounded-t-lg transition-transform duration-300 hover:scale-105"
                     />
                     <div className="absolute top-3 left-3">
                       <div className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -965,20 +977,20 @@ const AdvancedSearch: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <CardContent className="p-4">
+                  <CardContent className="component-spacing">
                     <div className="mb-2">
-                      <h3 className="font-semibold text-lg text-gray-900 mb-1">{property.title}</h3>
-                      <div className="flex items-center text-sm text-gray-600 mb-2">
+                      <h3 className="text-heading-sm text-gray-900 mb-1">{property.title}</h3>
+                      <div className="flex items-center text-body-sm text-gray-600 mb-2">
                         <MapPin className="w-4 h-4 mr-1" />
                         <span>{property.address}, {property.city}</span>
                       </div>
-                      <div className="text-2xl font-bold text-blue-600 mb-3">
+                      <div className="text-heading-lg font-bold text-blue-600 mb-3">
                         {formatPrice(property.price, property.priceType)}
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
-                      <div className="flex items-center space-x-4">
+                    <div className="flex-between text-body-sm text-gray-600 mb-3">
+                      <div className="flex items-center gap-responsive">
                         {property.bedrooms > 0 && (
                           <div className="flex items-center">
                             <Bed className="w-4 h-4 mr-1" />
@@ -1006,15 +1018,15 @@ const AdvancedSearch: React.FC = () => {
                         </span>
                       ))}
                       {property.features.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                        <span className="badge-primary text-caption">
                           +{property.features.length - 3} more
                         </span>
                       )}
                     </div>
                     
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                    <div className="flex-between text-caption text-gray-500 mb-3">
                       <span>Listed {new Date(property.listedDate).toLocaleDateString()}</span>
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center gap-responsive">
                         <span className="flex items-center">
                           <Eye className="w-3 h-3 mr-1" />
                           {property.viewingStats.views}
@@ -1026,7 +1038,7 @@ const AdvancedSearch: React.FC = () => {
                       </div>
                     </div>
                     
-                    <div className="flex space-x-2">
+                    <div className="flex gap-responsive">
                       <Button size="sm" className="flex-1">
                         <Eye className="w-4 h-4 mr-2" />
                         View Details
@@ -1048,11 +1060,11 @@ const AdvancedSearch: React.FC = () => {
           )}
 
           {viewMode === 'list' && (
-            <div className="space-y-6">
+            <div className="stack-lg">
               {filteredProperties.map((property) => (
                 <Card key={property.id} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col lg:flex-row gap-6">
+                  <CardContent className="component-spacing">
+                    <div className="flex flex-col lg:flex-row gap-responsive">
                       <div className="lg:w-1/3">
                         <div className="relative">
                           <img
@@ -1075,16 +1087,16 @@ const AdvancedSearch: React.FC = () => {
                       <div className="lg:w-2/3">
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">{property.title}</h3>
-                            <div className="flex items-center text-gray-600 mb-2">
+                            <h3 className="text-heading-lg text-gray-900 mb-2">{property.title}</h3>
+                            <div className="flex items-center text-body-md text-gray-600 mb-2">
                               <MapPin className="w-4 h-4 mr-1" />
                               <span>{property.address}, {property.city}, {property.postcode}</span>
                             </div>
-                            <div className="text-2xl font-bold text-blue-600 mb-3">
+                            <div className="text-heading-lg font-bold text-blue-600 mb-3">
                               {formatPrice(property.price, property.priceType)}
                             </div>
                           </div>
-                          <div className="flex space-x-2">
+                          <div className="flex gap-responsive">
                             {property.featured && (
                               <div className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">
                                 Featured
@@ -1098,58 +1110,58 @@ const AdvancedSearch: React.FC = () => {
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-responsive mb-4">
                           {property.bedrooms > 0 && (
-                            <div className="flex items-center text-gray-600">
+                            <div className="flex items-center text-body-sm text-gray-600">
                               <Bed className="w-4 h-4 mr-2" />
                               <span>{property.bedrooms} bedrooms</span>
                             </div>
                           )}
-                          <div className="flex items-center text-gray-600">
+                          <div className="flex items-center text-body-sm text-gray-600">
                             <Bath className="w-4 h-4 mr-2" />
                             <span>{property.bathrooms} bathrooms</span>
                           </div>
-                          <div className="flex items-center text-gray-600">
+                          <div className="flex items-center text-body-sm text-gray-600">
                             <Square className="w-4 h-4 mr-2" />
                             <span>{property.sqft} sqft</span>
                           </div>
-                          <div className="flex items-center text-gray-600">
+                          <div className="flex items-center text-body-sm text-gray-600">
                             <Building className="w-4 h-4 mr-2" />
                             <span className="capitalize">{property.propertyType}</span>
                           </div>
                         </div>
                         
-                        <p className="text-gray-600 mb-4 line-clamp-2">{property.description}</p>
+                        <p className="text-body-md text-gray-600 mb-4 line-clamp-2">{property.description}</p>
                         
                         <div className="flex flex-wrap gap-2 mb-4">
                           {property.features.slice(0, 5).map((feature, index) => (
                             <span
                               key={index}
-                              className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                              className="badge-primary text-caption"
                             >
                               {feature}
                             </span>
                           ))}
                           {property.features.length > 5 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                            <span className="badge-primary text-caption">
                               +{property.features.length - 5} more
                             </span>
                           )}
                         </div>
                         
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 text-sm text-gray-500">
-                            <span>Listed {new Date(property.listedDate).toLocaleDateString()}</span>
-                            <span className="flex items-center">
-                              <Eye className="w-4 h-4 mr-1" />
-                              {property.viewingStats.views} views
-                            </span>
-                            <span className="flex items-center">
-                              <Heart className="w-4 h-4 mr-1" />
-                              {property.viewingStats.enquiries} enquiries
-                            </span>
-                          </div>
-                          <div className="flex space-x-2">
+                        <div className="flex-between">
+                            <div className="flex items-center gap-responsive text-body-sm text-gray-500">
+                              <span>Listed {new Date(property.listedDate).toLocaleDateString()}</span>
+                              <span className="flex items-center">
+                                <Eye className="w-4 h-4 mr-1" />
+                                {property.viewingStats.views} views
+                              </span>
+                              <span className="flex items-center">
+                                <Heart className="w-4 h-4 mr-1" />
+                                {property.viewingStats.enquiries} enquiries
+                              </span>
+                            </div>
+                            <div className="flex gap-responsive">
                             <Button size="sm">
                               <Eye className="w-4 h-4 mr-2" />
                               View Details
@@ -1177,12 +1189,12 @@ const AdvancedSearch: React.FC = () => {
 
           {viewMode === 'map' && (
             <Card>
-              <CardContent className="p-6">
-                <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center">
+              <CardContent className="component-spacing">
+                <div className="h-96 bg-gray-100 rounded-lg flex-center">
                   <div className="text-center">
                     <Map className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-600">Interactive map view coming soon</p>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-body-md text-gray-600">Interactive map view coming soon</p>
+                    <p className="text-body-sm text-gray-500 mt-2">
                       This will show all {filteredProperties.length} properties on an interactive map
                     </p>
                   </div>
@@ -1194,14 +1206,14 @@ const AdvancedSearch: React.FC = () => {
           {/* No Results */}
           {filteredProperties.length === 0 && !isSearching && (
             <Card>
-              <CardContent className="p-12 text-center">
+              <CardContent className="component-spacing text-center">
                 <Search className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Properties Found</h3>
-                <p className="text-gray-600 mb-6">
+                <h3 className="text-heading-lg text-gray-900 mb-2">No Properties Found</h3>
+                <p className="text-body-md text-gray-600 mb-6">
                   We couldn't find any properties matching your search criteria.
                   Try adjusting your filters or search terms.
                 </p>
-                <div className="flex justify-center space-x-3">
+                <div className="flex-center gap-responsive">
                   <Button onClick={clearFilters}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Clear Filters
@@ -1217,15 +1229,15 @@ const AdvancedSearch: React.FC = () => {
 
           {/* Pagination */}
           {searchResults.pages > 1 && (
-            <div className="flex justify-center mt-8">
-              <div className="flex space-x-2">
+            <div className="flex-center component-spacing">
+              <div className="flex gap-responsive">
                 <Button variant="outline" disabled={searchResults.currentPage === 1}>
                   Previous
                 </Button>
                 {Array.from({ length: Math.min(5, searchResults.pages) }, (_, i) => (
                   <Button
                     key={i + 1}
-                    variant={searchResults.currentPage === i + 1 ? 'default' : 'outline'}
+                    variant={searchResults.currentPage === i + 1 ? 'primary' : 'outline'}
                   >
                     {i + 1}
                   </Button>

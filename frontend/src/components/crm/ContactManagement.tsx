@@ -50,8 +50,10 @@ import {
   Target,
   Banknote,
   BarChart3,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatCurrency } from '../../utils';
 
 interface Contact {
   id: string;
@@ -508,14 +510,7 @@ const ContactManagement: React.FC = () => {
     });
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+
 
   const formatPercentage = (value: number) => {
     return `${value.toFixed(1)}%`;
@@ -712,338 +707,486 @@ const ContactManagement: React.FC = () => {
                   <TabsTrigger value="preferences">Preferences</TabsTrigger>
                   <TabsTrigger value="social">Social & Custom</TabsTrigger>
                 </TabsList>
-                <TabsContent value="basic" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name *</Label>
-                      <Input
-                        id="firstName"
-                        value={newContact.firstName}
-                        onChange={(e) => setNewContact({ ...newContact, firstName: e.target.value })}
-                        placeholder="Enter first name"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name *</Label>
-                      <Input
-                        id="lastName"
-                        value={newContact.lastName}
-                        onChange={(e) => setNewContact({ ...newContact, lastName: e.target.value })}
-                        placeholder="Enter last name"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={newContact.email}
-                        onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
-                        placeholder="Enter email address"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone *</Label>
-                      <Input
-                        id="phone"
-                        value={newContact.phone}
-                        onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
-                        placeholder="Enter phone number"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="mobile">Mobile</Label>
-                      <Input
-                        id="mobile"
-                        value={newContact.mobile}
-                        onChange={(e) => setNewContact({ ...newContact, mobile: e.target.value })}
-                        placeholder="Enter mobile number"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Company</Label>
-                      <Input
-                        id="company"
-                        value={newContact.company}
-                        onChange={(e) => setNewContact({ ...newContact, company: e.target.value })}
-                        placeholder="Enter company name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="jobTitle">Job Title</Label>
-                      <Input
-                        id="jobTitle"
-                        value={newContact.jobTitle}
-                        onChange={(e) => setNewContact({ ...newContact, jobTitle: e.target.value })}
-                        placeholder="Enter job title"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="website">Website</Label>
-                      <Input
-                        id="website"
-                        value={newContact.website}
-                        onChange={(e) => setNewContact({ ...newContact, website: e.target.value })}
-                        placeholder="Enter website URL"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="type">Contact Type</Label>
-                      <Select value={newContact.type} onValueChange={(value) => setNewContact({ ...newContact, type: value as any })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="BUYER">Buyer</SelectItem>
-                          <SelectItem value="SELLER">Seller</SelectItem>
-                          <SelectItem value="LANDLORD">Landlord</SelectItem>
-                          <SelectItem value="TENANT">Tenant</SelectItem>
-                          <SelectItem value="INVESTOR">Investor</SelectItem>
-                          <SelectItem value="AGENT">Agent</SelectItem>
-                          <SelectItem value="VENDOR">Vendor</SelectItem>
-                          <SelectItem value="OTHER">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select value={newContact.status} onValueChange={(value) => setNewContact({ ...newContact, status: value as any })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="PROSPECT">Prospect</SelectItem>
-                          <SelectItem value="QUALIFIED">Qualified</SelectItem>
-                          <SelectItem value="ACTIVE">Active</SelectItem>
-                          <SelectItem value="CONVERTED">Converted</SelectItem>
-                          <SelectItem value="INACTIVE">Inactive</SelectItem>
-                          <SelectItem value="LOST">Lost</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="source">Source</Label>
-                      <Select value={newContact.source} onValueChange={(value) => setNewContact({ ...newContact, source: value as any })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="WEBSITE">Website</SelectItem>
-                          <SelectItem value="REFERRAL">Referral</SelectItem>
-                          <SelectItem value="SOCIAL_MEDIA">Social Media</SelectItem>
-                          <SelectItem value="ADVERTISING">Advertising</SelectItem>
-                          <SelectItem value="COLD_CALL">Cold Call</SelectItem>
-                          <SelectItem value="EVENT">Event</SelectItem>
-                          <SelectItem value="PARTNER">Partner</SelectItem>
-                          <SelectItem value="OTHER">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="priority">Priority</Label>
-                      <Select value={newContact.priority} onValueChange={(value) => setNewContact({ ...newContact, priority: value as any })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="LOW">Low</SelectItem>
-                          <SelectItem value="MEDIUM">Medium</SelectItem>
-                          <SelectItem value="HIGH">High</SelectItem>
-                          <SelectItem value="URGENT">Urgent</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Notes</Label>
-                    <Textarea
-                      id="notes"
-                      value={newContact.notes}
-                      onChange={(e) => setNewContact({ ...newContact, notes: e.target.value })}
-                      placeholder="Enter notes about this contact"
-                      rows={3}
-                    />
-                  </div>
-                </TabsContent>
-                <TabsContent value="address" className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="street">Street Address</Label>
-                    <Input
-                      id="street"
-                      value={newContact.address?.street}
-                      onChange={(e) => setNewContact({
-                        ...newContact,
-                        address: { ...newContact.address!, street: e.target.value },
-                      })}
-                      placeholder="Enter street address"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        value={newContact.address?.city}
-                        onChange={(e) => setNewContact({
-                          ...newContact,
-                          address: { ...newContact.address!, city: e.target.value },
-                        })}
-                        placeholder="Enter city"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="county">County</Label>
-                      <Input
-                        id="county"
-                        value={newContact.address?.county}
-                        onChange={(e) => setNewContact({
-                          ...newContact,
-                          address: { ...newContact.address!, county: e.target.value },
-                        })}
-                        placeholder="Enter county"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="postcode">Postcode</Label>
-                      <Input
-                        id="postcode"
-                        value={newContact.address?.postcode}
-                        onChange={(e) => setNewContact({
-                          ...newContact,
-                          address: { ...newContact.address!, postcode: e.target.value },
-                        })}
-                        placeholder="Enter postcode"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="country">Country</Label>
-                      <Select
-                        value={newContact.address?.country}
-                        onValueChange={(value) => setNewContact({
-                          ...newContact,
-                          address: { ...newContact.address!, country: value },
-                        })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                          <SelectItem value="Ireland">Ireland</SelectItem>
-                          <SelectItem value="United States">United States</SelectItem>
-                          <SelectItem value="Canada">Canada</SelectItem>
-                          <SelectItem value="Australia">Australia</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </TabsContent>
-                <TabsContent value="preferences" className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Price Range</Label>
-                      <div className="flex space-x-2">
+                <TabsContent value="basic" className="space-y-6">
+                  {/* Personal Information */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <User className="h-5 w-5 mr-2 text-blue-600" />
+                      Personal Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <Label htmlFor="firstName" className="text-sm font-medium text-gray-700 flex items-center">
+                          <User className="h-4 w-4 mr-2 text-gray-500" />
+                          First Name *
+                        </Label>
                         <Input
-                          type="number"
-                          placeholder="Min price"
-                          value={newContact.preferences?.priceRange.min}
-                          onChange={(e) => setNewContact({
-                            ...newContact,
-                            preferences: {
-                              ...newContact.preferences!,
-                              priceRange: {
-                                ...newContact.preferences!.priceRange,
-                                min: parseInt(e.target.value) || 0,
-                              },
-                            },
-                          })}
+                          id="firstName"
+                          value={newContact.firstName}
+                          onChange={(e) => setNewContact({ ...newContact, firstName: e.target.value })}
+                          placeholder="Enter first name"
+                          required
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
                         />
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="lastName" className="text-sm font-medium text-gray-700 flex items-center">
+                          <User className="h-4 w-4 mr-2 text-gray-500" />
+                          Last Name *
+                        </Label>
                         <Input
-                          type="number"
-                          placeholder="Max price"
-                          value={newContact.preferences?.priceRange.max}
-                          onChange={(e) => setNewContact({
-                            ...newContact,
-                            preferences: {
-                              ...newContact.preferences!,
-                              priceRange: {
-                                ...newContact.preferences!.priceRange,
-                                max: parseInt(e.target.value) || 0,
-                              },
-                            },
-                          })}
+                          id="lastName"
+                          value={newContact.lastName}
+                          onChange={(e) => setNewContact({ ...newContact, lastName: e.target.value })}
+                          placeholder="Enter last name"
+                          required
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
                         />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="communicationPreference">Communication Preference</Label>
-                      <Select
-                        value={newContact.preferences?.communicationPreference}
-                        onValueChange={(value) => setNewContact({
-                          ...newContact,
-                          preferences: {
-                            ...newContact.preferences!,
-                            communicationPreference: value as any,
-                          },
-                        })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select preference" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="EMAIL">Email</SelectItem>
-                          <SelectItem value="PHONE">Phone</SelectItem>
-                          <SelectItem value="SMS">SMS</SelectItem>
-                          <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Phone className="h-5 w-5 mr-2 text-green-600" />
+                      Contact Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <Label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Mail className="h-4 w-4 mr-2 text-gray-500" />
+                          Email *
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={newContact.email}
+                          onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
+                          placeholder="Enter email address"
+                          required
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="phone" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Phone className="h-4 w-4 mr-2 text-gray-500" />
+                          Phone *
+                        </Label>
+                        <Input
+                          id="phone"
+                          value={newContact.phone}
+                          onChange={(e) => setNewContact({ ...newContact, phone: e.target.value })}
+                          placeholder="Enter phone number"
+                          required
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="mobile" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Phone className="h-4 w-4 mr-2 text-gray-500" />
+                          Mobile
+                        </Label>
+                        <Input
+                          id="mobile"
+                          value={newContact.mobile}
+                          onChange={(e) => setNewContact({ ...newContact, mobile: e.target.value })}
+                          placeholder="Enter mobile number"
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="bedrooms">Bedrooms</Label>
-                      <Input
-                        id="bedrooms"
-                        type="number"
-                        value={newContact.preferences?.bedrooms}
-                        onChange={(e) => setNewContact({
-                          ...newContact,
-                          preferences: {
-                            ...newContact.preferences!,
-                            bedrooms: parseInt(e.target.value) || undefined,
-                          },
-                        })}
-                        placeholder="Number of bedrooms"
-                      />
+                  </div>
+
+                  {/* Professional Information */}
+                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-6 rounded-lg border border-purple-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Briefcase className="h-5 w-5 mr-2 text-purple-600" />
+                      Professional Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <Label htmlFor="company" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Building className="h-4 w-4 mr-2 text-gray-500" />
+                          Company
+                        </Label>
+                        <Input
+                          id="company"
+                          value={newContact.company}
+                          onChange={(e) => setNewContact({ ...newContact, company: e.target.value })}
+                          placeholder="Enter company name"
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="jobTitle" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Briefcase className="h-4 w-4 mr-2 text-gray-500" />
+                          Job Title
+                        </Label>
+                        <Input
+                          id="jobTitle"
+                          value={newContact.jobTitle}
+                          onChange={(e) => setNewContact({ ...newContact, jobTitle: e.target.value })}
+                          placeholder="Enter job title"
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400"
+                        />
+                      </div>
+                      <div className="form-group md:col-span-2">
+                        <Label htmlFor="website" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Globe className="h-4 w-4 mr-2 text-gray-500" />
+                          Website
+                        </Label>
+                        <Input
+                          id="website"
+                          value={newContact.website}
+                          onChange={(e) => setNewContact({ ...newContact, website: e.target.value })}
+                          placeholder="Enter website URL"
+                          className="input-field mt-2 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="bathrooms">Bathrooms</Label>
-                      <Input
-                        id="bathrooms"
-                        type="number"
-                        value={newContact.preferences?.bathrooms}
-                        onChange={(e) => setNewContact({
-                          ...newContact,
-                          preferences: {
-                            ...newContact.preferences!,
-                            bathrooms: parseInt(e.target.value) || undefined,
-                          },
-                        })}
-                        placeholder="Number of bathrooms"
+                  </div>
+                  {/* Contact Classification */}
+                  <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-lg border border-orange-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Tag className="h-5 w-5 mr-2 text-orange-600" />
+                      Contact Classification
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <Label htmlFor="type" className="text-sm font-medium text-gray-700 flex items-center">
+                          <User className="h-4 w-4 mr-2 text-gray-500" />
+                          Contact Type
+                        </Label>
+                        <Select value={newContact.type} onValueChange={(value) => setNewContact({ ...newContact, type: value as any })}>
+                          <SelectTrigger className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-gray-400">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="BUYER">Buyer</SelectItem>
+                            <SelectItem value="SELLER">Seller</SelectItem>
+                            <SelectItem value="LANDLORD">Landlord</SelectItem>
+                            <SelectItem value="TENANT">Tenant</SelectItem>
+                            <SelectItem value="INVESTOR">Investor</SelectItem>
+                            <SelectItem value="AGENT">Agent</SelectItem>
+                            <SelectItem value="VENDOR">Vendor</SelectItem>
+                            <SelectItem value="OTHER">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="status" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Activity className="h-4 w-4 mr-2 text-gray-500" />
+                          Status
+                        </Label>
+                        <Select value={newContact.status} onValueChange={(value) => setNewContact({ ...newContact, status: value as any })}>
+                          <SelectTrigger className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-gray-400">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PROSPECT">Prospect</SelectItem>
+                            <SelectItem value="QUALIFIED">Qualified</SelectItem>
+                            <SelectItem value="ACTIVE">Active</SelectItem>
+                            <SelectItem value="CONVERTED">Converted</SelectItem>
+                            <SelectItem value="INACTIVE">Inactive</SelectItem>
+                            <SelectItem value="LOST">Lost</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="source" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Target className="h-4 w-4 mr-2 text-gray-500" />
+                          Source
+                        </Label>
+                        <Select value={newContact.source} onValueChange={(value) => setNewContact({ ...newContact, source: value as any })}>
+                          <SelectTrigger className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-gray-400">
+                            <SelectValue placeholder="Select source" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="WEBSITE">Website</SelectItem>
+                            <SelectItem value="REFERRAL">Referral</SelectItem>
+                            <SelectItem value="SOCIAL_MEDIA">Social Media</SelectItem>
+                            <SelectItem value="ADVERTISING">Advertising</SelectItem>
+                            <SelectItem value="COLD_CALL">Cold Call</SelectItem>
+                            <SelectItem value="EVENT">Event</SelectItem>
+                            <SelectItem value="PARTNER">Partner</SelectItem>
+                            <SelectItem value="OTHER">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="priority" className="text-sm font-medium text-gray-700 flex items-center">
+                          <AlertCircle className="h-4 w-4 mr-2 text-gray-500" />
+                          Priority
+                        </Label>
+                        <Select value={newContact.priority} onValueChange={(value) => setNewContact({ ...newContact, priority: value as any })}>
+                          <SelectTrigger className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-gray-400">
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="LOW">Low</SelectItem>
+                            <SelectItem value="MEDIUM">Medium</SelectItem>
+                            <SelectItem value="HIGH">High</SelectItem>
+                            <SelectItem value="URGENT">Urgent</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <FileText className="h-5 w-5 mr-2 text-gray-600" />
+                      Notes
+                    </h3>
+                    <div className="form-group">
+                      <Label htmlFor="notes" className="text-sm font-medium text-gray-700 flex items-center">
+                        <Edit className="h-4 w-4 mr-2 text-gray-500" />
+                        Additional Information
+                      </Label>
+                      <Textarea
+                        id="notes"
+                        value={newContact.notes}
+                        onChange={(e) => setNewContact({ ...newContact, notes: e.target.value })}
+                        placeholder="Enter notes about this contact, their preferences, or any important details..."
+                        rows={4}
+                        className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-gray-500 focus:border-gray-500 hover:border-gray-400 resize-none"
                       />
                     </div>
                   </div>
                 </TabsContent>
-                <TabsContent value="social" className="space-y-4">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Social Media</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="linkedin">LinkedIn</Label>
+                <TabsContent value="address" className="space-y-6">
+                  {/* Address Information */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <MapPin className="h-5 w-5 mr-2 text-blue-600" />
+                      Address Information
+                    </h3>
+                    <div className="space-y-6">
+                      <div className="form-group">
+                        <Label htmlFor="street" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Home className="h-4 w-4 mr-2 text-gray-500" />
+                          Street Address
+                        </Label>
+                        <Input
+                          id="street"
+                          value={newContact.address?.street}
+                          onChange={(e) => setNewContact({
+                            ...newContact,
+                            address: { ...newContact.address!, street: e.target.value },
+                          })}
+                          placeholder="Enter full street address"
+                          className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="form-group">
+                          <Label htmlFor="city" className="text-sm font-medium text-gray-700 flex items-center">
+                            <Building className="h-4 w-4 mr-2 text-gray-500" />
+                            City
+                          </Label>
+                          <Input
+                            id="city"
+                            value={newContact.address?.city}
+                            onChange={(e) => setNewContact({
+                              ...newContact,
+                              address: { ...newContact.address!, city: e.target.value },
+                            })}
+                            placeholder="Enter city"
+                            className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <Label htmlFor="county" className="text-sm font-medium text-gray-700 flex items-center">
+                            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+                            County
+                          </Label>
+                          <Input
+                            id="county"
+                            value={newContact.address?.county}
+                            onChange={(e) => setNewContact({
+                              ...newContact,
+                              address: { ...newContact.address!, county: e.target.value },
+                            })}
+                            placeholder="Enter county"
+                            className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <Label htmlFor="postcode" className="text-sm font-medium text-gray-700 flex items-center">
+                            <Tag className="h-4 w-4 mr-2 text-gray-500" />
+                            Postcode
+                          </Label>
+                          <Input
+                            id="postcode"
+                            value={newContact.address?.postcode}
+                            onChange={(e) => setNewContact({
+                              ...newContact,
+                              address: { ...newContact.address!, postcode: e.target.value },
+                            })}
+                            placeholder="Enter postcode"
+                            className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <Label htmlFor="country" className="text-sm font-medium text-gray-700 flex items-center">
+                            <Globe className="h-4 w-4 mr-2 text-gray-500" />
+                            Country
+                          </Label>
+                          <Select
+                            value={newContact.address?.country}
+                            onValueChange={(value) => setNewContact({
+                              ...newContact,
+                              address: { ...newContact.address!, country: value },
+                            })}
+                          >
+                            <SelectTrigger className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400">
+                              <SelectValue placeholder="Select country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                              <SelectItem value="Ireland">Ireland</SelectItem>
+                              <SelectItem value="United States">United States</SelectItem>
+                              <SelectItem value="Canada">Canada</SelectItem>
+                              <SelectItem value="Australia">Australia</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="preferences" className="space-y-6">
+                  {/* Property Preferences */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <Home className="h-5 w-5 mr-2 text-green-600" />
+                      Property Preferences
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <Label className="text-sm font-medium text-gray-700 flex items-center">
+                          <Banknote className="h-4 w-4 mr-2 text-gray-500" />
+                          Price Range
+                        </Label>
+                        <div className="flex space-x-3 mt-2">
+                          <Input
+                            type="number"
+                            placeholder="Min price"
+                            value={newContact.preferences?.priceRange.min}
+                            onChange={(e) => setNewContact({
+                              ...newContact,
+                              preferences: {
+                                ...newContact.preferences!,
+                                priceRange: {
+                                  ...newContact.preferences!.priceRange,
+                                  min: parseInt(e.target.value) || 0,
+                                },
+                              },
+                            })}
+                            className="transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                          />
+                          <Input
+                            type="number"
+                            placeholder="Max price"
+                            value={newContact.preferences?.priceRange.max}
+                            onChange={(e) => setNewContact({
+                              ...newContact,
+                              preferences: {
+                                ...newContact.preferences!,
+                                priceRange: {
+                                  ...newContact.preferences!.priceRange,
+                                  max: parseInt(e.target.value) || 0,
+                                },
+                              },
+                            })}
+                            className="transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                          />
+                        </div>
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="communicationPreference" className="text-sm font-medium text-gray-700 flex items-center">
+                          <MessageSquare className="h-4 w-4 mr-2 text-gray-500" />
+                          Communication Preference
+                        </Label>
+                        <Select
+                          value={newContact.preferences?.communicationPreference}
+                          onValueChange={(value) => setNewContact({
+                            ...newContact,
+                            preferences: {
+                              ...newContact.preferences!,
+                              communicationPreference: value as any,
+                            },
+                          })}
+                        >
+                          <SelectTrigger className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400">
+                            <SelectValue placeholder="Select preference" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="EMAIL">Email</SelectItem>
+                            <SelectItem value="PHONE">Phone</SelectItem>
+                            <SelectItem value="SMS">SMS</SelectItem>
+                            <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="bedrooms" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Home className="h-4 w-4 mr-2 text-gray-500" />
+                          Bedrooms
+                        </Label>
+                        <Input
+                          id="bedrooms"
+                          type="number"
+                          value={newContact.preferences?.bedrooms}
+                          onChange={(e) => setNewContact({
+                            ...newContact,
+                            preferences: {
+                              ...newContact.preferences!,
+                              bedrooms: parseInt(e.target.value) || undefined,
+                            },
+                          })}
+                          placeholder="Number of bedrooms"
+                          className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <Label htmlFor="bathrooms" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Home className="h-4 w-4 mr-2 text-gray-500" />
+                          Bathrooms
+                        </Label>
+                        <Input
+                          id="bathrooms"
+                          type="number"
+                          value={newContact.preferences?.bathrooms}
+                          onChange={(e) => setNewContact({
+                            ...newContact,
+                            preferences: {
+                              ...newContact.preferences!,
+                              bathrooms: parseInt(e.target.value) || undefined,
+                            },
+                          })}
+                          placeholder="Number of bathrooms"
+                          className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-green-500 focus:border-green-500 hover:border-gray-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="social" className="space-y-6">
+                  {/* Social Media */}
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border border-purple-200">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                      <MessageSquare className="h-5 w-5 mr-2 text-purple-600" />
+                      Social Media Profiles
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="form-group">
+                        <Label htmlFor="linkedin" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Linkedin className="h-4 w-4 mr-2 text-blue-600" />
+                          LinkedIn
+                        </Label>
                         <Input
                           id="linkedin"
                           value={newContact.socialMedia?.linkedin}
@@ -1054,11 +1197,15 @@ const ContactManagement: React.FC = () => {
                               linkedin: e.target.value,
                             },
                           })}
-                          placeholder="LinkedIn profile URL"
+                          placeholder="https://linkedin.com/in/username"
+                          className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="facebook">Facebook</Label>
+                      <div className="form-group">
+                        <Label htmlFor="facebook" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Facebook className="h-4 w-4 mr-2 text-blue-700" />
+                          Facebook
+                        </Label>
                         <Input
                           id="facebook"
                           value={newContact.socialMedia?.facebook}
@@ -1069,11 +1216,15 @@ const ContactManagement: React.FC = () => {
                               facebook: e.target.value,
                             },
                           })}
-                          placeholder="Facebook profile URL"
+                          placeholder="https://facebook.com/username"
+                          className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="twitter">Twitter</Label>
+                      <div className="form-group">
+                        <Label htmlFor="twitter" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Twitter className="h-4 w-4 mr-2 text-blue-400" />
+                          Twitter
+                        </Label>
                         <Input
                           id="twitter"
                           value={newContact.socialMedia?.twitter}
@@ -1084,11 +1235,15 @@ const ContactManagement: React.FC = () => {
                               twitter: e.target.value,
                             },
                           })}
-                          placeholder="Twitter profile URL"
+                          placeholder="https://twitter.com/username"
+                          className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="instagram">Instagram</Label>
+                      <div className="form-group">
+                        <Label htmlFor="instagram" className="text-sm font-medium text-gray-700 flex items-center">
+                          <Instagram className="h-4 w-4 mr-2 text-pink-600" />
+                          Instagram
+                        </Label>
                         <Input
                           id="instagram"
                           value={newContact.socialMedia?.instagram}
@@ -1099,20 +1254,31 @@ const ContactManagement: React.FC = () => {
                               instagram: e.target.value,
                             },
                           })}
-                          placeholder="Instagram profile URL"
+                          placeholder="https://instagram.com/username"
+                          className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 hover:border-gray-400"
                         />
                       </div>
                     </div>
                   </div>
                 </TabsContent>
               </Tabs>
-              <div className="flex justify-end space-x-3 mt-6">
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                  className="btn-secondary flex items-center px-6 py-3 text-sm font-medium"
+                >
+                  <X className="h-4 w-4 mr-2" />
                   Cancel
-                </Button>
-                <Button onClick={handleCreateContact}>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateContact}
+                  className="btn-primary flex items-center px-6 py-3 text-sm font-medium"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
                   Create Contact
-                </Button>
+                </button>
               </div>
             </DialogContent>
           </Dialog>

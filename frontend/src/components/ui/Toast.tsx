@@ -1,6 +1,7 @@
 import React from 'react';
 import { Toaster, toast } from 'sonner';
-import { CheckCircle, AlertCircle, XCircle, Info } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Info, X, Loader2 } from 'lucide-react';
+import { cn } from '../../utils';
 import { NotificationType } from '../../types';
 
 interface ToastProps {
@@ -35,80 +36,304 @@ const ToastProvider: React.FC<ToastProps> = ({
   );
 };
 
-// Toast utility functions
-const showToast = {
-  success: (message: string, description?: string) => {
-    toast.success(message, {
-      description,
-      icon: <CheckCircle className="h-4 w-4" />
-    });
+interface ToastMessageProps {
+  message: string;
+  description?: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+  onDismiss?: () => void;
+}
+
+// Custom toast components with consistent styling
+const ToastSuccess = ({ message, description, action, onDismiss }: ToastMessageProps) => (
+  <div className="flex items-start gap-3 p-4 bg-white border border-green-200 rounded-lg shadow-lg">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+      <CheckCircle className="h-4 w-4 text-green-600" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-semibold text-gray-900">{message}</p>
+      {description && (
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
+      )}
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="mt-2 text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+        >
+          {action.label}
+        </button>
+      )}
+    </div>
+    {onDismiss && (
+      <button
+        onClick={onDismiss}
+        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    )}
+  </div>
+);
+
+const ToastError = ({ message, description, action, onDismiss }: ToastMessageProps) => (
+  <div className="flex items-start gap-3 p-4 bg-white border border-red-200 rounded-lg shadow-lg">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100">
+      <XCircle className="h-4 w-4 text-red-600" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-semibold text-gray-900">{message}</p>
+      {description && (
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
+      )}
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="mt-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+        >
+          {action.label}
+        </button>
+      )}
+    </div>
+    {onDismiss && (
+      <button
+        onClick={onDismiss}
+        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    )}
+  </div>
+);
+
+const ToastWarning = ({ message, description, action, onDismiss }: ToastMessageProps) => (
+  <div className="flex items-start gap-3 p-4 bg-white border border-yellow-200 rounded-lg shadow-lg">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100">
+      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-semibold text-gray-900">{message}</p>
+      {description && (
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
+      )}
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="mt-2 text-sm font-medium text-yellow-600 hover:text-yellow-700 transition-colors"
+        >
+          {action.label}
+        </button>
+      )}
+    </div>
+    {onDismiss && (
+      <button
+        onClick={onDismiss}
+        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    )}
+  </div>
+);
+
+const ToastInfo = ({ message, description, action, onDismiss }: ToastMessageProps) => (
+  <div className="flex items-start gap-3 p-4 bg-white border border-blue-200 rounded-lg shadow-lg">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
+      <Info className="h-4 w-4 text-blue-600" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-semibold text-gray-900">{message}</p>
+      {description && (
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
+      )}
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          {action.label}
+        </button>
+      )}
+    </div>
+    {onDismiss && (
+      <button
+        onClick={onDismiss}
+        className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    )}
+  </div>
+);
+
+const ToastLoading = ({ message, description }: { message: string; description?: string }) => (
+  <div className="flex items-start gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-lg">
+    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+      <Loader2 className="h-4 w-4 text-gray-600 animate-spin" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-semibold text-gray-900">{message}</p>
+      {description && (
+        <p className="text-sm text-gray-600 mt-1">{description}</p>
+      )}
+    </div>
+  </div>
+);
+
+// Toast utility functions with enhanced options
+export const showToast = {
+  success: (message: string, options?: {
+    description?: string;
+    action?: { label: string; onClick: () => void };
+    duration?: number;
+    onDismiss?: () => void;
+  }) => {
+    return toast.custom(
+      (t) => (
+        <ToastSuccess 
+          message={message} 
+          description={options?.description}
+          action={options?.action}
+          onDismiss={() => {
+            toast.dismiss(t);
+            options?.onDismiss?.();
+          }}
+        />
+      ),
+      { duration: options?.duration }
+    );
   },
-  
-  error: (message: string, description?: string) => {
-    toast.error(message, {
-      description,
-      icon: <XCircle className="h-4 w-4" />
-    });
+  error: (message: string, options?: {
+    description?: string;
+    action?: { label: string; onClick: () => void };
+    duration?: number;
+    onDismiss?: () => void;
+  }) => {
+    return toast.custom(
+      (t) => (
+        <ToastError 
+          message={message} 
+          description={options?.description}
+          action={options?.action}
+          onDismiss={() => {
+            toast.dismiss(t);
+            options?.onDismiss?.();
+          }}
+        />
+      ),
+      { duration: options?.duration }
+    );
   },
-  
-  warning: (message: string, description?: string) => {
-    toast.warning(message, {
-      description,
-      icon: <AlertCircle className="h-4 w-4" />
-    });
+  warning: (message: string, options?: {
+    description?: string;
+    action?: { label: string; onClick: () => void };
+    duration?: number;
+    onDismiss?: () => void;
+  }) => {
+    return toast.custom(
+      (t) => (
+        <ToastWarning 
+          message={message} 
+          description={options?.description}
+          action={options?.action}
+          onDismiss={() => {
+            toast.dismiss(t);
+            options?.onDismiss?.();
+          }}
+        />
+      ),
+      { duration: options?.duration }
+    );
   },
-  
-  info: (message: string, description?: string) => {
-    toast.info(message, {
-      description,
-      icon: <Info className="h-4 w-4" />
-    });
+  info: (message: string, options?: {
+    description?: string;
+    action?: { label: string; onClick: () => void };
+    duration?: number;
+    onDismiss?: () => void;
+  }) => {
+    return toast.custom(
+      (t) => (
+        <ToastInfo 
+          message={message} 
+          description={options?.description}
+          action={options?.action}
+          onDismiss={() => {
+            toast.dismiss(t);
+            options?.onDismiss?.();
+          }}
+        />
+      ),
+      { duration: options?.duration }
+    );
   },
-  
-  promise: <T,>(
-    promise: Promise<T>,
-    {
-      loading,
-      success,
-      error
-    }: {
-      loading: string;
-      success: string | ((data: T) => string);
-      error: string | ((error: any) => string);
-    }
-  ) => {
+  loading: (message: string, options?: {
+    description?: string;
+    duration?: number;
+  }) => {
+    return toast.custom(
+      () => <ToastLoading message={message} description={options?.description} />,
+      { duration: options?.duration || Infinity }
+    );
+  },
+  promise: <T,>(promise: Promise<T>, options: {
+    loading: string;
+    success: string | ((data: T) => string);
+    error: string | ((error: any) => string);
+    loadingDescription?: string;
+    successDescription?: string | ((data: T) => string);
+    errorDescription?: string | ((error: any) => string);
+  }) => {
     return toast.promise(promise, {
-      loading,
-      success,
-      error
+      loading: () => (
+        <ToastLoading 
+          message={options.loading} 
+          description={options.loadingDescription}
+        />
+      ),
+      success: (data) => {
+        const message = typeof options.success === 'function' ? options.success(data) : options.success;
+        const description = typeof options.successDescription === 'function' 
+          ? options.successDescription(data) 
+          : options.successDescription;
+        return <ToastSuccess message={message} description={description} />;
+      },
+      error: (error) => {
+        const message = typeof options.error === 'function' ? options.error(error) : options.error;
+        const description = typeof options.errorDescription === 'function' 
+          ? options.errorDescription(error) 
+          : options.errorDescription;
+        return <ToastError message={message} description={description} />;
+      },
     });
   },
-  
-  custom: (component: (id: string | number) => React.ReactElement, options?: any) => {
-    return toast.custom(component, options);
+  custom: (component: React.ReactNode, options?: { duration?: number }) => {
+    return toast.custom(() => component, options);
   },
-  
   dismiss: (toastId?: string | number) => {
     toast.dismiss(toastId);
+  },
+  dismissAll: () => {
+    toast.dismiss();
   },
   
   // Helper to show toast based on notification type
   fromType: (type: NotificationType, message: string, description?: string) => {
     switch (type) {
       case NotificationType.SUCCESS:
-        showToast.success(message, description);
+        showToast.success(message, { description });
         break;
       case NotificationType.ERROR:
-        showToast.error(message, description);
+        showToast.error(message, { description });
         break;
       case NotificationType.WARNING:
-        showToast.warning(message, description);
+        showToast.warning(message, { description });
         break;
       case NotificationType.INFO:
-        showToast.info(message, description);
+        showToast.info(message, { description });
         break;
       default:
-        showToast.info(message, description);
+        showToast.info(message, { description });
     }
   }
 };
@@ -173,8 +398,12 @@ const LoadingToast: React.FC<{
 
 export {
   ToastProvider,
-  showToast,
   CustomToast,
-  LoadingToast
+  LoadingToast,
+  ToastSuccess,
+  ToastError,
+  ToastWarning,
+  ToastInfo,
+  ToastLoading
 };
 export type { ToastProps };

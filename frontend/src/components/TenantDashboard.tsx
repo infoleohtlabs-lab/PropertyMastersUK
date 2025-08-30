@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { DocumentManagement } from './DocumentManagement';
 import { FinancialDashboard } from './FinancialDashboard';
+import { formatCurrency } from '../utils';
 
 // Interfaces
 interface TenantMetrics {
@@ -270,12 +271,6 @@ const TenantDashboard: React.FC = () => {
   ];
 
   // Utility functions
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount);
-  };
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-GB', {

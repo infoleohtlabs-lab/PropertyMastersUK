@@ -20,7 +20,8 @@ import {
   CheckCircle,
   Clock,
   BarChart3,
-  Receipt
+  Receipt,
+  X
 } from 'lucide-react';
 import { 
   financialService, 
@@ -32,6 +33,7 @@ import {
   BudgetCategory
 } from '../services/financialService';
 import { toast } from 'sonner';
+import { formatCurrency } from '../utils';
 
 interface FinancialDashboardProps {
   userRole: 'admin' | 'agent' | 'landlord' | 'tenant';
@@ -280,12 +282,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount);
-  };
+
 
   return (
     <div className="space-y-6">

@@ -53,6 +53,7 @@ import {
 import { toast } from 'sonner';
 import BookingManagement from './BookingManagement';
 import DocumentManagement from './DocumentManagement';
+import { formatCurrency } from '../utils';
 
 interface AgentDashboardProps {
   userId: string;
@@ -403,12 +404,7 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ userId }) => {
     loadAgentData();
   }, []);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount);
-  };
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-GB', {
@@ -439,91 +435,92 @@ const AgentDashboard: React.FC<AgentDashboardProps> = ({ userId }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Agent Dashboard</h1>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-3 sm:space-y-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Agent Dashboard</h1>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {/* View Mode Toggle */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex flex-wrap bg-gray-100 rounded-lg p-1 gap-1">
               {(['overview', 'properties', 'clients', 'bookings', 'leads', 'commission', 'analytics', 'documents'] as ViewMode[]).map(mode => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
-                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors capitalize ${
+                  className={`px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-colors capitalize ${
                     viewMode === mode ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {mode}
+                  <span className="hidden sm:inline">{mode}</span>
+                  <span className="sm:hidden">{mode.slice(0, 4)}</span>
                 </button>
               ))}
             </div>
             
             <button
               onClick={() => loadAgentData()}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
               <RefreshCw className="h-4 w-4" />
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
             </button>
           </div>
         </div>
         
         {/* Agent Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Building className="h-4 w-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-600">Properties</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className="bg-blue-50 p-2 sm:p-3 rounded-lg">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Building className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+              <span className="text-xs sm:text-sm font-medium text-blue-600">Properties</span>
             </div>
-            <div className="text-lg font-bold text-blue-700">{agentMetrics.totalProperties}</div>
+            <div className="text-base sm:text-lg font-bold text-blue-700">{agentMetrics.totalProperties}</div>
             <div className="text-xs text-blue-600">{agentMetrics.activeListings} active</div>
           </div>
           
-          <div className="bg-green-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Users className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-600">Clients</span>
+          <div className="bg-green-50 p-2 sm:p-3 rounded-lg">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
+              <span className="text-xs sm:text-sm font-medium text-green-600">Clients</span>
             </div>
-            <div className="text-lg font-bold text-green-700">{agentMetrics.totalClients}</div>
+            <div className="text-base sm:text-lg font-bold text-green-700">{agentMetrics.totalClients}</div>
             <div className="text-xs text-green-600">{agentMetrics.activeClients} active</div>
           </div>
           
-          <div className="bg-purple-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Calendar className="h-4 w-4 text-purple-600" />
-              <span className="text-sm font-medium text-purple-600">Bookings</span>
+          <div className="bg-purple-50 p-2 sm:p-3 rounded-lg">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
+              <span className="text-xs sm:text-sm font-medium text-purple-600">Bookings</span>
             </div>
-            <div className="text-lg font-bold text-purple-700">{agentMetrics.totalBookings}</div>
+            <div className="text-base sm:text-lg font-bold text-purple-700">{agentMetrics.totalBookings}</div>
             <div className="text-xs text-purple-600">{agentMetrics.pendingBookings} pending</div>
           </div>
           
-          <div className="bg-yellow-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Target className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-600">Leads</span>
+          <div className="bg-yellow-50 p-2 sm:p-3 rounded-lg">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Target className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-600" />
+              <span className="text-xs sm:text-sm font-medium text-yellow-600">Leads</span>
             </div>
-            <div className="text-lg font-bold text-yellow-700">{agentMetrics.leadsThisMonth}</div>
+            <div className="text-base sm:text-lg font-bold text-yellow-700">{agentMetrics.leadsThisMonth}</div>
             <div className="text-xs text-yellow-600">This month</div>
           </div>
           
-          <div className="bg-indigo-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Banknote className="h-4 w-4 text-indigo-600" />
-              <span className="text-sm font-medium text-indigo-600">Commission</span>
+          <div className="bg-indigo-50 p-2 sm:p-3 rounded-lg">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Banknote className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-600" />
+              <span className="text-xs sm:text-sm font-medium text-indigo-600">Commission</span>
             </div>
-            <div className="text-lg font-bold text-indigo-700">{formatCurrency(agentMetrics.monthlyCommission)}</div>
+            <div className="text-base sm:text-lg font-bold text-indigo-700">{formatCurrency(agentMetrics.monthlyCommission)}</div>
             <div className="text-xs text-indigo-600">This month</div>
           </div>
           
-          <div className="bg-red-50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 mb-1">
-              <Percent className="h-4 w-4 text-red-600" />
-              <span className="text-sm font-medium text-red-600">Conversion</span>
+          <div className="bg-red-50 p-2 sm:p-3 rounded-lg">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Percent className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+              <span className="text-xs sm:text-sm font-medium text-red-600">Conversion</span>
             </div>
-            <div className="text-lg font-bold text-red-700">{agentMetrics.conversionRate}%</div>
+            <div className="text-base sm:text-lg font-bold text-red-700">{agentMetrics.conversionRate}%</div>
             <div className="text-xs text-red-600">Lead to deal</div>
           </div>
         </div>

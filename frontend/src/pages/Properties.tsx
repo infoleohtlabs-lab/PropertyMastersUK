@@ -13,7 +13,9 @@ import {
   Grid,
   List,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -309,7 +311,7 @@ const Properties: React.FC = () => {
               
               <div className="flex border border-gray-300 rounded-md">
                 <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  variant={viewMode === 'grid' ? 'primary' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
                   className="rounded-r-none"
@@ -317,7 +319,7 @@ const Properties: React.FC = () => {
                   <Grid className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  variant={viewMode === 'list' ? 'primary' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('list')}
                   className="rounded-l-none"
@@ -362,20 +364,20 @@ const Properties: React.FC = () => {
       </div>
 
       {/* Results */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container-responsive section-spacing">
         {/* Results Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-heading-lg text-gray-900">
               Properties {localFilters.location && `in ${localFilters.location}`}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-body-base text-gray-600">
               {displayProperties.length} properties found
             </p>
           </div>
           
           <div className="flex items-center gap-4">
-            <select className="border border-gray-300 rounded-md px-3 py-2 text-sm text-black">
+            <select className="input-field text-sm text-black min-w-[160px]">
               <option>Sort by: Newest</option>
               <option>Price: Low to High</option>
               <option>Price: High to Low</option>
@@ -407,11 +409,11 @@ const Properties: React.FC = () => {
         {!isLoading && !error && (
           <div className={cn(
             viewMode === 'grid' 
-              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-              : 'space-y-6'
+              ? 'grid-responsive gap-6'
+              : 'stack-6'
           )}>
             {displayProperties.map((property: any) => (
-              <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={property.id} className="card hover:shadow-lg transition-shadow">
                 <div className="relative">
                   <img
                     src={property.images[0]?.url}
@@ -451,71 +453,73 @@ const Properties: React.FC = () => {
                   </div>
                 </div>
                 
-                <CardContent className="p-6">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      <Link 
-                        to={`/properties/${property.id}`}
-                        className="hover:text-blue-600 transition-colors"
-                      >
-                        {property.title}
+                <CardContent className="component-spacing">
+                  <div className="stack-4">
+                    <div>
+                      <h3 className="text-heading-sm text-gray-900 mb-2">
+                        <Link 
+                          to={`/properties/${property.id}`}
+                          className="hover:text-blue-600 transition-colors"
+                        >
+                          {property.title}
+                        </Link>
+                      </h3>
+                      <p className="text-body-sm text-gray-600 flex items-center">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {property.location}
+                      </p>
+                    </div>
+
+                    <div>
+                      <div className="text-heading-md font-bold text-blue-600">
+                        {property.price.period 
+                          ? `${formatCurrency(property.price.amount)}/${property.price.period}`
+                          : formatCurrency(property.price.amount)
+                        }
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-caption text-gray-600">
+                      <div className="flex items-center">
+                        <Bed className="h-4 w-4 mr-1" />
+                        {property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''}
+                      </div>
+                      <div className="flex items-center">
+                        <Bath className="h-4 w-4 mr-1" />
+                        {property.bathrooms} bath{property.bathrooms !== 1 ? 's' : ''}
+                      </div>
+                      <div className="flex items-center">
+                        <Square className="h-4 w-4 mr-1" />
+                        {property.area} sq ft
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {property.features.slice(0, 3).map((feature: string, index: number) => (
+                        <span
+                          key={index}
+                          className="badge-primary text-xs"
+                        >
+                          {feature}
+                        </span>
+                      ))}
+                      {property.features.length > 3 && (
+                        <span className="badge-primary text-xs">
+                          +{property.features.length - 3} more
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <div className="text-caption text-gray-600">
+                        {property.agent.companyName}
+                      </div>
+                      <Link to={`/properties/${property.id}`}>
+                        <Button size="sm">
+                          View Details
+                        </Button>
                       </Link>
-                    </h3>
-                    <p className="text-gray-600 flex items-center">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {property.location}
-                    </p>
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {property.price.period 
-                        ? `${formatCurrency(property.price.amount)}/${property.price.period}`
-                        : formatCurrency(property.price.amount)
-                      }
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                    <div className="flex items-center">
-                      <Bed className="h-4 w-4 mr-1" />
-                      {property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''}
-                    </div>
-                    <div className="flex items-center">
-                      <Bath className="h-4 w-4 mr-1" />
-                      {property.bathrooms} bath{property.bathrooms !== 1 ? 's' : ''}
-                    </div>
-                    <div className="flex items-center">
-                      <Square className="h-4 w-4 mr-1" />
-                      {property.area} sq ft
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {property.features.slice(0, 3).map((feature: string, index: number) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                    {property.features.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                        +{property.features.length - 3} more
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-600">
-                      {property.agent.companyName}
-                    </div>
-                    <Link to={`/properties/${property.id}`}>
-                      <Button size="sm">
-                        View Details
-                      </Button>
-                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -524,36 +528,66 @@ const Properties: React.FC = () => {
         )}
 
         {/* Pagination */}
-        {!isLoading && !error && displayProperties.length > 0 && (
-          <div className="mt-12 flex justify-center">
+        {!isLoading && !error && totalPages > 1 && (
+          <div className="section-spacing flex-center">
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={prevPage}
                 disabled={!canGoPrev}
+                className="hidden sm:flex"
               >
+                <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
               
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                const page = i + 1;
-                return (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? 'default' : 'outline'}
-                    onClick={() => goToPage(page)}
-                  >
-                    {page}
-                  </Button>
-                );
-              })}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={prevPage}
+                disabled={!canGoPrev}
+                className="sm:hidden"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "primary" : "outline"}
+                      size="sm"
+                      onClick={() => goToPage(page)}
+                      className="min-w-[2.5rem]"
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+              </div>
               
               <Button
                 variant="outline"
+                size="sm"
                 onClick={nextPage}
                 disabled={!canGoNext}
+                className="hidden sm:flex"
               >
                 Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={nextPage}
+                disabled={!canGoNext}
+                className="sm:hidden"
+              >
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -567,16 +601,16 @@ const Properties: React.FC = () => {
         title="Filter Properties"
         size="lg"
       >
-        <div className="space-y-6">
+        <div className="stack-6">
           {/* Property Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="form-group">
+            <label className="text-label text-gray-700 mb-2">
               Property Type
             </label>
             <select
               value={localFilters.type || ''}
               onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-black"
+              className="input-field"
             >
               <option value="">Any Type</option>
               <option value="house">House</option>
@@ -587,9 +621,9 @@ const Properties: React.FC = () => {
           </div>
 
           {/* Price Range */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="text-label text-gray-700 mb-2">
                 Min Price
               </label>
               <Input
@@ -597,10 +631,11 @@ const Properties: React.FC = () => {
                 placeholder="Min price"
                 value={localFilters.minPrice || ''}
                 onChange={(e) => handleFilterChange('minPrice', e.target.value ? Number(e.target.value) : undefined)}
+                className="input-field"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="form-group">
+              <label className="text-label text-gray-700 mb-2">
                 Max Price
               </label>
               <Input
@@ -608,20 +643,21 @@ const Properties: React.FC = () => {
                 placeholder="Max price"
                 value={localFilters.maxPrice || ''}
                 onChange={(e) => handleFilterChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
+                className="input-field"
               />
             </div>
           </div>
 
           {/* Bedrooms & Bathrooms */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="text-label text-gray-700 mb-2">
                 Bedrooms
               </label>
               <select
                 value={localFilters.minBedrooms || ''}
                 onChange={(e) => handleFilterChange('minBedrooms', e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-black"
+                className="input-field"
               >
                 <option value="">Any</option>
                 <option value="1">1+</option>
@@ -631,14 +667,14 @@ const Properties: React.FC = () => {
                 <option value="5">5+</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="form-group">
+              <label className="text-label text-gray-700 mb-2">
                 Bathrooms
               </label>
               <select
                 value={localFilters.minBathrooms || ''}
                 onChange={(e) => handleFilterChange('minBathrooms', e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-black"
+                className="input-field"
               >
                 <option value="">Any</option>
                 <option value="1">1+</option>
@@ -650,7 +686,7 @@ const Properties: React.FC = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Button
               variant="outline"
               onClick={clearFilters}

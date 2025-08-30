@@ -327,14 +327,14 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
       isMobile ? 'bg-white' : 'bg-gray-900'
     }`}>
       {/* Header */}
-      <div className={`p-4 border-b ${
-        isMobile ? 'border-gray-200 flex justify-between items-center' : 'border-gray-700'
+      <div className={`flex-between h-16 container-responsive border-b ${
+        isMobile ? 'border-gray-200' : 'border-gray-700'
       }`}>
         <div className="flex items-center space-x-3">
           <Building2 className={`h-8 w-8 ${
             isMobile ? 'text-blue-600' : 'text-white'
           }`} />
-          <span className={`text-xl font-bold ${
+          <span className={`text-heading-4 ${
             isMobile ? 'text-gray-900' : 'text-white'
           }`}>
             PropertyMasters
@@ -351,22 +351,22 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
       </div>
 
       {/* User Info */}
-      <div className={`p-4 border-b ${
+      <div className={`component-spacing border-b ${
         isMobile ? 'border-gray-200' : 'border-gray-700'
       }`}>
         <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+          <div className={`w-10 h-10 rounded-full flex-center ${
             isMobile ? 'bg-blue-100 text-blue-600' : 'bg-gray-700 text-white'
           }`}>
             {user.firstName.charAt(0)}{user.lastName.charAt(0)}
           </div>
           <div>
-            <p className={`font-medium ${
+            <p className={`text-label ${
               isMobile ? 'text-gray-900' : 'text-white'
             }`}>
               {user.firstName} {user.lastName}
             </p>
-            <p className={`text-sm ${
+            <p className={`text-caption ${
               isMobile ? 'text-gray-500' : 'text-gray-400'
             }`}>
               {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
@@ -376,7 +376,7 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 container-responsive py-4 stack-sm overflow-y-auto">
         {filteredItems.map((item) => {
           const isExpanded = expandedItems.includes(item.name);
           const hasChildren = item.children && item.children.length > 0;
@@ -387,7 +387,7 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
               {hasChildren ? (
                 <button
                   onClick={() => toggleExpanded(item.name)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-label transition-colors ${
                     isMobile
                       ? 'text-gray-700 hover:bg-gray-100'
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white'
@@ -397,14 +397,14 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
                     <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
                   </div>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${
-                    isExpanded ? 'rotate-180' : ''
-                  }`} />
+                  <span className="text-caption ml-auto">
+                    {isExpanded ? '−' : '+'}
+                  </span>
                 </button>
               ) : (
                 <Link
                   to={item.href}
-                  className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-md text-label transition-colors ${
                     isItemActive(item.href)
                       ? isMobile
                         ? 'bg-blue-100 text-blue-700'
@@ -426,7 +426,7 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
                     <Link
                       key={child.name}
                       to={child.href}
-                      className={`flex items-center space-x-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                      className={`flex items-center space-x-3 px-3 py-2 rounded-md text-body-sm transition-colors ${
                         isItemActive(child.href)
                           ? isMobile
                             ? 'bg-blue-50 text-blue-600'
@@ -448,12 +448,12 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
       </nav>
 
       {/* Logout */}
-      <div className={`p-4 border-t ${
+      <div className={`component-spacing border-t ${
         isMobile ? 'border-gray-200' : 'border-gray-700'
       }`}>
         <button
           onClick={handleLogout}
-          className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-label transition-colors ${
             isMobile
               ? 'text-red-600 hover:bg-red-50'
               : 'text-red-400 hover:bg-red-900 hover:text-red-300'
@@ -466,23 +466,29 @@ const Navigation: React.FC<NavigationProps> = ({ isMobile = false, isOpen = true
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <div className={`fixed inset-0 z-50 lg:hidden ${
-        isOpen ? 'block' : 'hidden'
-      }`}>
-        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
-        <div className="fixed left-0 top-0 bottom-0 w-80 bg-white shadow-xl">
+  return (
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-black/50 transition-opacity duration-300 animate-fade-in" onClick={onClose} />
+          <nav className={`relative flex-1 flex flex-col max-w-xs w-full ${
+            isMobile ? 'bg-white' : 'bg-gray-900'
+          } component-spacing overflow-y-auto transform transition-transform duration-300 ease-in-out`}>
+            {navigationContent}
+          </nav>
+        </div>
+      )}
+
+      {/* Desktop sidebar */}
+      <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-50">
+        <div className={`flex-1 flex flex-col min-h-0 ${
+          isMobile ? 'bg-white border-r border-gray-200' : 'bg-gray-900'
+        } shadow-lg`}>
           {navigationContent}
         </div>
       </div>
-    );
-  }
-
-  return (
-    <div className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0">
-      {navigationContent}
-    </div>
+    </>
   );
 };
 

@@ -22,6 +22,9 @@ import { DocumentsModule } from './documents/documents.module';
 import { AuditModule } from './audit/audit.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { CrmModule } from './crm/crm.module';
+import { TenancyModule } from './tenancy/tenancy.module';
+import { FinancialModule } from './financial/financial.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -54,6 +57,9 @@ import { CrmModule } from './crm/crm.module';
     AuditModule,
     IntegrationsModule,
     CrmModule,
+    TenancyModule,
+    FinancialModule,
+    MaintenanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

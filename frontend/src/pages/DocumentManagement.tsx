@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Upload, Download, Eye, Edit, Trash2, Search, Filter, Calendar, AlertTriangle, CheckCircle, Clock, Plus, FolderOpen, File } from 'lucide-react';
+import { FileText, Upload, Download, Eye, Edit, Trash2, Search, Filter, Calendar, AlertTriangle, CheckCircle, Clock, Plus, FolderOpen, File, X, AlertCircle } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -765,9 +765,11 @@ const DocumentManagement: React.FC = () => {
         onClose={() => setShowUploadModal(false)}
         title="Upload New Document"
       >
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="space-y-8">
+          {/* Document Title */}
+          <div className="form-group">
+            <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <FileText className="h-4 w-4 mr-2 text-blue-600" />
               Document Title *
             </label>
             <Input
@@ -775,31 +777,36 @@ const DocumentManagement: React.FC = () => {
               value={documentForm.title}
               onChange={(e) => setDocumentForm(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Enter document title"
+              className="input-field focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Description */}
+          <div className="form-group">
+            <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <Edit className="h-4 w-4 mr-2 text-gray-600" />
               Description
             </label>
             <textarea
               value={documentForm.description}
               onChange={(e) => setDocumentForm(prev => ({ ...prev, description: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none hover:border-gray-400"
               placeholder="Brief description of the document"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Document Type and Property */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-group">
+              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <File className="h-4 w-4 mr-2 text-purple-600" />
                 Document Type *
               </label>
               <select
                 value={documentForm.type}
                 onChange={(e) => setDocumentForm(prev => ({ ...prev, type: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white"
               >
                 <option value="OTHER">Other</option>
                 <option value="EPC">EPC Certificate</option>
@@ -820,14 +827,15 @@ const DocumentManagement: React.FC = () => {
               </select>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="form-group">
+              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <FolderOpen className="h-4 w-4 mr-2 text-green-600" />
                 Property
               </label>
               <select
                 value={documentForm.propertyId}
                 onChange={(e) => setDocumentForm(prev => ({ ...prev, propertyId: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white"
               >
                 <option value="">Select Property</option>
                 <option value="prop1">123 High Street, London</option>
@@ -838,162 +846,212 @@ const DocumentManagement: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Issue Date and Expiry Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-group">
+              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <Calendar className="h-4 w-4 mr-2 text-blue-600" />
                 Issue Date
               </label>
-              <Input
+              <input
                 type="date"
                 value={documentForm.issueDate}
                 onChange={(e) => setDocumentForm(prev => ({ ...prev, issueDate: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white"
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="form-group">
+              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <Clock className="h-4 w-4 mr-2 text-orange-600" />
                 Expiry Date
               </label>
-              <Input
+              <input
                 type="date"
                 value={documentForm.expiryDate}
                 onChange={(e) => setDocumentForm(prev => ({ ...prev, expiryDate: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Issuer and Certificate Number */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="form-group">
+              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
                 Issuer
               </label>
-              <Input
+              <input
                 type="text"
                 value={documentForm.issuer}
                 onChange={(e) => setDocumentForm(prev => ({ ...prev, issuer: e.target.value }))}
-                placeholder="Document issuer/authority"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white placeholder-gray-400"
+                placeholder="Enter issuer name"
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="form-group">
+              <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                <FileText className="h-4 w-4 mr-2 text-indigo-600" />
                 Certificate Number
               </label>
-              <Input
+              <input
                 type="text"
                 value={documentForm.certificateNumber}
                 onChange={(e) => setDocumentForm(prev => ({ ...prev, certificateNumber: e.target.value }))}
-                placeholder="Certificate/reference number"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white placeholder-gray-400"
+                placeholder="Enter certificate number"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags (comma-separated)
+          {/* Tags */}
+          <div className="form-group">
+            <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <Edit className="h-4 w-4 mr-2 text-purple-600" />
+              Tags
             </label>
-            <Input
+            <input
               type="text"
               value={documentForm.tags}
               onChange={(e) => setDocumentForm(prev => ({ ...prev, tags: e.target.value }))}
-              placeholder="e.g. certificate, safety, required"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white placeholder-gray-400"
+              placeholder="Enter tags separated by commas (e.g., safety, certificate, annual)"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isRequired"
-                checked={documentForm.isRequired}
-                onChange={(e) => setDocumentForm(prev => ({ ...prev, isRequired: e.target.checked }))}
-                className="mr-2"
-              />
-              <label htmlFor="isRequired" className="text-sm text-gray-700">
-                Required Document
-              </label>
-            </div>
-            
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isPublic"
-                checked={documentForm.isPublic}
-                onChange={(e) => setDocumentForm(prev => ({ ...prev, isPublic: e.target.checked }))}
-                className="mr-2"
-              />
-              <label htmlFor="isPublic" className="text-sm text-gray-700">
-                Public Document
-              </label>
-            </div>
-          </div>
-
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="requiresRenewal"
-              checked={documentForm.requiresRenewal}
-              onChange={(e) => setDocumentForm(prev => ({ ...prev, requiresRenewal: e.target.checked }))}
-              className="mr-2"
-            />
-            <label htmlFor="requiresRenewal" className="text-sm text-gray-700">
-              Requires Renewal
-            </label>
-            {documentForm.requiresRenewal && (
-              <div className="ml-4">
-                <Input
-                  type="number"
-                  value={documentForm.renewalReminderDays}
-                  onChange={(e) => setDocumentForm(prev => ({ ...prev, renewalReminderDays: parseInt(e.target.value) }))}
-                  placeholder="Reminder days"
-                  className="w-32"
-                  min="1"
+          {/* Document Options */}
+          <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-800 mb-4 flex items-center">
+              <AlertCircle className="h-4 w-4 mr-2 text-blue-600" />
+              Document Options
+            </h4>
+            <div className="space-y-4">
+              <div className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors duration-200">
+                <input
+                  type="checkbox"
+                  id="required"
+                  checked={documentForm.isRequired}
+                  onChange={(e) => setDocumentForm(prev => ({ ...prev, isRequired: e.target.checked }))}
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
                 />
-                <span className="ml-2 text-sm text-gray-600">days before expiry</span>
+                <label htmlFor="required" className="ml-3 block text-sm font-medium text-gray-900">
+                  Required Document
+                  <span className="block text-xs text-gray-500 mt-1">This document is mandatory for compliance</span>
+                </label>
               </div>
-            )}
+              
+              <div className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors duration-200">
+                <input
+                  type="checkbox"
+                  id="public"
+                  checked={documentForm.isPublic}
+                  onChange={(e) => setDocumentForm(prev => ({ ...prev, isPublic: e.target.checked }))}
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                />
+                <label htmlFor="public" className="ml-3 block text-sm font-medium text-gray-900">
+                  Public Document
+                  <span className="block text-xs text-gray-500 mt-1">Visible to tenants and other stakeholders</span>
+                </label>
+              </div>
+              
+              <div className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition-colors duration-200">
+                <input
+                  type="checkbox"
+                  id="renewal"
+                  checked={documentForm.requiresRenewal}
+                  onChange={(e) => setDocumentForm(prev => ({ ...prev, requiresRenewal: e.target.checked }))}
+                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                />
+                <label htmlFor="renewal" className="ml-3 block text-sm font-medium text-gray-900">
+                  Requires Renewal
+                  <span className="block text-xs text-gray-500 mt-1">Set up automatic renewal reminders</span>
+                </label>
+              </div>
+              
+              {documentForm.requiresRenewal && (
+                <div className="ml-8 mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                    <Clock className="h-4 w-4 mr-2 text-blue-600" />
+                    Renewal Reminder (days before expiry)
+                  </label>
+                  <input
+                    type="number"
+                    value={documentForm.renewalReminderDays}
+                    onChange={(e) => setDocumentForm(prev => ({ ...prev, renewalReminderDays: parseInt(e.target.value) || 30 }))}
+                    className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
+                    min="1"
+                    max="365"
+                    placeholder="30"
+                  />
+                  <p className="text-xs text-gray-600 mt-2">We'll send reminders this many days before the document expires</p>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          {/* Notes */}
+          <div className="form-group">
+            <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <FileText className="h-4 w-4 mr-2 text-gray-600" />
               Notes
             </label>
             <textarea
               value={documentForm.notes}
               onChange={(e) => setDocumentForm(prev => ({ ...prev, notes: e.target.value }))}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Additional notes about this document"
+              rows={4}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 bg-white placeholder-gray-400 resize-none"
+              placeholder="Add any additional notes or comments about this document..."
             />
           </div>
 
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 mb-2">Drop files here or click to browse</p>
-            <p className="text-xs text-gray-500">Supports PDF, DOC, DOCX, JPG, PNG (max 10MB)</p>
-            <input
-              type="file"
-              className="hidden"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              multiple
-            />
+          {/* File Upload */}
+          <div className="form-group">
+            <label className="block text-sm font-semibold text-gray-800 mb-3 flex items-center">
+              <Upload className="h-4 w-4 mr-2 text-blue-600" />
+              Upload Files
+            </label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 cursor-pointer group">
+              <Upload className="h-12 w-12 text-gray-400 group-hover:text-blue-500 mx-auto mb-4 transition-colors duration-200" />
+              <p className="text-sm font-medium text-gray-700 group-hover:text-blue-700 mb-2 transition-colors duration-200">
+                Drop files here or click to browse
+              </p>
+              <p className="text-xs text-gray-500 mb-4">
+                Supports PDF, DOC, DOCX, JPG, PNG (max 10MB per file)
+              </p>
+              <div className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                <Upload className="h-4 w-4 mr-2" />
+                Choose Files
+              </div>
+              <input
+                type="file"
+                className="hidden"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                multiple
+              />
+            </div>
           </div>
 
-          <div className="flex gap-3 pt-4">
-            <Button
-              variant="outline"
+          {/* Action Buttons */}
+          <div className="flex gap-4 pt-6 border-t border-gray-200">
+            <button
+              type="button"
               onClick={() => setShowUploadModal(false)}
-              className="flex-1"
+              className="btn-secondary flex-1 px-6 py-3 text-sm font-medium"
             >
+              <X className="h-4 w-4 mr-2" />
               Cancel
-            </Button>
-            <Button
+            </button>
+            <button
+              type="button"
               onClick={handleSubmitDocument}
-              className="flex-1"
               disabled={!documentForm.title}
+              className="btn-primary flex-1 px-6 py-3 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
+              <Upload className="h-4 w-4 mr-2" />
               Upload Document
-            </Button>
+            </button>
           </div>
         </div>
       </Modal>
@@ -1106,26 +1164,32 @@ const DocumentManagement: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 pt-4">
-              <Button variant="outline" className="flex-1">
-                <Download className="h-4 w-4 mr-2" />
+            <div className="flex gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                className="btn-secondary flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-all duration-200 hover:scale-105"
+              >
+                <Download className="h-4 w-4" />
                 Download
-              </Button>
-              <Button variant="outline" className="flex-1">
-                <Edit className="h-4 w-4 mr-2" />
+              </button>
+              <button
+                type="button"
+                className="btn-secondary flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-all duration-200 hover:scale-105"
+              >
+                <Edit className="h-4 w-4" />
                 Edit
-              </Button>
-              <Button 
-                variant="outline" 
-                className="flex-1"
+              </button>
+              <button
+                type="button"
                 onClick={() => {
                   handleDeleteDocument(selectedDocument.id);
                   setShowDocumentModal(false);
                 }}
+                className="bg-red-600 hover:bg-red-700 text-white flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="h-4 w-4" />
                 Delete
-              </Button>
+              </button>
             </div>
           </div>
         )}

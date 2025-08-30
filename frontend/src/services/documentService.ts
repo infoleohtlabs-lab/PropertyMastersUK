@@ -174,10 +174,14 @@ class DocumentService {
       if (options.tenancyId) formData.append('tenancyId', options.tenancyId);
       if (options.replaceExisting) formData.append('replaceExisting', 'true');
 
-      const response = await apiService.uploadFile('/documents/upload', formData);
+      const response = await apiService.post('/documents/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
       
       toast.success('Document uploaded successfully');
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Upload failed';
       toast.error(errorMessage);
@@ -233,10 +237,9 @@ class DocumentService {
     limit = 20
   ): Promise<{ documents: DocumentMetadata[]; total: number; pages: number }> {
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString()
-      });
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
 
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
@@ -251,7 +254,7 @@ class DocumentService {
       }
 
       const response = await apiService.get(`/documents?${params.toString()}`);
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch documents';
       toast.error(errorMessage);
@@ -265,7 +268,7 @@ class DocumentService {
   async getDocument(documentId: string): Promise<DocumentMetadata> {
     try {
       const response = await apiService.get(`/documents/${documentId}`);
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch document';
       toast.error(errorMessage);
@@ -283,7 +286,7 @@ class DocumentService {
         : `/documents/${documentId}/download`;
       
       const response = await apiService.get(url, { responseType: 'blob' });
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to download document';
       toast.error(errorMessage);
@@ -297,7 +300,7 @@ class DocumentService {
   async getDocumentVersions(documentId: string): Promise<DocumentVersion[]> {
     try {
       const response = await apiService.get(`/documents/${documentId}/versions`);
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch document versions';
       toast.error(errorMessage);
@@ -315,7 +318,7 @@ class DocumentService {
     try {
       const response = await apiService.patch(`/documents/${documentId}`, updates);
       toast.success('Document updated successfully');
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to update document';
       toast.error(errorMessage);
@@ -372,7 +375,7 @@ class DocumentService {
   }> {
     try {
       const response = await apiService.get(`/documents/${documentId}/permissions`);
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch permissions';
       toast.error(errorMessage);
@@ -415,7 +418,7 @@ class DocumentService {
   }>> {
     try {
       const response = await apiService.get(`/documents/${documentId}/audit`);
-      return response.data;
+      return (response as any).data;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to fetch audit trail';
       toast.error(errorMessage);

@@ -3,6 +3,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Modal } from '../components/ui/Modal';
+import { formatCurrency } from '../utils';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -255,14 +256,7 @@ const MarketAnalysisPage: React.FC = () => {
   });
 
   // Utility functions
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+
 
   const formatPercentage = (value: number) => {
     return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
@@ -738,7 +732,7 @@ const MarketAnalysisPage: React.FC = () => {
       </div>
 
       {/* Advanced Search and Filters */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="container-responsive section-spacing">
         <Card className="mb-6">
           <div className="p-4">
             <div className="flex flex-col lg:flex-row gap-4">
@@ -772,7 +766,7 @@ const MarketAnalysisPage: React.FC = () => {
 
             {showFilters && (
               <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid-responsive gap-responsive">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Timeframe</label>
                     <select
@@ -844,7 +838,7 @@ const MarketAnalysisPage: React.FC = () => {
       </div>
 
       {/* Tabbed Interface */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container-responsive">
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
             {[
@@ -879,7 +873,7 @@ const MarketAnalysisPage: React.FC = () => {
         {activeTab === 'overview' && (
           <div>
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid-responsive gap-responsive mb-8">
               <Card className="p-6">
                 <div className="flex items-center">
                   <div className="p-2 bg-blue-100 rounded-lg">

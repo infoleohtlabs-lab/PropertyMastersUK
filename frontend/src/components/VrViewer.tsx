@@ -449,7 +449,7 @@ const VrViewer: React.FC<VrViewerProps> = ({
                     {currentRooms.map((room) => (
                       <Button
                         key={room.id}
-                        variant={room.id === state.currentRoom ? "default" : "ghost"}
+                        variant={room.id === state.currentRoom ? "primary" : "ghost"}
                         size="sm"
                         className={room.id === state.currentRoom ? "" : "text-white hover:bg-white hover:bg-opacity-20"}
                         onClick={() => handleRoomChange(room.id)}
@@ -502,7 +502,7 @@ const VrViewer: React.FC<VrViewerProps> = ({
                   {(['panorama', 'vr', 'dollhouse'] as const).map((mode) => (
                     <Button
                       key={mode}
-                      variant={state.viewMode === mode ? "default" : "ghost"}
+                      variant={state.viewMode === mode ? "primary" : "ghost"}
                       size="sm"
                       className={state.viewMode === mode ? "" : "text-white hover:bg-white hover:bg-opacity-20"}
                       onClick={() => setState(prev => ({ ...prev, viewMode: mode }))}

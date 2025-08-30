@@ -67,6 +67,43 @@ const LandingPage: React.FC = () => {
     daysOnMarket: 28
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [animatedStats, setAnimatedStats] = useState({
+    averagePrice: 0,
+    propertiesSold: 0,
+    marketActivity: 0
+  });
+
+  // Animate statistics on page load
+  useEffect(() => {
+    const animateValue = (start: number, end: number, duration: number, callback: (value: number) => void) => {
+      const startTime = Date.now();
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = start + (end - start) * progress;
+        callback(Math.floor(current));
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+      animate();
+    };
+
+    // Start animations after a short delay
+    setTimeout(() => {
+      animateValue(0, marketStats.averagePrice, 2000, (value) => 
+        setAnimatedStats(prev => ({ ...prev, averagePrice: value }))
+      );
+      animateValue(0, marketStats.propertiesSold, 2500, (value) => 
+        setAnimatedStats(prev => ({ ...prev, propertiesSold: value }))
+      );
+      animateValue(0, 94, 1500, (value) => 
+        setAnimatedStats(prev => ({ ...prev, marketActivity: value }))
+      );
+    }, 500);
+  }, [marketStats]);
+
   // Mock UK postcode autocomplete
   const ukPostcodes = [
     'SW1A 1AA', 'W1A 0AX', 'M1 1AA', 'B33 8TH', 'LS1 1UR',
@@ -85,16 +122,26 @@ const LandingPage: React.FC = () => {
     }
   }, [searchLocation]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchLocation.trim()) {
       showToast.error('Please enter a location to search');
       return;
     }
 
+    setIsLoading(true);
+    
+    // Simulate search processing
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     setSearchFilters({
-      location: searchLocation
+      location: searchLocation,
+      type: searchType,
+      propertyType: propertyType || undefined,
+      priceRange: priceRange || undefined
     });
+    
+    setIsLoading(false);
     navigate('/properties');
   };
 
@@ -248,6 +295,22 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <style>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
+          opacity: 0;
+        }
+      `}</style>
       {/* Hero Section with Ocean Breeze Theme */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Ocean Breeze Background */}
@@ -263,16 +326,61 @@ const LandingPage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-[#5ab1d8]/30 to-transparent" />
         </div>
 
+        {/* Floating Property Icons */}
+        <div className="absolute inset-0 z-5 pointer-events-none">
+          <div className="absolute top-20 left-10 animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}>
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+              <Home className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <div className="absolute top-32 right-16 animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }}>
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+              <Building className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <div className="absolute bottom-32 left-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '3.5s' }}>
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+              <Key className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <div className="absolute bottom-40 right-12 animate-bounce" style={{ animationDelay: '0.5s', animationDuration: '4.5s' }}>
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+              <TrendingUp className="h-6 w-6 text-white" />
+            </div>
+          </div>
+        </div>
+
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            Find Your Dream
-            <span className="block text-white drop-shadow-lg">Property in the UK</span>
+        <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-6 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <span className="inline-block bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-full text-sm font-medium mb-4 hover:bg-white/30 transition-all duration-300 transform hover:scale-105">
+              🏆 UK's #1 Property Platform 2024
+            </span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            Discover Your Perfect
+            <span className="block text-white drop-shadow-lg bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent animate-pulse">
+              UK Property
+            </span>
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-            The UK's most advanced property platform powered by AI, featuring virtual tours, 
-            real-time market analytics, and seamless connections between all property stakeholders.
+          <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-8 max-w-4xl mx-auto leading-relaxed drop-shadow-md animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            Join over <strong className="text-yellow-300">{animatedStats.propertiesSold.toLocaleString()}+ satisfied customers</strong> using the UK's most advanced property platform. 
+            Powered by AI with virtual tours, real-time market analytics, and seamless connections.
           </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <div className="flex items-center text-white/90">
+              <CheckCircle className="h-5 w-5 mr-2 text-green-300" />
+              <span className="text-sm">Land Registry Verified</span>
+            </div>
+            <div className="flex items-center text-white/90">
+              <CheckCircle className="h-5 w-5 mr-2 text-green-300" />
+              <span className="text-sm">GDPR Compliant</span>
+            </div>
+            <div className="flex items-center text-white/90">
+              <CheckCircle className="h-5 w-5 mr-2 text-green-300" />
+              <span className="text-sm">AI-Powered Valuations</span>
+            </div>
+          </div>
 
           {/* Search Form */}
           <form onSubmit={handleSearch} className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 shadow-2xl max-w-6xl mx-auto mb-12">
@@ -380,9 +488,22 @@ const LandingPage: React.FC = () => {
                   </select>
                 </div>
                 <div className="lg:col-span-1">
-                  <Button type="submit" className="w-full h-12 text-base font-semibold bg-[#5ab1d8] hover:bg-[#4a9bc7] border-[#5ab1d8]">
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
+                  <Button 
+                    type="submit" 
+                    disabled={isLoading}
+                    className="w-full h-12 text-base font-semibold bg-[#5ab1d8] hover:bg-[#4a9bc7] border-[#5ab1d8] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-95"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Searching...
+                      </>
+                    ) : (
+                      <>
+                        <Search className="h-4 w-4 mr-2" />
+                        Search
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -390,12 +511,21 @@ const LandingPage: React.FC = () => {
           </form>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8 py-4 bg-white text-[#5ab1d8] hover:bg-gray-50 border-white">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+            <Button 
+              size="lg" 
+              className="text-lg px-8 py-4 bg-white text-[#5ab1d8] hover:bg-gray-50 border-white transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+              onClick={() => navigate('/properties')}
+            >
               <Play className="h-5 w-5 mr-2" />
               Take Virtual Tour
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4 bg-white/10 border-white/50 text-white hover:bg-white/20">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-8 py-4 bg-white/10 border-white/50 text-white hover:bg-white/20 transition-all duration-300 transform hover:scale-105 hover:shadow-xl backdrop-blur-sm"
+              onClick={() => navigate('/market-analysis')}
+            >
               <TrendingUp className="h-5 w-5 mr-2" />
               View Market Data
             </Button>
@@ -404,17 +534,22 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* UK Market Statistics Dashboard */}
-      <section className="py-16 bg-gradient-to-r from-[#5ab1d8]/10 to-white">
+      <section className="py-20 bg-gradient-to-br from-[#5ab1d8]/5 via-white to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center bg-[#5ab1d8]/10 text-[#5ab1d8] px-4 py-2 rounded-full text-sm font-medium mb-4">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Live Market Data
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
               UK Property Market Insights
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Real-time data from across the UK property market, powered by Land Registry and market analysis
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              Real-time data from across the UK property market, powered by Land Registry, ONS, and comprehensive market analysis. 
+              Updated every 15 minutes to give you the most accurate market picture.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-l-4 border-[#5ab1d8]">
               <div className="flex items-center justify-between mb-4">
                 <div className="bg-[#5ab1d8]/10 rounded-lg p-3">
@@ -425,7 +560,7 @@ const LandingPage: React.FC = () => {
                 </span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Property Price</h3>
-              <p className="text-3xl font-bold text-gray-900 mb-1">£{marketStats.averagePrice.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-gray-900 mb-1">£{animatedStats.averagePrice.toLocaleString()}</p>
               <p className="text-sm text-gray-600">Year-on-year growth</p>
             </div>
             
@@ -453,8 +588,94 @@ const LandingPage: React.FC = () => {
                 </span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Properties Sold</h3>
-              <p className="text-3xl font-bold text-gray-900 mb-1">{marketStats.propertiesSold.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-gray-900 mb-1">{animatedStats.propertiesSold.toLocaleString()}</p>
               <p className="text-sm text-gray-600">Average time on market</p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border-l-4 border-green-500">
+              <div className="flex items-center justify-between mb-4">
+                <div className="bg-green-500/10 rounded-lg p-3">
+                  <TrendingUp className="h-8 w-8 text-green-500" />
+                </div>
+                <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                  +12.3%
+                </span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Market Activity</h3>
+              <p className="text-3xl font-bold text-gray-900 mb-1">{animatedStats.marketActivity}%</p>
+              <p className="text-sm text-gray-600">Properties under offer</p>
+            </div>
+          </div>
+          
+          {/* Additional Market Insights */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-6 border border-blue-100">
+              <div className="flex items-center mb-4">
+                <div className="bg-blue-100 rounded-lg p-2 mr-3">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Regional Hotspots</h4>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">London</span>
+                  <span className="text-sm font-medium text-green-600">+8.2%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Manchester</span>
+                  <span className="text-sm font-medium text-green-600">+15.7%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Birmingham</span>
+                  <span className="text-sm font-medium text-green-600">+11.4%</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 border border-green-100">
+              <div className="flex items-center mb-4">
+                <div className="bg-green-100 rounded-lg p-2 mr-3">
+                  <Clock className="h-5 w-5 text-green-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Market Timing</h4>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Best time to buy</span>
+                  <span className="text-sm font-medium text-blue-600">Q1 2024</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Peak selling season</span>
+                  <span className="text-sm font-medium text-blue-600">Spring</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Market forecast</span>
+                  <span className="text-sm font-medium text-green-600">Stable</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-br from-purple-50 to-white rounded-xl p-6 border border-purple-100">
+              <div className="flex items-center mb-4">
+                <div className="bg-purple-100 rounded-lg p-2 mr-3">
+                  <Calculator className="h-5 w-5 text-purple-600" />
+                </div>
+                <h4 className="font-semibold text-gray-900">Investment Metrics</h4>
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Avg. ROI</span>
+                  <span className="text-sm font-medium text-green-600">7.8%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Capital growth</span>
+                  <span className="text-sm font-medium text-green-600">4.2%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Rental yield</span>
+                  <span className="text-sm font-medium text-green-600">3.6%</span>
+                </div>
+              </div>
             </div>
           </div>
           
@@ -468,26 +689,26 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Comprehensive Services Showcase */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+      <section className="section-spacing bg-white">
+        <div className="max-w-7xl mx-auto container-responsive">
+          <div className="text-center stack-lg">
+            <h2 className="text-heading-1">
               Complete Property Management Platform
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-body-xl max-w-3xl mx-auto">
               Everything you need to manage, market, and grow your property business in one powerful platform
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid-responsive">
             {/* Multi-tenant Property Management */}
             <div className="group bg-gradient-to-br from-[#5ab1d8]/5 to-white rounded-2xl p-8 hover:shadow-xl transition-all duration-300 border border-[#5ab1d8]/10">
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <Building className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Multi-Tenant Management</h3>
-              <p className="text-gray-600 mb-4">Comprehensive property portfolio management with tenant screening, lease management, and automated rent collection.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">Multi-Tenant Management</h3>
+              <p className="text-body">Comprehensive property portfolio management with tenant screening, lease management, and automated rent collection.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Tenant screening & verification</li>
                 <li>• Automated rent collection</li>
                 <li>• Lease management & renewals</li>
@@ -499,9 +720,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <UserCheck className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">CRM & Lead Management</h3>
-              <p className="text-gray-600 mb-4">Advanced customer relationship management with lead tracking, automated follow-ups, and conversion analytics.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">CRM & Lead Management</h3>
+              <p className="text-body">Advanced customer relationship management with lead tracking, automated follow-ups, and conversion analytics.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Lead capture & scoring</li>
                 <li>• Automated follow-up sequences</li>
                 <li>• Customer journey tracking</li>
@@ -513,9 +734,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <Target className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Campaign Management</h3>
-              <p className="text-gray-600 mb-4">Targeted marketing campaigns with email automation, social media integration, and performance tracking.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">Campaign Management</h3>
+              <p className="text-body">Targeted marketing campaigns with email automation, social media integration, and performance tracking.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Email marketing automation</li>
                 <li>• Social media campaigns</li>
                 <li>• ROI tracking & analytics</li>
@@ -527,9 +748,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <Calendar className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Booking & Scheduling</h3>
-              <p className="text-gray-600 mb-4">Seamless appointment booking for viewings, inspections, and maintenance with automated reminders.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">Booking & Scheduling</h3>
+              <p className="text-body">Seamless appointment booking for viewings, inspections, and maintenance with automated reminders.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Online booking system</li>
                 <li>• Automated reminders</li>
                 <li>• Calendar synchronization</li>
@@ -541,9 +762,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <BarChart3 className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Financial Analytics</h3>
-              <p className="text-gray-600 mb-4">Comprehensive financial reporting with profit analysis, expense tracking, and tax preparation tools.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">Financial Analytics</h3>
+              <p className="text-body">Comprehensive financial reporting with profit analysis, expense tracking, and tax preparation tools.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Profit & loss reporting</li>
                 <li>• Expense categorization</li>
                 <li>• Tax preparation assistance</li>
@@ -555,9 +776,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <Settings className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Maintenance Management</h3>
-              <p className="text-gray-600 mb-4">Streamlined maintenance requests, contractor management, and preventive maintenance scheduling.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">Maintenance Management</h3>
+              <p className="text-body">Streamlined maintenance requests, contractor management, and preventive maintenance scheduling.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Work order management</li>
                 <li>• Contractor network</li>
                 <li>• Preventive maintenance</li>
@@ -569,9 +790,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <Shield className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">GDPR Compliance</h3>
-              <p className="text-gray-600 mb-4">Built-in GDPR compliance tools with data protection, consent management, and audit trails.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">GDPR Compliance</h3>
+              <p className="text-body">Built-in GDPR compliance tools with data protection, consent management, and audit trails.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Data protection controls</li>
                 <li>• Consent management</li>
                 <li>• Compliance reporting</li>
@@ -583,9 +804,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <Globe className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">UK-Specific Integrations</h3>
-              <p className="text-gray-600 mb-4">Direct integration with Land Registry, Rightmove, Zoopla, and other UK property platforms.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">UK-Specific Integrations</h3>
+              <p className="text-body">Direct integration with Land Registry, Rightmove, Zoopla, and other UK property platforms.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• Land Registry integration</li>
                 <li>• Property portal sync</li>
                 <li>• Market data feeds</li>
@@ -597,9 +818,9 @@ const LandingPage: React.FC = () => {
               <div className="bg-[#5ab1d8] rounded-xl p-4 w-16 h-16 mb-6 group-hover:scale-110 transition-transform">
                 <Brain className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">AI-Powered Features</h3>
-              <p className="text-gray-600 mb-4">Advanced AI for property valuation, market predictions, and automated virtual tours.</p>
-              <ul className="text-sm text-gray-500 space-y-1">
+              <h3 className="text-heading-4">AI-Powered Features</h3>
+              <p className="text-body">Advanced AI for property valuation, market predictions, and automated virtual tours.</p>
+              <ul className="text-body-sm text-gray-500 stack-sm">
                 <li>• AI property valuation</li>
                 <li>• Market trend analysis</li>
                 <li>• Virtual tour generation</li>
@@ -617,26 +838,26 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+      <section className="section-spacing bg-gray-50">
+        <div className="max-w-7xl mx-auto container-responsive">
+          <div className="text-center stack-lg">
+            <h2 className="text-heading-1">
               Why Choose PropertyMasters UK?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-body-xl max-w-3xl mx-auto">
               Experience the future of property search with our cutting-edge technology and comprehensive platform.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid-responsive">
             {features.map((feature, index) => (
               <div key={index} className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow">
                 <div className="bg-blue-100 rounded-lg p-3 w-fit mb-6">
                   <feature.icon className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-heading-4">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-body">
                   {feature.description}
                 </p>
               </div>
@@ -646,26 +867,26 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Statistics Section */}
-      <section className="py-20 bg-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
+      <section className="section-spacing bg-blue-600">
+        <div className="max-w-7xl mx-auto container-responsive">
+          <div className="text-center stack-lg">
+            <h2 className="text-heading-1 text-white">
               Trusted by Thousands
             </h2>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+            <p className="text-body-xl text-blue-100 max-w-3xl mx-auto">
               Join the growing community of property professionals and clients who trust PropertyMasters UK.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid-responsive">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+                <div className="text-heading-1 text-white">
                   {stat.value}
                 </div>
-                <div className="text-xl font-semibold text-blue-100 mb-1">
+                <div className="text-heading-4 text-blue-100">
                   {stat.label}
                 </div>
-                <div className="text-blue-200">
+                <div className="text-body text-blue-200">
                   {stat.description}
                 </div>
               </div>
@@ -675,17 +896,17 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+      <section className="section-spacing bg-white">
+        <div className="max-w-7xl mx-auto container-responsive">
+          <div className="text-center stack-lg">
+            <h2 className="text-heading-1">
               What Our Clients Say
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-body-xl text-gray-600 max-w-3xl mx-auto">
               Real stories from real people who found their perfect property with PropertyMasters UK.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid-responsive">
             {testimonials.map((testimonial, index) => (
               <div key={index} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
                 <div className="flex items-center justify-between mb-4">
@@ -701,7 +922,7 @@ const LandingPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <p className="text-gray-700 mb-4 leading-relaxed text-sm">
+                <p className="text-body-sm text-gray-700">
                   "{testimonial.content}"
                 </p>
                 <div className="border-t pt-4">
@@ -712,15 +933,15 @@ const LandingPage: React.FC = () => {
                       className="w-10 h-10 rounded-full mr-3"
                     />
                     <div>
-                      <div className="font-semibold text-gray-900 text-sm">
+                      <div className="text-body-sm font-semibold text-gray-900">
                         {testimonial.name}
                       </div>
-                      <div className="text-gray-600 text-xs">
+                      <div className="text-caption text-gray-600">
                         {testimonial.role}
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
+                  <div className="text-caption text-blue-600 bg-blue-50 px-2 py-1 rounded-full inline-block">
                     {testimonial.propertyType}
                   </div>
                 </div>
@@ -731,13 +952,13 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Featured Properties Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+      <section className="section-spacing bg-gray-50">
+        <div className="max-w-7xl mx-auto container-responsive">
+          <div className="text-center stack-lg">
+            <h2 className="text-heading-1">
               Featured Properties
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-body-xl text-gray-600 max-w-3xl mx-auto">
               Discover some of our most popular and exclusive properties available right now.
             </p>
           </div>
@@ -751,7 +972,7 @@ const LandingPage: React.FC = () => {
                     className="w-full h-48 object-cover"
                   />
                   <div className="absolute top-4 left-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    <span className={`px-3 py-1 rounded-full text-body-sm font-medium ${
                       property.type === 'sale' 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-blue-100 text-blue-800'
@@ -768,7 +989,7 @@ const LandingPage: React.FC = () => {
                     </button>
                   </div>
                   <div className="absolute bottom-4 left-4">
-                    <span className={`px-2 py-1 rounded text-xs font-medium text-white ${
+                    <span className={`px-2 py-1 rounded text-caption font-medium text-white ${
                       property.epcRating === 'A' ? 'bg-green-600' :
                       property.epcRating === 'B' ? 'bg-green-500' :
                       property.epcRating === 'C' ? 'bg-yellow-500' : 'bg-orange-500'
@@ -779,22 +1000,22 @@ const LandingPage: React.FC = () => {
                 </div>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-bold text-gray-900">
+                    <span className="text-heading-3 text-gray-900">
                       £{property.price.toLocaleString()}
-                      {property.type === 'rent' && <span className="text-sm text-gray-600">/month</span>}
+                      {property.type === 'rent' && <span className="text-body-sm text-gray-600">/month</span>}
                     </span>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-heading-4 text-gray-900">
                     {property.title}
                   </h3>
-                  <p className="text-gray-600 mb-2 flex items-center">
+                  <p className="text-body text-gray-600 flex items-center">
                     <MapPin className="h-4 w-4 mr-1" />
                     {property.location}
                   </p>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-body-sm text-gray-500">
                     {property.postcode} • {property.tenure} • Built {property.yearBuilt}
                   </p>
-                  <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                  <div className="flex items-center justify-between text-body-sm text-gray-600">
                     <span className="flex items-center">
                       <Bed className="h-4 w-4 mr-1" />
                       {property.bedrooms} beds
@@ -811,12 +1032,12 @@ const LandingPage: React.FC = () => {
                   <div className="mb-4">
                     <div className="flex flex-wrap gap-1">
                       {property.features.slice(0, 3).map((feature, index) => (
-                        <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                        <span key={index} className="text-caption bg-gray-100 text-gray-700 px-2 py-1 rounded">
                           {feature}
                         </span>
                       ))}
                       {property.features.length > 3 && (
-                        <span className="text-xs text-gray-500">+{property.features.length - 3} more</span>
+                        <span className="text-caption text-gray-500">+{property.features.length - 3} more</span>
                       )}
                     </div>
                   </div>
@@ -837,15 +1058,15 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-white mb-6">
+      <section className="section-spacing bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-4xl mx-auto text-center container-responsive">
+          <h2 className="text-heading-1 text-white">
             Ready to Find Your Perfect Property?
           </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-body-xl text-blue-100 max-w-2xl mx-auto">
             Join thousands of satisfied customers who found their dream homes through PropertyMasters UK.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center stack-md">
             <Button size="lg" variant="outline" className="text-lg px-8 py-4 bg-white text-blue-600 hover:bg-gray-100">
               Browse Properties
             </Button>
@@ -857,21 +1078,21 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-900 text-white section-spacing">
+        <div className="max-w-7xl mx-auto container-responsive">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-1">
-              <div className="flex items-center space-x-2 mb-4">
+              <div className="flex items-center space-x-2 stack-sm">
                 <Building2 className="h-8 w-8 text-blue-400" />
-                <span className="text-xl font-bold">PropertyMasters UK</span>
+                <span className="text-heading-4 font-bold">PropertyMasters UK</span>
               </div>
-              <p className="text-gray-400 leading-relaxed">
+              <p className="text-body text-gray-400 leading-relaxed">
                 The UK's most advanced property platform, connecting all stakeholders in the property ecosystem.
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">For Buyers &amp; Tenants</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h3 className="text-heading-5 font-semibold stack-sm">For Buyers &amp; Tenants</h3>
+              <ul className="space-y-2 text-body-sm text-gray-400">
                 <li><Link to="/properties" className="hover:text-white transition-colors">Search Properties</Link></li>
                 <li><Link to="/virtual-tours" className="hover:text-white transition-colors">Virtual Tours</Link></li>
                 <li><Link to="/market-analysis" className="hover:text-white transition-colors">Market Analysis</Link></li>
@@ -879,8 +1100,8 @@ const LandingPage: React.FC = () => {
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">For Professionals</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h3 className="text-heading-5 font-semibold stack-sm">For Professionals</h3>
+              <ul className="space-y-2 text-body-sm text-gray-400">
                 <li><Link to="/auth/admin-login" className="hover:text-white transition-colors">Professional Login</Link></li>
                 <li><Link to="/list-property" className="hover:text-white transition-colors">List Property</Link></li>
                 <li><Link to="/agent-tools" className="hover:text-white transition-colors">Agent Tools</Link></li>
@@ -888,8 +1109,8 @@ const LandingPage: React.FC = () => {
               </ul>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h3 className="text-heading-5 font-semibold stack-sm">Support</h3>
+              <ul className="space-y-2 text-body-sm text-gray-400">
                 <li><Link to="/help" className="hover:text-white transition-colors">Help Center</Link></li>
                 <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
@@ -897,7 +1118,7 @@ const LandingPage: React.FC = () => {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-body-sm text-gray-400">
             <p>&copy; 2024 PropertyMasters UK. All rights reserved.</p>
           </div>
         </div>

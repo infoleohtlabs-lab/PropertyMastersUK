@@ -192,9 +192,9 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label className="form-label required">
                       First Name
                     </label>
                     <Input
@@ -202,10 +202,12 @@ const Profile: React.FC = () => {
                       value={profileData.firstName}
                       onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
                       required
+                      className="form-input focus-ring"
+                      placeholder="Enter your first name"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label required">
                       Last Name
                     </label>
                     <Input
@@ -213,10 +215,12 @@ const Profile: React.FC = () => {
                       value={profileData.lastName}
                       onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
                       required
+                      className="form-input focus-ring"
+                      placeholder="Enter your last name"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label required">
                       Email
                     </label>
                     <Input
@@ -224,72 +228,91 @@ const Profile: React.FC = () => {
                       value={profileData.email}
                       onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
                       required
+                      className="form-input focus-ring"
+                      placeholder="Enter your email address"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label">
                       Phone
                     </label>
                     <Input
                       type="tel"
                       value={profileData.phone}
                       onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                      className="form-input focus-ring"
+                      placeholder="Enter your phone number"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label">
                       Company
                     </label>
                     <Input
                       type="text"
                       value={profileData.company}
                       onChange={(e) => setProfileData({ ...profileData, company: e.target.value })}
+                      className="form-input focus-ring"
+                      placeholder="Enter your company name"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label">
                       Position
                     </label>
                     <Input
                       type="text"
                       value={profileData.position}
                       onChange={(e) => setProfileData({ ...profileData, position: e.target.value })}
+                      className="form-input focus-ring"
+                      placeholder="Enter your position"
                     />
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group md:col-span-2">
+                    <label className="form-label">
                       Address
                     </label>
                     <Input
                       type="text"
                       value={profileData.address}
                       onChange={(e) => setProfileData({ ...profileData, address: e.target.value })}
+                      className="form-input focus-ring"
+                      placeholder="Enter your full address"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label">
                       City
                     </label>
                     <Input
                       type="text"
                       value={profileData.city}
                       onChange={(e) => setProfileData({ ...profileData, city: e.target.value })}
+                      className="form-input focus-ring"
+                      placeholder="Enter your city"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="form-group">
+                    <label className="form-label">
                       Postcode
                     </label>
                     <Input
                       type="text"
                       value={profileData.postcode}
                       onChange={(e) => setProfileData({ ...profileData, postcode: e.target.value })}
+                      className="form-input focus-ring"
+                      placeholder="Enter your postcode"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={loading}>
+                <div className="form-actions">
+                  <Button 
+                    type="submit" 
+                    disabled={loading}
+                    className="btn-primary btn-loading"
+                    size="lg"
+                  >
                     <Save className="h-4 w-4 mr-2" />
                     {loading ? 'Saving...' : 'Save Changes'}
                   </Button>
@@ -298,13 +321,16 @@ const Profile: React.FC = () => {
             )}
 
             {activeTab === 'security' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium text-gray-900">Change Password</h3>
+              <div className="form-section">
+                <div className="section-header">
+                  <h3 className="section-title">Change Password</h3>
+                  <p className="section-description">Update your password to keep your account secure</p>
+                </div>
                 
-                <form onSubmit={handlePasswordChange} className="space-y-6">
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                <form onSubmit={handlePasswordChange} className="form-container">
+                  <div className="form-grid-single">
+                    <div className="form-group">
+                      <label className="form-label required">
                         Current Password
                       </label>
                       <Input
@@ -312,10 +338,12 @@ const Profile: React.FC = () => {
                         value={securitySettings.currentPassword}
                         onChange={(e) => setSecuritySettings({ ...securitySettings, currentPassword: e.target.value })}
                         required
+                        className="form-input focus-ring"
+                        placeholder="Enter your current password"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label required">
                         New Password
                       </label>
                       <Input
@@ -323,10 +351,12 @@ const Profile: React.FC = () => {
                         value={securitySettings.newPassword}
                         onChange={(e) => setSecuritySettings({ ...securitySettings, newPassword: e.target.value })}
                         required
+                        className="form-input focus-ring"
+                        placeholder="Enter your new password"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <div className="form-group">
+                      <label className="form-label required">
                         Confirm New Password
                       </label>
                       <Input
@@ -334,29 +364,41 @@ const Profile: React.FC = () => {
                         value={securitySettings.confirmPassword}
                         onChange={(e) => setSecuritySettings({ ...securitySettings, confirmPassword: e.target.value })}
                         required
+                        className="form-input focus-ring"
+                        placeholder="Confirm your new password"
                       />
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={loading}>
+                  <div className="form-actions">
+                    <Button 
+                      type="submit" 
+                      disabled={loading}
+                      className="btn-primary btn-loading"
+                      size="lg"
+                    >
                       <Shield className="h-4 w-4 mr-2" />
                       {loading ? 'Updating...' : 'Update Password'}
                     </Button>
                   </div>
                 </form>
 
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Two-Factor Authentication</h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">
-                        Add an extra layer of security to your account
+                <div className="section-divider">
+                  <div className="section-header">
+                    <h3 className="section-title">Two-Factor Authentication</h3>
+                    <p className="section-description">Add an extra layer of security to your account</p>
+                  </div>
+                  <div className="setting-toggle">
+                    <div className="setting-info">
+                      <p className="setting-label">Enable 2FA</p>
+                      <p className="setting-description">
+                        Protect your account with an additional verification step
                       </p>
                     </div>
                     <Button
-                      variant={securitySettings.twoFactorEnabled ? 'outline' : 'default'}
+                      variant={securitySettings.twoFactorEnabled ? 'outline' : 'primary'}
                       onClick={() => setSecuritySettings({ ...securitySettings, twoFactorEnabled: !securitySettings.twoFactorEnabled })}
+                      className="btn-toggle"
                     >
                       {securitySettings.twoFactorEnabled ? 'Disable' : 'Enable'}
                     </Button>
@@ -366,65 +408,73 @@ const Profile: React.FC = () => {
             )}
 
             {activeTab === 'notifications' && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-medium text-gray-900">Notification Preferences</h3>
+              <div className="form-section">
+                <div className="section-header">
+                  <h3 className="section-title">Notification Preferences</h3>
+                  <p className="section-description">Choose how you want to receive notifications</p>
+                </div>
                 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Email Notifications</p>
-                      <p className="text-sm text-gray-600">Receive notifications via email</p>
+                <div className="settings-list">
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">Email Notifications</p>
+                      <p className="setting-description">Receive notifications via email</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={notificationSettings.emailNotifications}
                       onChange={(e) => setNotificationSettings({ ...notificationSettings, emailNotifications: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="form-checkbox focus-ring"
                     />
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">SMS Notifications</p>
-                      <p className="text-sm text-gray-600">Receive notifications via SMS</p>
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">SMS Notifications</p>
+                      <p className="setting-description">Receive notifications via SMS</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={notificationSettings.smsNotifications}
                       onChange={(e) => setNotificationSettings({ ...notificationSettings, smsNotifications: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="form-checkbox focus-ring"
                     />
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Push Notifications</p>
-                      <p className="text-sm text-gray-600">Receive push notifications in your browser</p>
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">Push Notifications</p>
+                      <p className="setting-description">Receive push notifications in your browser</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={notificationSettings.pushNotifications}
                       onChange={(e) => setNotificationSettings({ ...notificationSettings, pushNotifications: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="form-checkbox focus-ring"
                     />
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">Marketing Communications</p>
-                      <p className="text-sm text-gray-600">Receive updates about new features and offers</p>
+                  <div className="setting-item">
+                    <div className="setting-info">
+                      <p className="setting-label">Marketing Communications</p>
+                      <p className="setting-description">Receive updates about new features and offers</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={notificationSettings.marketingEmails}
                       onChange={(e) => setNotificationSettings({ ...notificationSettings, marketingEmails: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="form-checkbox focus-ring"
                     />
                   </div>
                 </div>
 
-                <div className="flex justify-end">
-                  <Button onClick={handleNotificationUpdate} disabled={loading}>
+                <div className="form-actions">
+                  <Button
+                    onClick={handleNotificationUpdate}
+                    disabled={loading}
+                    className="btn-primary btn-loading"
+                    size="lg"
+                  >
                     <Bell className="h-4 w-4 mr-2" />
                     {loading ? 'Saving...' : 'Save Preferences'}
                   </Button>

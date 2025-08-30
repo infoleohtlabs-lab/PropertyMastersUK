@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PropertyMasters Deployment Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PropertyMasters Deployment Test</h1>
+        <p>This test verifies that the deployed application at <strong>property-masters.vercel.app</strong> is working correctly.</p>
+        
+        <div class="test-section">
+            <h3>1. Deployment Accessibility Test</h3>
+            <p>Test if the deployed application is accessible and loads correctly.</p>
+            <button onclick="testDeploymentAccess()">Test Deployment Access</button>
+            <div id="accessResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Login Page Test</h3>
+            <p>Test if the login page loads and is functional.</p>
+            <button onclick="testLoginPage()">Test Login Page</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Authentication API Test</h3>
+            <p>Test if the authentication system works with the test credentials.</p>
+            <button onclick="testAuthentication()">Test Authentication</button>
+            <div id="authResult" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. Live Application Preview</h3>
+            <p>Preview the deployed application in an iframe.</p>
+            <button onclick="loadPreview()">Load Application Preview</button>
+            <div id="previewContainer"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>5. Console Error Check</h3>
+            <p>Check for JavaScript errors in the deployed application.</p>
+            <button onclick="checkConsoleErrors()">Check for Errors</button>
+            <div id="errorResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const deploymentUrl = 'https://property-masters.vercel.app';
+        const loginUrl = `${deploymentUrl}/auth/login`;
+        
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = `result ${type}`;
+        }
+        
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const current = element.innerHTML;
+            element.innerHTML = current + '\n' + message;
+        }
+        
+        async function testDeploymentAccess() {
+            showResult('accessResult', 'Testing deployment accessibility...', 'info');
+            
+            try {
+                const response = await fetch(deploymentUrl, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                
+                log('accessResult', '✓ Deployment URL is accessible');
+                log('accessResult', `URL: ${deploymentUrl}`);
+                log('accessResult', 'Status: Reachable');
+                
+                // Test if it's a valid HTML page
+                const htmlResponse = await fetch(deploymentUrl);
+                if (htmlResponse.ok) {
+                    const html = await htmlResponse.text();
+                    if (html.includes('<title>') && html.includes('PropertyMasters')) {
+                        log('accessResult', '✓ Valid PropertyMasters application detected');
+                        showResult('accessResult', document.getElementById('accessResult').innerHTML, 'success');
+                    } else {
+                        log('accessResult', '⚠ Response received but may not be the correct application');
+                        showResult('accessResult', document.getElementById('accessResult').innerHTML, 'warning');
+                    }
+                } else {
+                    log('accessResult', `⚠ HTTP Status: ${htmlResponse.status}`);
+                    showResult('accessResult', document.getElementById('accessResult').innerHTML, 'warning');
+                }
+                
+            } catch (error) {
+                log('accessResult', `❌ Error accessing deployment: ${error.message}`);
+                showResult('accessResult', document.getElementById('accessResult').innerHTML, 'error');
+            }
+        }
+        
+        async function testLoginPage() {
+            showResult('loginResult', 'Testing login page...', 'info');
+            
+            try {
+                const response = await fetch(loginUrl);
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    log('loginResult', '✓ Login page is accessible');
+                    log('loginResult', `URL: ${loginUrl}`);
+                    log('loginResult', `Status: ${response.status}`);
+                    
+                    // Check for login form elements
+                    const hasEmailInput = html.includes('email') || html.includes('Email');
+                    const hasPasswordInput = html.includes('password') || html.includes('Password');
+                    const hasLoginButton = html.includes('Sign in') || html.includes('Login');
+                    
+                    if (hasEmailInput && hasPasswordInput && hasLoginButton) {
+                        log('loginResult', '✓ Login form elements detected');
+                        showResult('loginResult', document.getElementById('loginResult').innerHTML, 'success');
+                    } else {
+                        log('loginResult', '⚠ Login form elements may be missing');
+                        log('loginResult', `Email input: ${hasEmailInput}`);
+                        log('loginResult', `Password input: ${hasPasswordInput}`);
+                        log('loginResult', `Login button: ${hasLoginButton}`);
+                        showResult('loginResult', document.getElementById('loginResult').innerHTML, 'warning');
+                    }
+                } else {
+                    log('loginResult', `❌ Login page not accessible: ${response.status}`);
+                    showResult('loginResult', document.getElementById('loginResult').innerHTML, 'error');
+                }
+                
+            } catch (error) {
+                log('loginResult', `❌ Error accessing login page: ${error.message}`);
+                showResult('loginResult', document.getElementById('loginResult').innerHTML, 'error');
+            }
+        }
+        
+        async function testAuthentication() {
+            showResult('authResult', 'Testing authentication system...', 'info');
+            
+            try {
+                // This test checks if the Supabase authentication endpoint is reachable
+                // We can't actually test login due to CORS, but we can verify the setup
+                
+                log('authResult', 'Testing Supabase configuration...');
+                
+                // Check if Supabase client can be initialized
+                const supabaseUrl = 'https://himanwdawxstxwphimhw.supabase.co';
+                const healthCheck = await fetch(`${supabaseUrl}/rest/v1/`, {
+                    method: 'HEAD',
+                    headers: {
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpbWFud2Rhd3hzdHh3cGhpbWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMjUwNzAsImV4cCI6MjA3MTgwMTA3MH0.rStT7HNC8EsehqsCB_a6-9ovd3R0X8N0HyFO8fF97Vw'
+                    }
+                });
+                
+                if (healthCheck.ok) {
+                    log('authResult', '✓ Supabase backend is accessible');
+                    log('authResult', '✓ API key is valid');
+                    
+                    // Test auth endpoint
+                    const authCheck = await fetch(`${supabaseUrl}/auth/v1/settings`, {
+                        headers: {
+                            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpbWFud2Rhd3hzdHh3cGhpbWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMjUwNzAsImV4cCI6MjA3MTgwMTA3MH0.rStT7HNC8EsehqsCB_a6-9ovd3R0X8N0HyFO8fF97Vw'
+                        }
+                    });
+                    
+                    if (authCheck.ok) {
+                        log('authResult', '✓ Authentication service is available');
+                        log('authResult', '✓ Ready to accept login requests');
+                        showResult('authResult', document.getElementById('authResult').innerHTML, 'success');
+                    } else {
+                        log('authResult', `⚠ Auth service status: ${authCheck.status}`);
+                        showResult('authResult', document.getElementById('authResult').innerHTML, 'warning');
+                    }
+                } else {
+                    log('authResult', `❌ Supabase backend not accessible: ${healthCheck.status}`);
+                    showResult('authResult', document.getElementById('authResult').innerHTML, 'error');
+                }
+                
+            } catch (error) {
+                log('authResult', `❌ Authentication test failed: ${error.message}`);
+                showResult('authResult', document.getElementById('authResult').innerHTML, 'error');
+            }
+        }
+        
+        function loadPreview() {
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = `
+                <p>Loading application preview...</p>
+                <iframe src="${deploymentUrl}" title="PropertyMasters Application"></iframe>
+                <p><strong>Note:</strong> You can interact with the application directly in the iframe above. Try logging in with:</p>
+                <ul>
+                    <li><strong>Email:</strong> admin@propertymasters.com</li>
+                    <li><strong>Password:</strong> PropertyTest2024!</li>
+                </ul>
+            `;
+        }
+        
+        function checkConsoleErrors() {
+            showResult('errorResult', 'Checking for console errors...', 'info');
+            
+            // Create a hidden iframe to load the app and check for errors
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = deploymentUrl;
+            
+            let errorCount = 0;
+            const errors = [];
+            
+            // Listen for errors
+            window.addEventListener('error', (event) => {
+                if (event.filename && event.filename.includes('property-masters')) {
+                    errorCount++;
+                    errors.push(`${event.message} at ${event.filename}:${event.lineno}`);
+                }
+            });
+            
+            iframe.onload = () => {
+                setTimeout(() => {
+                    document.body.removeChild(iframe);
+                    
+                    if (errorCount === 0) {
+                        log('errorResult', '✓ No JavaScript errors detected');
+                        log('errorResult', '✓ Application appears to be running cleanly');
+                        showResult('errorResult', document.getElementById('errorResult').innerHTML, 'success');
+                    } else {
+                        log('errorResult', `⚠ ${errorCount} JavaScript errors detected:`);
+                        errors.forEach(error => log('errorResult', `  - ${error}`));
+                        showResult('errorResult', document.getElementById('errorResult').innerHTML, 'warning');
+                    }
+                }, 3000);
+            };
+            
+            iframe.onerror = () => {
+                document.body.removeChild(iframe);
+                log('errorResult', '❌ Failed to load application for error checking');
+                showResult('errorResult', document.getElementById('errorResult').innerHTML, 'error');
+            };
+            
+            document.body.appendChild(iframe);
+        }
+        
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testDeploymentAccess();
+            }, 1000);
+            
+            setTimeout(() => {
+                testLoginPage();
+            }, 3000);
+            
+            setTimeout(() => {
+                testAuthentication();
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

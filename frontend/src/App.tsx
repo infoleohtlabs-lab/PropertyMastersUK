@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout, AuthLayout, ErrorLayout } from './components/layout';
 import { LandingPage, Properties } from './pages';
@@ -155,6 +155,13 @@ const NotFound: React.FC = () => {
 };
 
 function App() {
+  const { initializeAuth } = useAuthStore();
+
+  useEffect(() => {
+    // Initialize auth state on app startup
+    initializeAuth();
+  }, [initializeAuth]);
+
   return (
     <Router>
       <div className="App">

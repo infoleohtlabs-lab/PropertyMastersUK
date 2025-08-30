@@ -21,6 +21,7 @@ import {
   Shield,
   TrendingUp
 } from 'lucide-react';
+import { formatCurrency } from '../utils';
 
 interface MaintenanceRequest {
   id: string;
@@ -264,14 +265,7 @@ const MaintenanceManagement: React.FC = () => {
     }
   ];
 
-  const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-GB');

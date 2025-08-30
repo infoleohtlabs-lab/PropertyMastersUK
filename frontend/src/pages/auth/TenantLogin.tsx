@@ -66,7 +66,7 @@ const TenantLogin: React.FC = () => {
 
   const handleDemoLogin = async () => {
     try {
-      await login({ email: 'demo.tenant@propertymastersuk.com', password: 'demo123' });
+      await login({ email: 'tenant@example.com', password: 'PropertyTest2024!' });
       showToast.success('Welcome to the demo tenant account!');
       navigate(from, { replace: true });
     } catch (error: any) {
@@ -138,7 +138,7 @@ const TenantLogin: React.FC = () => {
 
       {/* Right Side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md animate-fade-in">
           {/* Back to Home */}
           <div className="mb-6">
             <Link 
@@ -154,70 +154,96 @@ const TenantLogin: React.FC = () => {
           <div className="text-center mb-8">
             <div className="flex justify-center items-center space-x-2 mb-4 lg:hidden">
               <Home className="h-8 w-8 text-green-600" />
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-heading-2 text-gray-900">
                 PropertyMasters UK
               </span>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="text-heading-1 text-gray-900 mb-2">
               Tenant Login
             </h2>
-            <p className="text-gray-600">
+            <p className="text-body-sm text-gray-600">
               Access your tenant portal to manage your rental experience
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                label="Email address"
-                placeholder="Enter your email"
-                value={values.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.email ? errors.email : ''}
-                leftIcon={<Mail className="h-4 w-4" />}
-                required
-              />
+          <form onSubmit={handleSubmit} className="form-section">
+            <div className="form-group">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={values.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field pl-10 ${
+                    touched.email && errors.email
+                      ? 'border-red-500 animate-shake'
+                      : touched.email && !errors.email
+                      ? 'border-green-500'
+                      : ''
+                  }`}
+                  required
+                />
+                <label htmlFor="email" className="text-label text-gray-700 mb-1 block">
+                  Email address
+                </label>
+                {touched.email && errors.email && (
+                  <p className="text-caption text-red-600 mt-1 animate-fade-in">{errors.email}</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                label="Password"
-                placeholder="Enter your password"
-                value={values.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.password ? errors.password : ''}
-                leftIcon={<Lock className="h-4 w-4" />}
-                rightIcon={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                }
-                required
-              />
+            <div className="form-group">
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={values.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field pl-10 pr-10 ${
+                    touched.password && errors.password
+                      ? 'border-red-500 animate-shake'
+                      : touched.password && !errors.password
+                      ? 'border-green-500'
+                      : ''
+                  }`}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+                <label htmlFor="password" className="text-label text-gray-700 mb-1 block">
+                  Password
+                </label>
+                {touched.password && errors.password && (
+                  <p className="text-caption text-red-600 mt-1 animate-fade-in">{errors.password}</p>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
-                  name="remember-me"
+                  name="rememberMe"
                   type="checkbox"
-                  className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                  checked={values.rememberMe}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-label text-gray-900">
                   Remember me
                 </label>
               </div>
@@ -225,7 +251,7 @@ const TenantLogin: React.FC = () => {
               <div className="text-sm">
                 <Link
                   to="/auth/forgot-password"
-                  className="font-medium text-green-600 hover:text-green-500"
+                  className="font-medium text-green-600 hover:text-green-500 transition-colors"
                 >
                   Forgot your password?
                 </Link>
@@ -233,47 +259,48 @@ const TenantLogin: React.FC = () => {
             </div>
 
             <div>
-              <Button
+              <button
                 type="submit"
-                className="w-full bg-green-600 hover:bg-green-700"
-                loading={isLoading}
                 disabled={!isValid || isLoading}
+                className={`btn-primary w-full ${
+                  isLoading ? 'animate-pulse' : 'hover:animate-scale-in'
+                } transition-all duration-200`}
               >
-                Sign in to Tenant Portal
-              </Button>
+                {isLoading ? 'Signing in...' : 'Sign in to Tenant Portal'}
+              </button>
             </div>
           </form>
 
           {/* Demo Account */}
-          <div className="mt-8">
+          <div className="component-spacing">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
-              <div className="relative flex justify-center text-sm">
+              <div className="relative flex justify-center text-caption">
                 <span className="px-2 bg-gray-50 text-gray-500">Try demo account</span>
               </div>
             </div>
 
             <div className="mt-6">
-              <Button
-                variant="outline"
+              <button
+                type="button"
                 onClick={handleDemoLogin}
                 disabled={isLoading}
-                className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                className="btn-secondary w-full hover:animate-scale-in transition-all duration-200"
               >
                 Demo Tenant Account
-              </Button>
+              </button>
             </div>
           </div>
 
           {/* Register Link */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="component-spacing text-center">
+            <p className="text-caption text-gray-600">
               Don't have an account?{' '}
               <Link
                 to="/auth/register"
-                className="font-medium text-green-600 hover:text-green-500"
+                className="font-medium text-green-600 hover:text-green-500 transition-colors"
               >
                 Create tenant account
               </Link>
@@ -282,11 +309,11 @@ const TenantLogin: React.FC = () => {
 
           {/* Professional Login */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
+            <p className="text-caption text-gray-500">
               Are you a property professional?{' '}
               <Link
                 to="/auth/admin-login"
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
                 Professional Login
               </Link>

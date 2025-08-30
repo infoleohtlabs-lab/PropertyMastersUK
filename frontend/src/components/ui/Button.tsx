@@ -1,71 +1,89 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'success' | 'warning';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  children: React.ReactNode;
   loading?: boolean;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', loading, children, disabled, ...props }, ref) => {
-    const variants = {
-      default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-      destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-      outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-      ghost: 'hover:bg-accent hover:text-accent-foreground',
-      link: 'text-primary underline-offset-4 hover:underline'
-    };
-
-    const sizes = {
-      default: 'h-10 px-4 py-2',
-      sm: 'h-9 rounded-md px-3',
-      lg: 'h-11 rounded-md px-8',
-      icon: 'h-10 w-10'
-    };
-
-    return (
-      <button
-        className={cn(
-          'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-          variants[variant],
-          sizes[size],
-          className
+export const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'md',
+  className,
+  children,
+  loading = false,
+  icon,
+  iconPosition = 'left',
+  disabled,
+  ...props
+}) => {
+  const baseClasses = 'group inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden transform hover:scale-105 active:scale-95 focus:scale-105';
+  
+  const variants = {
+    primary: 'bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white focus:ring-primary-500 shadow-sm hover:shadow-lg hover:shadow-primary-500/25 transition-shadow duration-300',
+    secondary: 'bg-secondary-100 hover:bg-secondary-200 active:bg-secondary-300 text-secondary-700 focus:ring-secondary-500 border border-secondary-200 hover:border-secondary-300 hover:shadow-md transition-shadow duration-300',
+    outline: 'border border-secondary-300 bg-white hover:bg-secondary-50 active:bg-secondary-100 text-secondary-700 focus:ring-primary-500 hover:border-primary-400 hover:text-primary-700 hover:shadow-md transition-all duration-300',
+    ghost: 'hover:bg-secondary-100 active:bg-secondary-200 text-secondary-700 focus:ring-secondary-500 hover:text-primary-700 transition-colors duration-200',
+    danger: 'bg-danger-600 hover:bg-danger-700 active:bg-danger-800 text-white focus:ring-danger-500 shadow-sm hover:shadow-lg hover:shadow-danger-500/25 transition-shadow duration-300',
+    success: 'bg-success-600 hover:bg-success-700 active:bg-success-800 text-white focus:ring-success-500 shadow-sm hover:shadow-lg hover:shadow-success-500/25 transition-shadow duration-300',
+    warning: 'bg-warning-600 hover:bg-warning-700 active:bg-warning-800 text-white focus:ring-warning-500 shadow-sm hover:shadow-lg hover:shadow-warning-500/25 transition-shadow duration-300',
+  };
+  
+  const sizes = {
+    xs: 'px-2 py-1 text-xs h-6',
+    sm: 'px-3 py-1.5 text-sm h-8',
+    md: 'px-4 py-2 text-sm h-10',
+    lg: 'px-6 py-3 text-base h-12',
+    xl: 'px-8 py-4 text-lg h-14',
+  };
+  
+  const iconSizes = {
+    xs: 'h-3 w-3',
+    sm: 'h-4 w-4',
+    md: 'h-4 w-4',
+    lg: 'h-5 w-5',
+    xl: 'h-6 w-6',
+  };
+  
+  const isDisabled = disabled || loading;
+  
+  return (
+    <button
+      className={cn(
+        baseClasses,
+        variants[variant],
+        sizes[size],
+        isDisabled && 'cursor-not-allowed',
+        className
+      )}
+      disabled={isDisabled}
+      {...props}
+    >
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-inherit rounded-lg">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent opacity-75" />
+        </div>
+      )}
+      
+      <div className={cn('flex items-center gap-2 transition-opacity duration-200', loading && 'opacity-0')}>
+        {icon && iconPosition === 'left' && (
+          <span className={cn('flex-shrink-0 transition-transform duration-200 group-hover:scale-110', iconSizes[size])}>
+            {icon}
+          </span>
         )}
-        ref={ref}
-        disabled={disabled || loading}
-        {...props}
-      >
-        {loading && (
-          <svg
-            className="mr-2 h-4 w-4 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
+        
+        <span className="flex-1">{children}</span>
+        
+        {icon && iconPosition === 'right' && (
+          <span className={cn('flex-shrink-0 transition-transform duration-200 group-hover:scale-110', iconSizes[size])}>
+            {icon}
+          </span>
         )}
-        {children}
-      </button>
-    );
-  }
-);
-
-Button.displayName = "Button";
-
-export { Button };
+      </div>
+    </button>
+  );
+};

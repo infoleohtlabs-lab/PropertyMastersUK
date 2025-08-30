@@ -1,14 +1,71 @@
 {
-  "dependencies": {
-    "@types/multer": "^2.0.0",
-    "@types/uuid": "^10.0.0",
-    "axios": "^1.11.0",
-    "clsx": "^2.1.1",
-    "multer": "^2.0.2",
-    "tailwind-merge": "^3.3.1",
-    "uuid": "^11.1.0"
+  "name": "propertymastersuk",
+  "version": "1.0.0",
+  "description": "PropertyMasters UK - Complete Property Management Platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run start:dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build:backend": "cd backend && npm install && npm run build",
+    "deploy": "node scripts/deploy.js",
+    "deploy:frontend": "cd frontend && npm install && npm run build && vercel --prod",
+    "deploy:backend": "supabase db push && supabase functions deploy",
+    "deploy:full": "npm run build && npm run deploy:backend && npm run deploy:frontend",
+    "test": "npm run test:frontend && npm run test:backend",
+    "test:frontend": "cd frontend && npm run test",
+    "test:backend": "cd backend && npm run test",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && npm run lint",
+    "lint:backend": "cd backend && npm run lint",
+    "setup": "npm install && npm run setup:frontend && npm run setup:backend",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:backend": "cd backend && npm install",
+    "clean": "npm run clean:frontend && npm run clean:backend",
+    "clean:frontend": "cd frontend && rm -rf node_modules dist",
+    "clean:backend": "cd backend && rm -rf node_modules dist",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:reset": "supabase db reset",
+    "supabase:migrate": "supabase db push",
+    "supabase:functions": "supabase functions deploy",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f"
   },
+  "keywords": [
+    "property",
+    "real-estate",
+    "management",
+    "uk",
+    "react",
+    "nestjs",
+    "supabase",
+    "vercel"
+  ],
+  "author": "PropertyMasters UK Team",
+  "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "supabase": "^2.39.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/propertymastersuk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/propertymastersuk/issues"
+  },
+  "homepage": "https://github.com/yourusername/propertymastersuk#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.0"
   }
 }

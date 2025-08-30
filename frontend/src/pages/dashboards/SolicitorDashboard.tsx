@@ -36,6 +36,7 @@ import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { useAuthStore } from '../../stores/authStore';
 import { showToast } from '../../components/ui/Toast';
+import { formatCurrency } from '../../utils';
 
 interface SolicitorStats {
   activeCases: number;
@@ -365,9 +366,7 @@ const SolicitorDashboard: React.FC = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
-    return `£${amount.toLocaleString()}`;
-  };
+
 
   const filteredCases = cases.filter(caseItem => {
     const matchesSearch = caseItem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -387,126 +386,126 @@ const SolicitorDashboard: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
           Welcome back, {user?.firstName}!
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
           Manage your legal cases, clients, and documents efficiently.
         </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Scale className="h-6 w-6 text-blue-600" />
+              <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                <Scale className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-blue-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Cases</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeCases}</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Active Cases</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.activeCases}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-green-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completedCases}</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Completed</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.completedCases}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-6 w-6 text-purple-600" />
+              <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg">
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-purple-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Clients</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalClients}</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Total Clients</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.totalClients}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Banknote className="h-6 w-6 text-yellow-600" />
+              <div className="p-1.5 sm:p-2 bg-yellow-100 rounded-lg">
+                <Banknote className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-yellow-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.monthlyRevenue)}</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Monthly Revenue</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{formatCurrency(stats.monthlyRevenue)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <FileText className="h-6 w-6 text-indigo-600" />
+              <div className="p-1.5 sm:p-2 bg-indigo-100 rounded-lg">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-indigo-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending Docs</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pendingDocuments}</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Pending Docs</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.pendingDocuments}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Clock className="h-6 w-6 text-orange-600" />
+              <div className="p-1.5 sm:p-2 bg-orange-100 rounded-lg">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-orange-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Deadlines</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.upcomingDeadlines}</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Deadlines</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.upcomingDeadlines}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-teal-600" />
+              <div className="p-1.5 sm:p-2 bg-teal-100 rounded-lg">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-teal-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avg Case Value</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.averageCaseValue)}</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Avg Case Value</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{formatCurrency(stats.averageCaseValue)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-pink-100 rounded-lg">
-                <Star className="h-6 w-6 text-pink-600" />
+              <div className="p-1.5 sm:p-2 bg-pink-100 rounded-lg">
+                <Star className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-pink-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completionRate}%</p>
+              <div className="ml-2 sm:ml-3 lg:ml-4">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Success Rate</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{stats.completionRate}%</p>
               </div>
             </div>
           </CardContent>
@@ -514,8 +513,8 @@ const SolicitorDashboard: React.FC = () => {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
+      <div className="border-b border-gray-200 mb-4 sm:mb-6">
+        <nav className="-mb-px flex space-x-2 sm:space-x-4 lg:space-x-8 overflow-x-auto">
           {[
             { id: 'overview', label: 'Overview', icon: Scale },
             { id: 'cases', label: 'Cases', icon: Briefcase },
@@ -529,14 +528,15 @@ const SolicitorDashboard: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
+                className={`flex items-center py-2 px-2 sm:px-3 lg:px-4 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
-                <Icon className="h-4 w-4 mr-2" />
-                {tab.label}
+                <Icon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             );
           })}

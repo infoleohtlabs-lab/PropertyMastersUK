@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, Eye, EyeOff, Mail, Lock, User, Phone, MapPin } from 'lucide-react';
+import { Building2, User, Mail, Phone, Lock, Eye, EyeOff, MapPin } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { showToast } from '../../components/ui/Toast';
@@ -189,7 +189,7 @@ const Register: React.FC = () => {
   ];
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl mx-auto animate-fade-in">
       {/* Logo and Title */}
       <div className="text-center mb-8">
         <div className="flex justify-center items-center space-x-2 mb-4">
@@ -198,29 +198,29 @@ const Register: React.FC = () => {
             PropertyMasters UK
           </span>
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+        <h2 className="text-heading-2 mb-2">
           Create your account
         </h2>
-        <p className="text-gray-600">
-          Join thousands of users on the UK's leading property platform
+        <p className="text-body-sm">
+          Join PropertyMasters UK and start your property journey
         </p>
       </div>
 
       {/* Registration Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="form-section">
         {/* Role Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+        <div className="form-group">
+          <label className="block text-label mb-3">
             I am a...
           </label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {roleOptions.map((option) => (
               <div
                 key={option.value}
-                className={`relative rounded-lg border p-4 cursor-pointer transition-all ${
+                className={`relative rounded-lg border p-4 cursor-pointer transition-all transform hover:scale-105 ${
                   selectedRole === option.value
-                    ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500'
-                    : 'border-gray-300 hover:border-gray-400'
+                    ? 'border-primary-500 bg-primary-50 ring-2 ring-primary-500 shadow-md'
+                    : 'border-gray-300 hover:border-gray-400 hover:shadow-sm'
                 }`}
                 onClick={() => handleRoleChange(option.value)}
               >
@@ -231,7 +231,7 @@ const Register: React.FC = () => {
                     value={option.value}
                     checked={selectedRole === option.value}
                     onChange={() => handleRoleChange(option.value)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 transition-colors duration-200"
                   />
                   <div className="ml-3">
                     <label className="block text-sm font-medium text-gray-900">
@@ -249,201 +249,254 @@ const Register: React.FC = () => {
 
         {/* Personal Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            id="firstName"
-            name="firstName"
-            type="text"
-            label="First Name"
-            placeholder="Enter your first name"
-            value={values.firstName}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.firstName ? errors.firstName : ''}
-            leftIcon={<User className="h-4 w-4" />}
-            required
-          />
+          <div className="form-group">
+            <Input
+              id="firstName"
+              name="firstName"
+              type="text"
+              label="First Name"
+              placeholder="Enter your first name"
+              value={values.firstName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touched.firstName ? errors.firstName : ''}
+              leftIcon={<User className="h-4 w-4" />}
+              required
+              className={`input-field transition-all duration-300 ${touched.firstName && errors.firstName ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+            />
+          </div>
 
+          <div className="form-group">
+            <Input
+              id="lastName"
+              name="lastName"
+              type="text"
+              label="Last Name"
+              placeholder="Enter your last name"
+              value={values.lastName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touched.lastName ? errors.lastName : ''}
+              leftIcon={<User className="h-4 w-4" />}
+              required
+              className={`input-field transition-all duration-300 ${touched.lastName && errors.lastName ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
           <Input
-            id="lastName"
-            name="lastName"
-            type="text"
-            label="Last Name"
-            placeholder="Enter your last name"
-            value={values.lastName}
+            id="email"
+            name="email"
+            type="email"
+            label="Email Address"
+            placeholder="Enter your email address"
+            value={values.email}
             onChange={handleChange}
             onBlur={handleBlur}
-            error={touched.lastName ? errors.lastName : ''}
-            leftIcon={<User className="h-4 w-4" />}
+            error={touched.email ? errors.email : ''}
+            leftIcon={<Mail className="h-4 w-4" />}
             required
+            className={`input-field transition-all duration-300 ${touched.email && errors.email ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
           />
         </div>
 
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          label="Email Address"
-          placeholder="Enter your email address"
-          value={values.email}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          error={touched.email ? errors.email : ''}
-          leftIcon={<Mail className="h-4 w-4" />}
-          required
-        />
-
-        <Input
-          id="phone"
-          name="phone"
-          type="tel"
-          label="Phone Number"
-          placeholder="Enter your UK phone number"
-          value={values.phone}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          error={touched.phone ? errors.phone : ''}
-          leftIcon={<Phone className="h-4 w-4" />}
-          required
-        />
+        <div className="form-group">
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            label="Phone Number"
+            placeholder="Enter your UK phone number"
+            value={values.phone}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={touched.phone ? errors.phone : ''}
+            leftIcon={<Phone className="h-4 w-4" />}
+            required
+            className={`input-field transition-all duration-300 ${touched.phone && errors.phone ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+          />
+        </div>
 
         {/* Company Name (for agents) */}
         {selectedRole === UserRole.AGENT && (
-          <Input
-            id="companyName"
-            name="companyName"
-            type="text"
-            label="Company Name"
-            placeholder="Enter your company name"
-            value={values.companyName}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.companyName ? errors.companyName : ''}
-            leftIcon={<Building2 className="h-4 w-4" />}
-            required
-          />
+          <div className="form-group">
+            <Input
+              id="companyName"
+              name="companyName"
+              type="text"
+              label="Company Name"
+              placeholder="Enter your company name"
+              value={values.companyName}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={touched.companyName ? errors.companyName : ''}
+              leftIcon={<Building2 className="h-4 w-4" />}
+              required
+              className={`input-field transition-all duration-300 ${touched.companyName && errors.companyName ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+            />
+          </div>
         )}
 
         {/* Password Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input
-            id="password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            label="Password"
-            placeholder="Create a password"
-            value={values.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.password ? errors.password : ''}
-            leftIcon={<Lock className="h-4 w-4" />}
-            required
-          />
+          <div className="form-group">
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                label="Password"
+                placeholder="Create a password"
+                value={values.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.password ? errors.password : ''}
+                leftIcon={<Lock className="h-4 w-4" />}
+                required
+                className={`input-field transition-all duration-300 ${touched.password && errors.password ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
 
-          <Input
-            id="confirmPassword"
-            name="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
-            label="Confirm Password"
-            placeholder="Confirm your password"
-            value={values.confirmPassword}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            error={touched.confirmPassword ? errors.confirmPassword : ''}
-            leftIcon={<Lock className="h-4 w-4" />}
-            required
-          />
+          <div className="form-group">
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                value={values.confirmPassword}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.confirmPassword ? errors.confirmPassword : ''}
+                leftIcon={<Lock className="h-4 w-4" />}
+                required
+                className={`input-field transition-all duration-300 ${touched.confirmPassword && errors.confirmPassword ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-9 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Address Information */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">Address Information</h3>
           
-          <Input
-            id="address.street"
-            name="address.street"
-            type="text"
-            label="Street Address"
-            placeholder="Enter your street address"
-            value={values.address?.street || ''}
-            onChange={(e) => handleAddressChange('street', e.target.value)}
-            onBlur={handleBlur}
-            error={touched.address ? errors.address : ''}
-            leftIcon={<MapPin className="h-4 w-4" />}
-            required
-          />
+          <div className="form-group">
+            <Input
+              id="address.street"
+              name="address.street"
+              type="text"
+              label="Street Address"
+              placeholder="Enter your street address"
+              value={values.address?.street || ''}
+              onChange={(e) => handleAddressChange('street', e.target.value)}
+              onBlur={handleBlur}
+              error={touched.address ? errors.address : ''}
+              leftIcon={<MapPin className="h-4 w-4" />}
+              required
+              className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+            />
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Input
-              id="address.city"
-              name="address.city"
-              type="text"
-              label="City"
-              placeholder="Enter your city"
-              value={values.address?.city || ''}
-              onChange={(e) => handleAddressChange('city', e.target.value)}
-              onBlur={handleBlur}
-              error={touched.address ? errors.address : ''}
-              required
-            />
+            <div className="form-group">
+              <Input
+                id="address.city"
+                name="address.city"
+                type="text"
+                label="City"
+                placeholder="Enter your city"
+                value={values.address?.city || ''}
+                onChange={(e) => handleAddressChange('city', e.target.value)}
+                onBlur={handleBlur}
+                error={touched.address ? errors.address : ''}
+                required
+                className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+              />
+            </div>
 
-            <Input
-              id="address.county"
-              name="address.county"
-              type="text"
-              label="County"
-              placeholder="Enter your county"
-              value={values.address?.county || ''}
-              onChange={(e) => handleAddressChange('county', e.target.value)}
-              onBlur={handleBlur}
-              error={touched.address ? errors.address : ''}
-              required
-            />
+            <div className="form-group">
+              <Input
+                id="address.county"
+                name="address.county"
+                type="text"
+                label="County"
+                placeholder="Enter your county"
+                value={values.address?.county || ''}
+                onChange={(e) => handleAddressChange('county', e.target.value)}
+                onBlur={handleBlur}
+                error={touched.address ? errors.address : ''}
+                required
+                className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+              />
+            </div>
 
-            <Input
-              id="address.postcode"
-              name="address.postcode"
-              type="text"
-              label="Postcode"
-              placeholder="Enter your postcode"
-              value={values.address?.postcode || ''}
-              onChange={(e) => handleAddressChange('postcode', e.target.value)}
-              onBlur={handleBlur}
-              error={touched.address ? errors.address : ''}
-              required
-            />
+            <div className="form-group">
+              <Input
+                id="address.postcode"
+                name="address.postcode"
+                type="text"
+                label="Postcode"
+                placeholder="Enter your postcode"
+                value={values.address?.postcode || ''}
+                onChange={(e) => handleAddressChange('postcode', e.target.value)}
+                onBlur={handleBlur}
+                error={touched.address ? errors.address : ''}
+                required
+                className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+              />
+            </div>
           </div>
         </div>
 
         {/* Terms and Conditions */}
-        <div className="flex items-center">
-          <input
-            id="terms"
-            name="terms"
-            type="checkbox"
-            required
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-          />
-          <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-            I agree to the{' '}
-            <Link to="/terms" className="text-blue-600 hover:text-blue-500">
-              Terms of Service
-            </Link>
-            {' '}and{' '}
-            <Link to="/privacy" className="text-blue-600 hover:text-blue-500">
-              Privacy Policy
-            </Link>
-          </label>
+        <div className="form-group">
+          <div className="flex items-center">
+            <input
+              id="terms"
+              name="terms"
+              type="checkbox"
+              required
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded transition-colors duration-200"
+            />
+            <label htmlFor="terms" className="ml-2 block text-label">
+              I agree to the{' '}
+              <Link to="/terms" className="text-primary-600 hover:text-primary-500 transition-colors duration-200">
+                Terms of Service
+              </Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="text-primary-600 hover:text-primary-500 transition-colors duration-200">
+                Privacy Policy
+              </Link>
+            </label>
+          </div>
         </div>
 
         {/* Submit Button */}
         <div>
           <Button
             type="submit"
-            className="w-full"
+            className={`w-full btn-primary transform transition-all duration-200 ${isLoading ? 'scale-95' : 'hover:scale-105'} ${!isValid || isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             loading={isLoading}
             disabled={!isValid || isLoading}
           >
-            Create Account
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
         </div>
       </form>

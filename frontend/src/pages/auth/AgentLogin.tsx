@@ -66,29 +66,29 @@ const AgentLogin: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div className="bg-white rounded-lg shadow-xl p-8">
+        <div className="bg-white rounded-lg shadow-xl p-8 animate-fade-in">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center items-center space-x-2 mb-4">
               <Building2 className="h-10 w-10 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-heading-2 text-gray-900">
                 PropertyMasters UK
               </span>
             </div>
             <div className="flex justify-center items-center space-x-2 mb-4">
               <Users className="h-6 w-6 text-blue-600" />
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-heading-2 text-gray-900">
                 Agent Portal
               </h2>
             </div>
-            <p className="text-gray-600">
+            <p className="text-body-sm text-gray-600">
               Access your agent dashboard and manage properties
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
+          <form onSubmit={handleSubmit} className="form-section">
+            <div className="form-group">
               <Input
                 id="email"
                 name="email"
@@ -99,12 +99,19 @@ const AgentLogin: React.FC = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touched.email ? errors.email : ''}
+                className={`input-field ${
+                  touched.email && errors.email 
+                    ? 'border-red-500 animate-shake' 
+                    : touched.email && !errors.email 
+                    ? 'border-green-500' 
+                    : ''
+                }`}
                 leftIcon={<Mail className="h-4 w-4" />}
                 required
               />
             </div>
 
-            <div>
+            <div className="form-group">
               <Input
                 id="password"
                 name="password"
@@ -115,12 +122,19 @@ const AgentLogin: React.FC = () => {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 error={touched.password ? errors.password : ''}
+                className={`input-field ${
+                  touched.password && errors.password 
+                    ? 'border-red-500 animate-shake' 
+                    : touched.password && !errors.password 
+                    ? 'border-green-500' 
+                    : ''
+                }`}
                 leftIcon={<Lock className="h-4 w-4" />}
                 rightIcon={
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-gray-400 hover:text-blue-600 transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -133,11 +147,13 @@ const AgentLogin: React.FC = () => {
               <div className="flex items-center">
                 <input
                   id="remember-me"
-                  name="remember-me"
+                  name="rememberMe"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  checked={values.rememberMe}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-label text-gray-900">
                   Remember me
                 </label>
               </div>
@@ -145,7 +161,7 @@ const AgentLogin: React.FC = () => {
               <div className="text-sm">
                 <Link
                   to="/auth/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500"
+                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -155,7 +171,9 @@ const AgentLogin: React.FC = () => {
             <div>
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className={`btn-primary w-full ${
+                  isLoading ? 'animate-pulse' : 'hover:animate-scale-in'
+                }`}
                 loading={isLoading}
                 disabled={!isValid || isLoading}
               >

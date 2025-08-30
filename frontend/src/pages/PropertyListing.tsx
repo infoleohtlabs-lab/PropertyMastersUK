@@ -333,21 +333,21 @@ const PropertyListing: React.FC = () => {
               </Button>
               <div className="flex items-center space-x-2">
                 <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  variant={viewMode === 'grid' ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
                 >
                   <Grid className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  variant={viewMode === 'list' ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('list')}
                 >
                   <List className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant={viewMode === 'map' ? 'default' : 'outline'}
+                  variant={viewMode === 'map' ? 'primary' : 'outline'}
                   size="sm"
                   onClick={() => setViewMode('map')}
                 >
@@ -574,7 +574,7 @@ const PropertyListing: React.FC = () => {
 
             {/* Properties Grid/List */}
             {viewMode === 'grid' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid-listing-cards">
                 {paginatedProperties.map(property => (
                   <PropertyCard key={property.id} property={property} onToggleSave={toggleSaveProperty} />
                 ))}
@@ -615,7 +615,7 @@ const PropertyListing: React.FC = () => {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                     <Button
                       key={page}
-                      variant={currentPage === page ? 'default' : 'outline'}
+                      variant={currentPage === page ? 'primary' : 'outline'}
                       size="sm"
                       onClick={() => setCurrentPage(page)}
                     >
@@ -642,208 +642,254 @@ const PropertyListing: React.FC = () => {
 // Property Card Component
 const PropertyCard: React.FC<{ property: Property; onToggleSave: (id: number) => void }> = ({ property, onToggleSave }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-      <div className="relative">
+    <Card 
+      variant="elevated" 
+      size="sm" 
+      interactive={true}
+      className="group overflow-hidden h-full flex flex-col transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary-500/20"
+    >
+      <div className="relative overflow-hidden rounded-t-lg">
         <img
           src={property.image}
           alt={property.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-48 sm:h-52 md:h-56 object-cover transition-transform duration-500 group-hover:scale-110"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        {/* Property Type Badge */}
         <div className="absolute top-3 left-3">
-          <span className={`px-2 py-1 rounded text-xs font-medium text-white ${
-            property.type === 'sale' ? 'bg-green-600' : 'bg-blue-600'
-          }`}>
-            For {property.type === 'sale' ? 'Sale' : 'Rent'}
-          </span>
-        </div>
-        <div className="absolute top-3 right-3 flex space-x-2">
-          <button
-            onClick={() => onToggleSave(property.id)}
-            className="bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors"
+          <CardBadge 
+            variant={property.type === 'sale' ? 'success' : 'default'}
+            className="bg-white/95 backdrop-blur-sm text-secondary-900 font-semibold shadow-lg border border-white/20"
           >
-            <Heart className={`h-4 w-4 ${property.saved ? 'text-red-500 fill-current' : 'text-gray-600'}`} />
+            For {property.type === 'sale' ? 'Sale' : 'Rent'}
+          </CardBadge>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="absolute top-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSave(property.id);
+            }}
+            className="bg-white/95 backdrop-blur-sm rounded-full p-2.5 hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg border border-white/20"
+          >
+            <Heart className={`h-4 w-4 transition-colors duration-200 ${
+              property.saved ? 'text-red-500 fill-current' : 'text-secondary-600 hover:text-red-500'
+            }`} />
           </button>
-          <button className="bg-white/90 backdrop-blur-sm rounded-full p-2 hover:bg-white transition-colors">
-            <Share2 className="h-4 w-4 text-gray-600" />
+          <button 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white/95 backdrop-blur-sm rounded-full p-2.5 hover:bg-white hover:scale-110 transition-all duration-200 shadow-lg border border-white/20"
+          >
+            <Share2 className="h-4 w-4 text-secondary-600 hover:text-primary-600 transition-colors duration-200" />
           </button>
         </div>
+        
+        {/* EPC Rating */}
         <div className="absolute bottom-3 left-3">
-          <span className={`px-2 py-1 rounded text-xs font-medium text-white ${
-            property.epcRating === 'A' ? 'bg-green-600' :
-            property.epcRating === 'B' ? 'bg-green-500' :
-            property.epcRating === 'C' ? 'bg-yellow-500' : 'bg-orange-500'
-          }`}>
+          <CardBadge 
+            variant={property.epcRating === 'A' || property.epcRating === 'B' ? 'success' : 
+                    property.epcRating === 'C' ? 'warning' : 'danger'}
+            className="bg-white/95 backdrop-blur-sm font-semibold shadow-lg border border-white/20"
+          >
             EPC {property.epcRating}
-          </span>
+          </CardBadge>
         </div>
       </div>
       
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xl font-bold text-gray-900">
-            £{property.price.toLocaleString()}
-            {property.type === 'rent' && <span className="text-sm text-gray-600">/month</span>}
-          </span>
-          <span className="text-sm text-gray-500">
-            £{property.pricePerSqft}/sqft
-          </span>
+      <CardContent className="flex-1 flex flex-col justify-between p-4 space-y-3">
+        {/* Price Section */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col">
+            <span className="text-xl sm:text-2xl font-bold text-secondary-900 group-hover:text-primary-700 transition-colors duration-200">
+              £{property.price.toLocaleString()}
+            </span>
+            {property.type === 'rent' && (
+              <span className="text-sm text-secondary-600 group-hover:text-secondary-700 transition-colors duration-200">/month</span>
+            )}
+          </div>
+          <div className="text-right">
+            <span className="text-sm font-medium text-secondary-600 group-hover:text-secondary-700 transition-colors duration-200">
+              £{property.pricePerSqft}/sqft
+            </span>
+          </div>
         </div>
         
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          {property.title}
-        </h3>
-        
-        <p className="text-gray-600 mb-3 flex items-center text-sm">
-          <MapPin className="h-4 w-4 mr-1" />
-          {property.location}
-        </p>
-        
-        <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
-          <span className="flex items-center">
-            <Bed className="h-4 w-4 mr-1" />
-            {property.bedrooms} beds
-          </span>
-          <span className="flex items-center">
-            <Bath className="h-4 w-4 mr-1" />
-            {property.bathrooms} baths
-          </span>
-          <span className="flex items-center">
-            <Square className="h-4 w-4 mr-1" />
-            {property.sqft} sqft
-          </span>
+        {/* Title and Location */}
+        <div className="space-y-2">
+          <CardTitle size="sm" className="line-clamp-2 leading-tight">
+            {property.title}
+          </CardTitle>
+          
+          <CardDescription className="flex items-center">
+            <MapPin className="h-4 w-4 mr-1.5 text-primary-500" />
+            {property.location}
+          </CardDescription>
         </div>
         
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-          <span>{property.daysOnMarket} days on market</span>
-          <span>{property.viewingCount} viewings</span>
+        {/* Property Features */}
+        <div className="grid grid-cols-3 gap-2 py-2">
+          <div className="flex items-center justify-center space-x-1 text-sm text-secondary-600 group-hover:text-secondary-700 transition-colors duration-200">
+            <Bed className="h-4 w-4 text-primary-500" />
+            <span className="font-medium">{property.bedrooms}</span>
+          </div>
+          <div className="flex items-center justify-center space-x-1 text-sm text-secondary-600 group-hover:text-secondary-700 transition-colors duration-200">
+            <Bath className="h-4 w-4 text-primary-500" />
+            <span className="font-medium">{property.bathrooms}</span>
+          </div>
+          <div className="flex items-center justify-center space-x-1 text-sm text-secondary-600 group-hover:text-secondary-700 transition-colors duration-200">
+            <Square className="h-4 w-4 text-primary-500" />
+            <span className="font-medium">{property.sqft}</span>
+          </div>
         </div>
         
-        <div className="flex space-x-2">
-          <Link to={`/property/${property.id}`} className="flex-1">
-            <Button className="w-full" size="sm">
-              <Eye className="h-4 w-4 mr-2" />
-              View Details
-            </Button>
-          </Link>
-          <Button variant="outline" size="sm">
-            <Calculator className="h-4 w-4" />
+        {/* Market Stats */}
+        <div className="flex items-center justify-between text-xs text-secondary-500 group-hover:text-secondary-600 transition-colors duration-200 py-2 border-t border-secondary-100">
+          <span className="font-medium">{property.daysOnMarket} days on market</span>
+          <span className="font-medium">{property.viewingCount} viewings</span>
+        </div>
+      </CardContent>
+      
+      <CardFooter className="p-4 pt-0 space-x-2">
+        <Link to={`/property/${property.id}`} className="flex-1">
+          <Button 
+            className="w-full group-hover:bg-primary-600 group-hover:shadow-lg transition-all duration-200" 
+            size="sm"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Details
           </Button>
-        </div>
-      </div>
-    </div>
+        </Link>
+        <Button 
+          variant="outline" 
+          size="sm"
+          className="hover:bg-primary-50 hover:border-primary-300 hover:text-primary-700 transition-all duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Calculator className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
 // Property List Item Component
 const PropertyListItem: React.FC<{ property: Property; onToggleSave: (id: number) => void }> = ({ property, onToggleSave }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6">
-      <div className="flex gap-6">
-        <div className="relative flex-shrink-0">
-          <img
-            src={property.image}
-            alt={property.title}
-            className="w-64 h-40 object-cover rounded-lg"
-          />
-          <div className="absolute top-2 left-2">
-            <span className={`px-2 py-1 rounded text-xs font-medium text-white ${
-              property.type === 'sale' ? 'bg-green-600' : 'bg-blue-600'
-            }`}>
-              For {property.type === 'sale' ? 'Sale' : 'Rent'}
-            </span>
-          </div>
-          <div className="absolute bottom-2 left-2">
-            <span className={`px-2 py-1 rounded text-xs font-medium text-white ${
-              property.epcRating === 'A' ? 'bg-green-600' :
-              property.epcRating === 'B' ? 'bg-green-500' :
-              property.epcRating === 'C' ? 'bg-yellow-500' : 'bg-orange-500'
-            }`}>
-              EPC {property.epcRating}
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex-1">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                {property.title}
-              </h3>
-              <p className="text-gray-600 flex items-center">
-                <MapPin className="h-4 w-4 mr-1" />
-                {property.location} • {property.postcode}
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => onToggleSave(property.id)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+    <Card 
+      variant="outlined" 
+      size="sm" 
+      interactive={true}
+      className="group hover:shadow-lg hover:border-primary-200 transition-all duration-300 hover:scale-[1.01]"
+    >
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
+          {/* Property Image */}
+          <div className="relative flex-shrink-0 w-full sm:w-40 md:w-48">
+            <img
+              src={property.image}
+              alt={property.title}
+              className="w-full h-32 sm:h-28 md:h-32 object-cover rounded-lg transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute top-2 left-2">
+              <CardBadge 
+                variant={property.type === 'sale' ? 'success' : 'default'}
+                className="bg-white/95 backdrop-blur-sm text-secondary-900 font-semibold shadow-lg border border-white/20"
               >
-                <Heart className={`h-5 w-5 ${property.saved ? 'text-red-500 fill-current' : 'text-gray-400'}`} />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <Share2 className="h-5 w-5 text-gray-400" />
-              </button>
+                For {property.type === 'sale' ? 'Sale' : 'Rent'}
+              </CardBadge>
             </div>
           </div>
           
-          <div className="flex items-center space-x-6 mb-3">
-            <span className="text-2xl font-bold text-gray-900">
-              £{property.price.toLocaleString()}
-              {property.type === 'rent' && <span className="text-base text-gray-600">/month</span>}
-            </span>
-            <span className="text-gray-500">
-              £{property.pricePerSqft}/sqft
-            </span>
-          </div>
-          
-          <div className="flex items-center space-x-6 mb-3 text-gray-600">
-            <span className="flex items-center">
-              <Bed className="h-4 w-4 mr-1" />
-              {property.bedrooms} bedrooms
-            </span>
-            <span className="flex items-center">
-              <Bath className="h-4 w-4 mr-1" />
-              {property.bathrooms} bathrooms
-            </span>
-            <span className="flex items-center">
-              <Square className="h-4 w-4 mr-1" />
-              {property.sqft} sqft
-            </span>
-            <span>{property.tenure}</span>
-          </div>
-          
-          <p className="text-gray-700 mb-4 line-clamp-2">
-            {property.description}
-          </p>
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 text-sm text-gray-500">
-              <span>{property.daysOnMarket} days on market</span>
-              <span>{property.viewingCount} viewings</span>
-              <span>Built {property.yearBuilt}</span>
+          {/* Property Details */}
+          <div className="flex-1 min-w-0 space-y-3">
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between space-y-2 sm:space-y-0">
+              <div className="flex-1 min-w-0">
+                <CardTitle size="sm" className="line-clamp-2 group-hover:text-primary-700 transition-colors duration-200">
+                  {property.title}
+                </CardTitle>
+                <CardDescription className="flex items-center mt-1">
+                  <MapPin className="h-4 w-4 mr-1.5 text-primary-500" />
+                  {property.location}
+                </CardDescription>
+              </div>
+              <div className="text-left sm:text-right flex-shrink-0">
+                <span className="text-xl sm:text-2xl font-bold text-secondary-900 group-hover:text-primary-700 transition-colors duration-200">
+                  £{property.price.toLocaleString()}
+                </span>
+                {property.type === 'rent' && (
+                  <span className="text-sm text-secondary-600 block">/month</span>
+                )}
+              </div>
             </div>
             
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
-                <Phone className="h-4 w-4 mr-2" />
-                Call Agent
-              </Button>
-              <Button variant="outline" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                Book Viewing
-              </Button>
-              <Link to={`/property/${property.id}`}>
-                <Button size="sm">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Details
-                </Button>
-              </Link>
+            {/* Property Features */}
+            <div className="flex flex-wrap items-center gap-4 text-sm text-secondary-600">
+              <div className="flex items-center space-x-1">
+                <Bed className="h-4 w-4 text-primary-500" />
+                <span className="font-medium">{property.bedrooms} beds</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Bath className="h-4 w-4 text-primary-500" />
+                <span className="font-medium">{property.bathrooms} baths</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Square className="h-4 w-4 text-primary-500" />
+                <span className="font-medium">{property.sqft} sqft</span>
+              </div>
+              <CardBadge 
+                variant={property.epcRating === 'A' || property.epcRating === 'B' ? 'success' : 
+                        property.epcRating === 'C' ? 'warning' : 'danger'}
+                size="sm"
+              >
+                EPC {property.epcRating}
+              </CardBadge>
+            </div>
+            
+            {/* Footer Section */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 pt-2 border-t border-secondary-100">
+              <div className="flex flex-wrap items-center gap-4 text-xs text-secondary-500">
+                <span className="font-medium">{property.daysOnMarket} days on market</span>
+                <span className="font-medium">{property.viewingCount} viewings</span>
+                <span className="font-medium">£{property.pricePerSqft}/sqft</span>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSave(property.id);
+                  }}
+                  className="p-2 rounded-full hover:bg-primary-50 hover:scale-110 transition-all duration-200"
+                >
+                  <Heart className={`h-4 w-4 transition-colors duration-200 ${
+                    property.saved ? 'text-red-500 fill-current' : 'text-secondary-400 hover:text-red-500'
+                  }`} />
+                </button>
+                <button 
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-2 rounded-full hover:bg-primary-50 hover:scale-110 transition-all duration-200"
+                >
+                  <Share2 className="h-4 w-4 text-secondary-400 hover:text-primary-600 transition-colors duration-200" />
+                </button>
+                <Link to={`/property/${property.id}`}>
+                  <Button 
+                    size="sm"
+                    className="hover:bg-primary-600 hover:shadow-lg transition-all duration-200"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

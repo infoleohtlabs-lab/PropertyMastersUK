@@ -41,6 +41,8 @@ import { useMessaging } from '../hooks/useMessaging';
 import { useNotifications } from '../hooks/useNotifications';
 import { useTypingIndicator, useInputTyping, formatTypingUsers } from '../hooks/useTypingIndicator';
 import { Conversation, Message, MessageReaction } from '../services/messaging.service';
+import { useAuthStore } from '../stores/authStore';
+import { messagingService } from '../services/messaging.service';
 import { toast } from 'sonner';
 
 interface ConversationListProps {
@@ -610,18 +612,20 @@ export default function Communications() {
     unreadCount: notificationCount,
     requestPermission,
   } = useNotifications();
+  
+  const { user } = useAuthStore();
 
   // Initialize connection
   useEffect(() => {
     const initializeMessaging = async () => {
       try {
-        // Get auth token and user ID from your auth system
-        const token = localStorage.getItem('auth_token');
-        const userId = localStorage.getItem('user_id');
-        
-        if (token && userId) {
-          await connect(token, userId);
+        // Get auth token and user ID from auth store
+        if (isAuthenticated && token && user?.id) {
+          await connect(token, user.id);
           await loadConversations();
+        } else {
+          // Disconnect if not authenticated
+          disconnect();
         }
       } catch (error) {
         console.error('Failed to initialize messaging:', error);
@@ -631,13 +635,15 @@ export default function Communications() {
 
     initializeMessaging();
     
-    // Request notification permission
-    requestPermission();
+    // Request notification permission on first load
+    if (isAuthenticated) {
+      requestPermission();
+    }
     
     return () => {
       disconnect();
     };
-  }, []);
+  }, [isAuthenticated, token, user?.id, connect, disconnect, loadConversations, requestPermission]);
 
   const handleSelectConversation = async (conversation: Conversation) => {
     try {
@@ -694,7 +700,7 @@ export default function Communications() {
 
   const handleReaction = (messageId: string, emoji: string) => {
     const message = messages.find(m => m.id === messageId);
-    const currentUserId = localStorage.getItem('user_id');
+    const currentUserId = user?.id;
     
     if (!message || !currentUserId) return;
     
@@ -853,7 +859,7 @@ export default function Communications() {
               {/* Messages */}
               <MessageList
                 messages={messages}
-                currentUserId={localStorage.getItem('user_id') || ''}
+                currentUserId={user?.id || ''}
                 onReaction={handleReaction}
                 onReply={handleReply}
                 onForward={handleForward}

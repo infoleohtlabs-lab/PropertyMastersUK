@@ -1,6 +1,7 @@
 import { WebSocketService } from './websocket.service';
 import { apiService } from './api';
 import { User } from '../types';
+import { useAuthStore } from '../stores/authStore';
 
 export interface Conversation {
   id: string;
@@ -143,14 +144,24 @@ class MessagingService {
 
   private async initializeWebSocket(): Promise<void> {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        console.warn('No auth token found, WebSocket not initialized');
+      // Check if WebSocket URL is configured
+      const wsUrl = import.meta.env.VITE_WS_URL;
+      if (!wsUrl) {
+        console.log('WebSocket URL not configured, skipping WebSocket initialization');
+        return;
+      }
+
+      // Get token from auth store instead of localStorage
+      const authStore = useAuthStore.getState();
+      const token = authStore.token;
+      
+      if (!token || !authStore.isAuthenticated) {
+        console.warn('No auth token found or user not authenticated, WebSocket not initialized');
         return;
       }
 
       this.wsService = new WebSocketService({
-        url: import.meta.env.VITE_WS_URL || 'ws://localhost:3001',
+        url: wsUrl,
         token,
         autoConnect: true,
         reconnection: true,
@@ -167,19 +178,35 @@ class MessagingService {
 
   // WebSocket connection management
   async connectWebSocket(token: string, userId: string): Promise<void> {
+    const wsUrl = import.meta.env.VITE_WS_URL;
+    if (!wsUrl) {
+      console.log('WebSocket URL not configured, skipping WebSocket connection');
+      return;
+    }
+
     this.currentUserId = userId;
     
     if (this.wsService) {
       this.wsService.updateToken(token);
     } else {
       this.wsService = new WebSocketService({
-        url: import.meta.env.VITE_WS_URL || 'ws://localhost:3001',
+        url: wsUrl,
         token,
         autoConnect: true,
       });
     }
 
     await this.wsService.connect();
+  }
+
+  // Reinitialize WebSocket with current auth state
+  async reinitializeWithAuth(): Promise<void> {
+    const authStore = useAuthStore.getState();
+    if (authStore.isAuthenticated && authStore.token && authStore.user) {
+      await this.connectWebSocket(authStore.token, authStore.user.id);
+    } else {
+      this.disconnectWebSocket();
+    }
   }
 
   disconnectWebSocket(): void {

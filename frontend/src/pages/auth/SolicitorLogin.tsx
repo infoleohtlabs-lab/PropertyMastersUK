@@ -66,78 +66,104 @@ const SolicitorLogin: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div className="bg-white rounded-lg shadow-xl p-8">
+        <div className="bg-white rounded-lg shadow-xl p-8 animate-fade-in">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center items-center space-x-2 mb-4">
               <Building2 className="h-10 w-10 text-purple-600" />
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-heading-2 text-gray-900">
                 PropertyMasters UK
               </span>
             </div>
             <div className="flex justify-center items-center space-x-2 mb-4">
               <Scale className="h-6 w-6 text-purple-600" />
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-heading-1 text-gray-900">
                 Solicitor Portal
               </h2>
             </div>
-            <p className="text-gray-600">
+            <p className="text-body-sm text-gray-600">
               Manage legal cases and property transactions
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                label="Solicitor Email"
-                placeholder="solicitor@lawfirm.com"
-                value={values.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.email ? errors.email : ''}
-                leftIcon={<Mail className="h-4 w-4" />}
-                required
-              />
+          <form onSubmit={handleSubmit} className="form-section">
+            <div className="form-group">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="solicitor@lawfirm.com"
+                  value={values.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field pl-10 ${
+                    touched.email && errors.email
+                      ? 'border-red-500 animate-shake'
+                      : touched.email && !errors.email
+                      ? 'border-green-500'
+                      : ''
+                  }`}
+                  required
+                />
+                <label htmlFor="email" className="text-label text-gray-700 mb-1 block">
+                  Solicitor Email
+                </label>
+                {touched.email && errors.email && (
+                  <p className="text-caption text-red-600 mt-1 animate-fade-in">{errors.email}</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                label="Password"
-                placeholder="Enter your password"
-                value={values.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={touched.password ? errors.password : ''}
-                leftIcon={<Lock className="h-4 w-4" />}
-                rightIcon={
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                }
-                required
-              />
+            <div className="form-group">
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={values.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`input-field pl-10 pr-10 ${
+                    touched.password && errors.password
+                      ? 'border-red-500 animate-shake'
+                      : touched.password && !errors.password
+                      ? 'border-green-500'
+                      : ''
+                  }`}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+                <label htmlFor="password" className="text-label text-gray-700 mb-1 block">
+                  Password
+                </label>
+                {touched.password && errors.password && (
+                  <p className="text-caption text-red-600 mt-1 animate-fade-in">{errors.password}</p>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
                   id="remember-me"
-                  name="remember-me"
+                  name="rememberMe"
                   type="checkbox"
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  checked={values.rememberMe}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-label text-gray-900">
                   Remember me
                 </label>
               </div>
@@ -145,7 +171,7 @@ const SolicitorLogin: React.FC = () => {
               <div className="text-sm">
                 <Link
                   to="/auth/forgot-password"
-                  className="font-medium text-purple-600 hover:text-purple-500"
+                  className="font-medium text-purple-600 hover:text-purple-500 transition-colors"
                 >
                   Forgot password?
                 </Link>
@@ -153,22 +179,23 @@ const SolicitorLogin: React.FC = () => {
             </div>
 
             <div>
-              <Button
+              <button
                 type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                loading={isLoading}
                 disabled={!isValid || isLoading}
+                className={`btn-primary w-full ${
+                  isLoading ? 'animate-pulse' : 'hover:animate-scale-in'
+                } transition-all duration-200`}
               >
-                Sign in to Solicitor Portal
-              </Button>
+                {isLoading ? 'Signing in...' : 'Sign in to Solicitor Portal'}
+              </button>
             </div>
           </form>
 
           {/* Professional Notice */}
-          <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+          <div className="component-spacing p-4 bg-purple-50 rounded-lg">
             <div className="flex items-start space-x-2">
               <Scale className="h-5 w-5 text-purple-600 mt-0.5" />
-              <div className="text-sm text-purple-800">
+              <div className="text-caption text-purple-800">
                 <p className="font-medium">Professional Access</p>
                 <p className="mt-1">
                   This portal is exclusively for qualified solicitors and legal professionals.
@@ -179,12 +206,12 @@ const SolicitorLogin: React.FC = () => {
           </div>
 
           {/* Footer Links */}
-          <div className="mt-6">
+          <div className="component-spacing">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
-              <div className="relative flex justify-center text-sm">
+              <div className="relative flex justify-center text-caption">
                 <span className="px-2 bg-white text-gray-500">Other login options</span>
               </div>
             </div>
@@ -192,13 +219,13 @@ const SolicitorLogin: React.FC = () => {
             <div className="mt-6 grid grid-cols-2 gap-3">
               <Link
                 to="/auth/login"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="btn-secondary text-center hover:animate-scale-in transition-all duration-200"
               >
                 General Login
               </Link>
               <Link
                 to="/contact"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="btn-secondary text-center hover:animate-scale-in transition-all duration-200"
               >
                 Contact Support
               </Link>

@@ -27,6 +27,7 @@ import {
   Target,
   Calculator
 } from 'lucide-react';
+import { formatCurrency } from '../utils';
 
 // Types
 interface Transaction {
@@ -191,12 +192,6 @@ const FinancialManagement: React.FC = () => {
   }, []);
 
   // Utility functions
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
-    }).format(amount);
-  };
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-GB');

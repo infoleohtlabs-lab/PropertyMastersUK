@@ -186,29 +186,38 @@ class FinancialService {
     total: number;
     pages: number;
   }> {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...filters
-    });
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    // Handle filters properly
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach(v => params.append(key, v));
+        } else if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
 
     const response = await apiService.get(`/financial/transactions?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   async getTransaction(id: string): Promise<Transaction> {
     const response = await apiService.get(`/financial/transactions/${id}`);
-    return response.data;
+    return (response as any).data;
   }
 
   async createTransaction(transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>): Promise<Transaction> {
     const response = await apiService.post('/financial/transactions', transaction);
-    return response.data;
+    return (response as any).data;
   }
 
   async updateTransaction(id: string, updates: Partial<Transaction>): Promise<Transaction> {
     const response = await apiService.put(`/financial/transactions/${id}`, updates);
-    return response.data;
+    return (response as any).data;
   }
 
   async deleteTransaction(id: string): Promise<void> {
@@ -217,7 +226,7 @@ class FinancialService {
 
   async bulkCreateTransactions(transactions: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>[]): Promise<Transaction[]> {
     const response = await apiService.post('/financial/transactions/bulk', { transactions });
-    return response.data;
+    return (response as any).data;
   }
 
   async uploadTransactionReceipt(transactionId: string, file: File): Promise<string> {
@@ -229,7 +238,7 @@ class FinancialService {
         'Content-Type': 'multipart/form-data',
       },
     });
-    return response.data.url;
+    return (response as any).data.url;
   }
 
   // Invoice Management
@@ -248,29 +257,38 @@ class FinancialService {
     total: number;
     pages: number;
   }> {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...filters
-    });
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    
+    // Handle filters properly
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach(v => params.append(key, v));
+        } else if (value !== undefined && value !== null) {
+          params.append(key, value.toString());
+        }
+      });
+    }
 
     const response = await apiService.get(`/financial/invoices?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   async getInvoice(id: string): Promise<Invoice> {
     const response = await apiService.get(`/financial/invoices/${id}`);
-    return response.data;
+    return (response as any).data;
   }
 
   async createInvoice(invoice: Omit<Invoice, 'id' | 'invoiceNumber' | 'createdAt' | 'updatedAt'>): Promise<Invoice> {
     const response = await apiService.post('/financial/invoices', invoice);
-    return response.data;
+    return (response as any).data;
   }
 
   async updateInvoice(id: string, updates: Partial<Invoice>): Promise<Invoice> {
     const response = await apiService.put(`/financial/invoices/${id}`, updates);
-    return response.data;
+    return (response as any).data;
   }
 
   async deleteInvoice(id: string): Promise<void> {
@@ -286,14 +304,14 @@ class FinancialService {
       paymentDate,
       paymentMethod
     });
-    return response.data;
+    return (response as any).data;
   }
 
   async generateInvoicePDF(id: string): Promise<Blob> {
     const response = await apiService.get(`/financial/invoices/${id}/pdf`, {
       responseType: 'blob'
     });
-    return response.data;
+    return (response as any).data;
   }
 
   async sendInvoiceReminder(id: string): Promise<void> {
@@ -305,7 +323,7 @@ class FinancialService {
       ...invoiceData,
       frequency
     });
-    return response.data;
+    return (response as any).data;
   }
 
   // Financial Reporting
@@ -314,38 +332,36 @@ class FinancialService {
     dateTo: string,
     propertyIds?: string[]
   ): Promise<FinancialReport> {
-    const params = new URLSearchParams({
-      dateFrom,
-      dateTo
-    });
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
     
     if (propertyIds?.length) {
       propertyIds.forEach(id => params.append('propertyIds', id));
     }
 
     const response = await apiService.get(`/financial/reports?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   async getTaxReport(taxYear: string): Promise<TaxReport> {
     const response = await apiService.get(`/financial/tax-report/${taxYear}`);
-    return response.data;
+    return (response as any).data;
   }
 
   async getCashFlowForecast(
     months: number,
     propertyIds?: string[]
   ): Promise<CashFlowData[]> {
-    const params = new URLSearchParams({
-      months: months.toString()
-    });
+    const params = new URLSearchParams();
+    params.append('months', months.toString());
     
     if (propertyIds?.length) {
       propertyIds.forEach(id => params.append('propertyIds', id));
     }
 
     const response = await apiService.get(`/financial/cash-flow-forecast?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   async getPropertyFinancials(
@@ -353,10 +369,9 @@ class FinancialService {
     dateFrom: string,
     dateTo: string
   ): Promise<PropertyFinancial> {
-    const params = new URLSearchParams({
-      dateFrom,
-      dateTo
-    });
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
 
     return await apiService.get<PropertyFinancial>(`/financial/properties/${propertyId}/financials?${params}`);
   }
@@ -415,11 +430,10 @@ class FinancialService {
     dateTo: string,
     groupBy: 'day' | 'week' | 'month' | 'quarter'
   ): Promise<{ date: string; amount: number }[]> {
-    const params = new URLSearchParams({
-      dateFrom,
-      dateTo,
-      groupBy
-    });
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
+    params.append('groupBy', groupBy);
 
     return await apiService.get<{ date: string; amount: number }[]>(`/financial/analytics/income?${params}`);
   }
@@ -429,11 +443,10 @@ class FinancialService {
     dateTo: string,
     groupBy: 'day' | 'week' | 'month' | 'quarter'
   ): Promise<{ date: string; amount: number }[]> {
-    const params = new URLSearchParams({
-      dateFrom,
-      dateTo,
-      groupBy
-    });
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
+    params.append('groupBy', groupBy);
 
     return await apiService.get<{ date: string; amount: number }[]>(`/financial/analytics/expenses?${params}`);
   }
@@ -449,17 +462,16 @@ class FinancialService {
     netProfit: number;
     profitMargin: number;
   }> {
-    const params = new URLSearchParams({
-      dateFrom,
-      dateTo
-    });
+    const params = new URLSearchParams();
+    params.append('dateFrom', dateFrom);
+    params.append('dateTo', dateTo);
     
     if (propertyIds?.length) {
       propertyIds.forEach(id => params.append('propertyIds', id));
     }
 
     const response = await apiService.get(`/financial/profit-loss?${params}`);
-    return response.data;
+    return (response as any).data;
   }
 
   // Recurring Transactions
