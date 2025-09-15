@@ -53,7 +53,7 @@ export class BookingService {
   async findAll(): Promise<Booking[]> {
     return this.bookingRepository.find({
       relations: ['property', 'client', 'agent'],
-      order: { scheduledDate: 'ASC', scheduledTime: 'ASC' },
+      order: { scheduledAt: 'ASC' },
     });
   }
 
@@ -72,23 +72,23 @@ export class BookingService {
     return this.bookingRepository.find({
       where: { propertyId },
       relations: ['property', 'client', 'agent'],
-      order: { scheduledDate: 'ASC', scheduledTime: 'ASC' },
+      order: { scheduledAt: 'ASC' },
     });
   }
 
   async findByAgent(agentId: string): Promise<Booking[]> {
     return this.bookingRepository.find({
-      where: { agentId },
+      where: { assignedToId: agentId },
       relations: ['property', 'client', 'agent'],
-      order: { scheduledDate: 'ASC', scheduledTime: 'ASC' },
+      order: { scheduledAt: 'ASC' },
     });
   }
 
   async findByClient(clientId: string): Promise<Booking[]> {
     return this.bookingRepository.find({
-      where: { clientId },
+      where: { bookedById: clientId },
       relations: ['property', 'client', 'agent'],
-      order: { scheduledDate: 'ASC', scheduledTime: 'ASC' },
+      order: { scheduledAt: 'ASC' },
     });
   }
 
@@ -104,8 +104,7 @@ export class BookingService {
     }
 
     return queryBuilder
-      .orderBy('booking.scheduledDate', 'ASC')
-      .addOrderBy('booking.scheduledTime', 'ASC')
+      .orderBy('booking.scheduledAt', 'ASC')
       .getMany();
   }
 
@@ -114,15 +113,14 @@ export class BookingService {
       .leftJoinAndSelect('booking.property', 'property')
       .leftJoinAndSelect('booking.client', 'client')
       .leftJoinAndSelect('booking.agent', 'agent')
-      .where('booking.scheduledDate BETWEEN :startDate AND :endDate', { startDate, endDate });
+      .where('booking.scheduledAt BETWEEN :startDate AND :endDate', { startDate, endDate });
 
     if (agentId) {
-      queryBuilder.andWhere('booking.agentId = :agentId', { agentId });
+      queryBuilder.andWhere('booking.assignedToId = :agentId', { agentId });
     }
 
     return queryBuilder
-      .orderBy('booking.scheduledDate', 'ASC')
-      .addOrderBy('booking.scheduledTime', 'ASC')
+      .orderBy('booking.scheduledAt', 'ASC')
       .getMany();
   }
 
@@ -135,10 +133,10 @@ export class BookingService {
       const newScheduledTime = newScheduledDate.toTimeString().slice(0, 5);
       
       const conflicts = await this.checkSchedulingConflicts(
-        booking.agentId,
+        booking.assignedToId,
         newScheduledDate,
         newScheduledTime,
-        updateBookingDto.duration || booking.duration,
+        updateBookingDto.duration || booking.durationMinutes,
         id // Exclude current booking from conflict check
       );
 
@@ -147,21 +145,20 @@ export class BookingService {
       }
       
       // Update the booking with new date and time
-      booking.scheduledDate = newScheduledDate;
-      booking.scheduledTime = newScheduledTime;
+      booking.scheduledAt = newScheduledDate;
     }
 
     // Update other properties manually to ensure proper mapping
     if (updateBookingDto.type !== undefined) booking.type = updateBookingDto.type;
-    if (updateBookingDto.duration !== undefined) booking.duration = updateBookingDto.duration;
+    if (updateBookingDto.duration !== undefined) booking.durationMinutes = updateBookingDto.duration;
     if (updateBookingDto.priority !== undefined) booking.priority = updateBookingDto.priority;
-    if (updateBookingDto.notes !== undefined) booking.notes = updateBookingDto.notes;
+    if (updateBookingDto.notes !== undefined) booking.internalNotes = updateBookingDto.notes;
     if (updateBookingDto.purpose !== undefined) booking.specialRequirements = updateBookingDto.purpose;
-    if (updateBookingDto.assignedAgentId !== undefined) booking.agentId = updateBookingDto.assignedAgentId;
+    if (updateBookingDto.assignedAgentId !== undefined) booking.assignedToId = updateBookingDto.assignedAgentId;
     if (updateBookingDto.status !== undefined) booking.status = updateBookingDto.status;
     if (updateBookingDto.cancellationReason !== undefined) booking.cancellationReason = updateBookingDto.cancellationReason;
     if (updateBookingDto.feedback !== undefined) {
-      booking.feedback = typeof updateBookingDto.feedback === 'string' ? updateBookingDto.feedback : JSON.stringify(updateBookingDto.feedback);
+      booking.outcome = typeof updateBookingDto.feedback === 'string' ? updateBookingDto.feedback : JSON.stringify(updateBookingDto.feedback);
     }
     if (updateBookingDto.rating !== undefined) booking.rating = updateBookingDto.rating;
     if (updateBookingDto.contactInfo) {
@@ -180,7 +177,7 @@ export class BookingService {
   async confirm(id: string): Promise<Booking> {
     const booking = await this.findOne(id);
     booking.status = BookingStatus.CONFIRMED;
-    booking.confirmedAt = new Date();
+    // No confirmedAt property in entity - status change is sufficient
     return this.bookingRepository.save(booking);
   }
 
@@ -199,7 +196,7 @@ export class BookingService {
     booking.status = BookingStatus.COMPLETED;
     booking.completedAt = new Date();
     if (feedback) {
-      booking.feedback = typeof feedback === 'string' ? feedback : JSON.stringify(feedback);
+      booking.outcome = typeof feedback === 'string' ? feedback : JSON.stringify(feedback);
     }
     if (rating) {
       booking.rating = rating;
@@ -212,10 +209,10 @@ export class BookingService {
     
     // Check for conflicts with new time
     const conflicts = await this.checkSchedulingConflicts(
-      originalBooking.agentId,
+      originalBooking.assignedToId,
       newDate,
       newTime,
-      originalBooking.duration,
+      originalBooking.durationMinutes,
       id
     );
 
@@ -224,10 +221,9 @@ export class BookingService {
     }
 
     // Update the booking
-    originalBooking.scheduledDate = newDate;
-    originalBooking.scheduledTime = newTime;
+    originalBooking.scheduledAt = newDate;
     originalBooking.status = BookingStatus.RESCHEDULED;
-    originalBooking.rescheduledAt = new Date();
+    // No rescheduledAt property in entity - status change is sufficient
     
     return this.bookingRepository.save(originalBooking);
   }
@@ -237,22 +233,21 @@ export class BookingService {
       .leftJoinAndSelect('booking.property', 'property')
       .leftJoinAndSelect('booking.client', 'client')
       .leftJoinAndSelect('booking.agent', 'agent')
-      .where('booking.scheduledDate >= :today', { today: new Date() })
+      .where('booking.scheduledAt >= :today', { today: new Date() })
       .andWhere('booking.status IN (:...statuses)', { 
         statuses: [BookingStatus.PENDING, BookingStatus.CONFIRMED] 
       });
 
     if (agentId) {
-      queryBuilder.andWhere('booking.agentId = :agentId', { agentId });
+      queryBuilder.andWhere('booking.assignedToId = :agentId', { agentId });
     }
 
     if (clientId) {
-      queryBuilder.andWhere('booking.clientId = :clientId', { clientId });
+      queryBuilder.andWhere('booking.bookedById = :clientId', { clientId });
     }
 
     return queryBuilder
-      .orderBy('booking.scheduledDate', 'ASC')
-      .addOrderBy('booking.scheduledTime', 'ASC')
+      .orderBy('booking.scheduledAt', 'ASC')
       .getMany();
   }
 
@@ -260,7 +255,7 @@ export class BookingService {
     const queryBuilder = this.bookingRepository.createQueryBuilder('booking');
     
     if (agentId) {
-      queryBuilder.where('booking.agentId = :agentId', { agentId });
+      queryBuilder.where('booking.assignedToId = :agentId', { agentId });
     }
 
     const [total, pending, confirmed, completed, cancelled] = await Promise.all([
@@ -292,7 +287,7 @@ export class BookingService {
     const queryBuilder = this.bookingRepository.createQueryBuilder('booking');
     
     if (agentId) {
-      queryBuilder.where('booking.agentId = :agentId', { agentId });
+      queryBuilder.where('booking.assignedToId = :agentId', { agentId });
     }
 
     // Get basic statistics
@@ -312,9 +307,9 @@ export class BookingService {
 
     // Get monthly booking trends (last 12 months)
     const monthlyTrends = await queryBuilder.clone()
-      .select('DATE_FORMAT(booking.scheduledDate, "%Y-%m") as month')
+      .select('DATE_FORMAT(booking.scheduledAt, "%Y-%m") as month')
       .addSelect('COUNT(*) as count')
-      .where('booking.scheduledDate >= DATE_SUB(NOW(), INTERVAL 12 MONTH)')
+      .where('booking.scheduledAt >= DATE_SUB(NOW(), INTERVAL 12 MONTH)')
       .groupBy('month')
       .orderBy('month', 'ASC')
       .getRawMany();
@@ -350,8 +345,8 @@ export class BookingService {
     excludeBookingId?: string
   ): Promise<Booking[]> {
     const queryBuilder = this.bookingRepository.createQueryBuilder('booking')
-      .where('booking.agentId = :agentId', { agentId })
-      .andWhere('booking.scheduledDate = :date', { date })
+      .where('booking.assignedToId = :agentId', { agentId })
+      .andWhere('DATE(booking.scheduledAt) = DATE(:date)', { date })
       .andWhere('booking.status IN (:...statuses)', { 
         statuses: [BookingStatus.PENDING, BookingStatus.CONFIRMED] 
       });
@@ -368,9 +363,11 @@ export class BookingService {
     const requestedEnd = requestedStart + duration;
 
     return existingBookings.filter(booking => {
-      const [existingHours, existingMinutes] = booking.scheduledTime.split(':').map(Number);
+      const existingDate = new Date(booking.scheduledAt);
+      const existingHours = existingDate.getHours();
+      const existingMinutes = existingDate.getMinutes();
       const existingStart = existingHours * 60 + existingMinutes;
-      const existingEnd = existingStart + booking.duration;
+      const existingEnd = existingStart + booking.durationMinutes;
 
       // Check if times overlap
       return (requestedStart < existingEnd && requestedEnd > existingStart);

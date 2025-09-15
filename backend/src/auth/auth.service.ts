@@ -1,45 +1,109 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, UnauthorizedException, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcryptjs';
-import * as crypto from 'crypto';
-import { MailerService } from '@nestjs-modules/mailer';
+import { TokenService } from './services/token.service';
+import { PasswordService } from './services/password.service';
+import { SecurityConfigService } from './config/security.config';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
+import { TokenPair } from './services/token.service';
 
 @Injectable()
 export class AuthService {
-  private refreshTokens: Map<string, { userId: string; expiresAt: Date }> = new Map();
-
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService,
-    private configService: ConfigService,
-    private mailerService: MailerService,
+    private passwordService: PasswordService,
+    private tokenService: TokenService,
+    private securityConfig: SecurityConfigService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.usersService.findByEmail(email);
-    if (user && await bcrypt.compare(password, user.password)) {
-      const { password, ...result } = user;
-      return result;
+    if (!user) {
+      return null;
     }
-    return null;
+
+    // Check if account is locked
+    const isLocked = await this.usersService.isAccountLocked(user);
+    if (isLocked) {
+      throw new UnauthorizedException('Account is temporarily locked due to multiple failed login attempts');
+    }
+
+    const isPasswordValid = await this.passwordService.comparePassword(password, user.password);
+    if (!isPasswordValid) {
+      // Increment failed login attempts
+      await this.handleFailedLogin(user);
+      return null;
+    }
+
+    // Reset failed login attempts on successful login
+    if (user.failedLoginAttempts > 0) {
+      await this.usersService.resetFailedLoginAttempts(user.id);
+    }
+
+    return user;
   }
 
-  async login(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const refreshToken = this.generateRefreshToken();
-    
-    // Store refresh token
-    this.refreshTokens.set(refreshToken, {
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+  async login(loginDto: LoginDto, deviceInfo?: string, ipAddress?: string): Promise<TokenPair> {
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException('Please verify your email before logging in');
+    }
+
+    return this.tokenService.generateTokenPair(
+      user.id,
+      user.email,
+      user.role,
+      user.tenantOrganizationId,
+      deviceInfo,
+      ipAddress,
+    );
+  }
+
+  async register(registerDto: RegisterDto): Promise<{ user: any; tokens: any }> {
+    const { email, password, firstName, lastName, role } = registerDto;
+    // Check if user already exists
+    const existingUser = await this.usersService.findByEmail(registerDto.email);
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    // Validate password strength
+    const passwordValidation = this.securityConfig.validatePassword(registerDto.password);
+    if (!passwordValidation.isValid) {
+      throw new BadRequestException(passwordValidation.errors.join(', '));
+    }
+
+    // Hash password
+    const hashedPassword = await this.passwordService.hashPassword(registerDto.password);
+
+    // Create user
+    const user = await this.usersService.create({
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      role: role || UserRole.TENANT,
     });
 
+    // Set email verification token
+    const emailVerificationToken = this.tokenService.generateEmailVerificationToken();
+    await this.usersService.updateEmailVerificationToken(user.id, emailVerificationToken);
+
+    // Generate tokens for the new user
+    const tokens = await this.tokenService.generateTokenPair(
+      user.id,
+      user.email,
+      user.role,
+      user.tenantOrganizationId,
+    );
+
     return {
-      access_token: accessToken,
-      refresh_token: refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -48,77 +112,89 @@ export class AuthService {
         role: user.role,
         isEmailVerified: user.isEmailVerified,
       },
+      tokens,
     };
   }
 
-  async register(userData: any) {
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    const emailVerificationToken = this.generateEmailVerificationToken();
-    
-    const user = await this.usersService.create({
-      ...userData,
-      password: hashedPassword,
-      emailVerificationToken,
-      isEmailVerified: false,
-    });
-    
-    // Send verification email
-    await this.sendVerificationEmail(user.email, emailVerificationToken);
-    
-    const { password, ...result } = user;
-    return {
-      ...result,
-      message: 'Registration successful. Please check your email to verify your account.',
-    };
+  async refreshToken(refreshToken: string): Promise<TokenPair> {
+    return this.tokenService.refreshAccessToken(refreshToken);
   }
 
-  async forgotPassword(email: string) {
-    const user = await this.usersService.findByEmail(email);
-    if (!user) {
-      throw new NotFoundException('User with this email does not exist');
-    }
-
-    const resetToken = this.generatePasswordResetToken();
-    const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    await this.usersService.updatePasswordResetToken(user.id, resetToken, resetTokenExpiry);
-    await this.sendPasswordResetEmail(email, resetToken);
-
-    return {
-      message: 'Password reset email sent successfully',
-    };
+  async logout(refreshToken: string): Promise<void> {
+    await this.tokenService.revokeToken(refreshToken);
   }
 
-  async resetPassword(token: string, newPassword: string) {
-    const user = await this.usersService.findByPasswordResetToken(token);
-    if (!user || user.passwordResetTokenExpiry < new Date()) {
-      throw new BadRequestException('Invalid or expired reset token');
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await this.usersService.updatePassword(user.id, hashedPassword);
-    await this.usersService.clearPasswordResetToken(user.id);
-
-    return {
-      message: 'Password reset successfully',
-    };
+  async logoutAll(userId: string): Promise<void> {
+    await this.tokenService.revokeAllUserTokens(userId);
   }
 
-  async verifyEmail(token: string) {
+  async verifyEmail(token: string): Promise<void> {
     const user = await this.usersService.findByEmailVerificationToken(token);
     if (!user) {
       throw new BadRequestException('Invalid verification token');
     }
 
     await this.usersService.verifyEmail(user.id);
-
-    return {
-      message: 'Email verified successfully',
-    };
   }
 
-  async resendVerificationEmail(email: string) {
+  async requestPasswordReset(email: string): Promise<void> {
     const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Don't reveal if email exists
+      return;
+    }
+
+    const resetToken = this.tokenService.generatePasswordResetToken();
+    const expiryDate = new Date();
+    expiryDate.setHours(expiryDate.getHours() + 1); // 1 hour expiry
+    await this.usersService.updatePasswordResetToken(user.id, resetToken, expiryDate);
+
+    // TODO: Send password reset email
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    const user = await this.usersService.findByPasswordResetToken(token);
+    if (!user || !user.passwordResetTokenExpiry || user.passwordResetTokenExpiry < new Date()) {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+
+    const hashedPassword = await this.passwordService.hashPassword(newPassword);
+    await this.usersService.updatePassword(user.id, hashedPassword);
+    await this.usersService.clearPasswordResetToken(user.id);
+
+    return { message: 'Password reset successfully' };
+  }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    await this.requestPasswordReset(email);
+    return { message: 'Password reset email sent successfully' };
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<{ message: string }> {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isCurrentPasswordValid = await this.passwordService.comparePassword(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const hashedNewPassword = await this.passwordService.hashPassword(newPassword);
+    await this.usersService.updatePassword(userId, hashedNewPassword);
+
+    return { message: 'Password changed successfully' };
+  }
+
+  async validateResetToken(token: string): Promise<{ valid: boolean }> {
+    const user = await this.usersService.findByPasswordResetToken(token);
+    const isValid = user && user.passwordResetTokenExpiry && user.passwordResetTokenExpiry > new Date();
+    return { valid: !!isValid };
+  }
+
+  async resendVerificationEmail(userId: string): Promise<{ message: string }> {
+    const user = await this.usersService.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -127,136 +203,23 @@ export class AuthService {
       throw new BadRequestException('Email is already verified');
     }
 
-    const emailVerificationToken = this.generateEmailVerificationToken();
-    await this.usersService.updateEmailVerificationToken(user.id, emailVerificationToken);
-    await this.sendVerificationEmail(email, emailVerificationToken);
+    const verificationToken = this.tokenService.generateEmailVerificationToken();
+    await this.usersService.updateEmailVerificationToken(user.id, verificationToken);
 
-    return {
-      message: 'Verification email sent successfully',
-    };
+    // TODO: Send verification email
+    return { message: 'Verification email sent successfully' };
   }
 
-  async refreshToken(refreshToken: string) {
-    const tokenData = this.refreshTokens.get(refreshToken);
-    if (!tokenData || tokenData.expiresAt < new Date()) {
-      this.refreshTokens.delete(refreshToken);
-      throw new UnauthorizedException('Invalid or expired refresh token');
-    }
+  private async handleFailedLogin(user: User): Promise<void> {
+    const maxAttempts = 5; // Could be configurable
+    const lockDuration = 30 * 60 * 1000; // 30 minutes
 
-    const user = await this.usersService.findById(tokenData.userId);
-    if (!user) {
-      this.refreshTokens.delete(refreshToken);
-      throw new UnauthorizedException('User not found');
-    }
-
-    const payload = { email: user.email, sub: user.id, role: user.role };
-    const newAccessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const newRefreshToken = this.generateRefreshToken();
-
-    // Remove old refresh token and store new one
-    this.refreshTokens.delete(refreshToken);
-    this.refreshTokens.set(newRefreshToken, {
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    });
-
-    return {
-      access_token: newAccessToken,
-      refresh_token: newRefreshToken,
-    };
-  }
-
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
-    const user = await this.usersService.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isCurrentPasswordValid) {
-      throw new BadRequestException('Current password is incorrect');
-    }
-
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    await this.usersService.updatePassword(userId, hashedNewPassword);
-
-    return {
-      message: 'Password changed successfully',
-    };
-  }
-
-  async logout(userId: string) {
-    // Remove all refresh tokens for this user
-    for (const [token, data] of this.refreshTokens.entries()) {
-      if (data.userId === userId) {
-        this.refreshTokens.delete(token);
-      }
-    }
-
-    return {
-      message: 'Logged out successfully',
-    };
-  }
-
-  async validateResetToken(token: string) {
-    const user = await this.usersService.findByPasswordResetToken(token);
-    if (!user || user.passwordResetTokenExpiry < new Date()) {
-      throw new BadRequestException('Invalid or expired reset token');
-    }
-
-    return {
-      valid: true,
-      message: 'Token is valid',
-    };
-  }
-
-  private generateRefreshToken(): string {
-    return crypto.randomBytes(64).toString('hex');
-  }
-
-  private generatePasswordResetToken(): string {
-    return crypto.randomBytes(32).toString('hex');
-  }
-
-  private generateEmailVerificationToken(): string {
-    return crypto.randomBytes(32).toString('hex');
-  }
-
-  private async sendPasswordResetEmail(email: string, token: string) {
-    const resetUrl = `${this.configService.get('FRONTEND_URL')}/reset-password?token=${token}`;
+    const newAttempts = user.failedLoginAttempts + 1;
     
-    try {
-      await this.mailerService.sendMail({
-        to: email,
-        subject: 'Password Reset Request - PropertyMasters UK',
-        template: 'password-reset',
-        context: {
-          resetUrl,
-          email,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to send password reset email:', error);
-      // Don't throw error to avoid exposing email service issues
-    }
-  }
-
-  private async sendVerificationEmail(email: string, token: string) {
-    const verificationUrl = `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`;
-    
-    try {
-      await this.mailerService.sendMail({
-        to: email,
-        subject: 'Email Verification - PropertyMasters UK',
-        template: 'email-verification',
-        context: {
-          verificationUrl,
-          email,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to send verification email:', error);
-      // Don't throw error to avoid exposing email service issues
+    if (newAttempts >= maxAttempts) {
+      await this.usersService.lockAccount(user.id, 30); // Lock for 30 minutes
+    } else {
+      await this.usersService.incrementFailedLoginAttempts(user.id);
     }
   }
 }

@@ -1,0 +1,171 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: propertymastersuk_test
+        options: >
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      
+      redis:
+        image: redis:7-alpine
+        options: >
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+    
+    - name: Create test environment file
+      working-directory: ./backend
+      run: |
+        cat > .env.test << EOF
+        NODE_ENV=test
+        DATABASE_HOST=localhost
+        DATABASE_PORT=5432
+        DATABASE_USERNAME=test_user
+        DATABASE_PASSWORD=test_password
+        DATABASE_NAME=propertymastersuk_test
+        REDIS_HOST=localhost
+        REDIS_PORT=6379
+        JWT_SECRET=test_jwt_secret_key_for_testing_only
+        JWT_REFRESH_SECRET=test_refresh_secret_key_for_testing_only
+        SENDGRID_API_KEY=test_sendgrid_key
+        AWS_ACCESS_KEY_ID=test_aws_key
+        AWS_SECRET_ACCESS_KEY=test_aws_secret
+        AWS_REGION=us-east-1
+        AWS_S3_BUCKET=test-bucket
+        STRIPE_SECRET_KEY=sk_test_fake_key
+        STRIPE_WEBHOOK_SECRET=whsec_test_fake_secret
+        EOF
+    
+    - name: Run linting
+      working-directory: ./backend
+      run: npm run lint
+    
+    - name: Run unit tests with coverage
+      working-directory: ./backend
+      run: npm run test:cov:ci
+    
+    - name: Run integration tests with coverage
+      working-directory: ./backend
+      run: npm run test:integration:cov
+    
+    - name: Run E2E tests
+      working-directory: ./backend
+      run: npm run test:e2e
+    
+    - name: Install Playwright browsers
+      working-directory: ./backend
+      run: npx playwright install --with-deps
+    
+    - name: Run Playwright tests
+      working-directory: ./backend
+      run: npm run test:playwright
+    
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        directory: ./backend/coverage
+        flags: backend
+        name: backend-coverage
+        fail_ci_if_error: false
+    
+    - name: Upload Playwright report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.node-version }}
+        path: backend/playwright-report/
+        retention-days: 30
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.node-version }}
+        path: |
+          backend/coverage/
+          backend/test-results/
+        retention-days: 30
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run security audit
+      working-directory: ./backend
+      run: npm audit --audit-level=high
+    
+    - name: Check for vulnerabilities
+      working-directory: ./backend
+      run: npm audit --audit-level=moderate --production
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+    
+    - name: Build application
+      working-directory: ./backend
+      run: npm run build
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: backend/dist/
+        retention-days: 7

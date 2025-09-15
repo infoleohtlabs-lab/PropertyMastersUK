@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+import { QueryOptimizationService } from '../database/query-optimization.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private queryOptimizationService: QueryOptimizationService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -28,6 +30,10 @@ export class UsersService {
     return this.usersRepository.find({
       select: ['id', 'email', 'firstName', 'lastName', 'phone', 'role', 'isActive', 'isVerified', 'createdAt', 'updatedAt'],
     });
+  }
+
+  async searchUsers(searchTerm: string, tenantOrganizationId: string, page: number = 1, limit: number = 20): Promise<{ users: User[]; total: number; page: number; limit: number }> {
+    return this.queryOptimizationService.searchUsersOptimized(searchTerm, tenantOrganizationId, page, limit);
   }
 
   async findOne(id: string): Promise<User> {
@@ -114,5 +120,50 @@ export class UsersService {
 
   async activateUser(id: string): Promise<void> {
     await this.usersRepository.update(id, { isActive: true });
+  }
+
+  async incrementFailedLoginAttempts(id: string): Promise<void> {
+    await this.usersRepository.increment({ id }, 'failedLoginAttempts', 1);
+  }
+
+  async resetFailedLoginAttempts(id: string): Promise<void> {
+    await this.usersRepository.update(id, {
+      failedLoginAttempts: 0,
+      isAccountLocked: false,
+      accountLockedUntil: null,
+    });
+  }
+
+  async lockAccount(id: string, lockDurationMinutes: number = 30): Promise<void> {
+    const lockUntil = new Date();
+    lockUntil.setMinutes(lockUntil.getMinutes() + lockDurationMinutes);
+    
+    await this.usersRepository.update(id, {
+      isAccountLocked: true,
+      accountLockedUntil: lockUntil,
+    });
+  }
+
+  async unlockAccount(id: string): Promise<void> {
+    await this.usersRepository.update(id, {
+      isAccountLocked: false,
+      accountLockedUntil: null,
+      failedLoginAttempts: 0,
+    });
+  }
+
+  async isAccountLocked(user: User): Promise<boolean> {
+    if (!user.isAccountLocked) {
+      return false;
+    }
+
+    // Check if lock period has expired
+    if (user.accountLockedUntil && new Date() > user.accountLockedUntil) {
+      // Auto-unlock expired accounts
+      await this.unlockAccount(user.id);
+      return false;
+    }
+
+    return true;
   }
 }

@@ -5,10 +5,11 @@ import { Property } from './entities/property.entity';
 import { MarketAnalysis } from './entities/market-analysis.entity';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
-import { PropertySearchDto } from './dto/property-search.dto';
 import { PropertyValuationDto } from './dto/property-valuation.dto';
+import { PropertySearchDto } from './dto/property-search.dto';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { FileType } from '../file-upload/entities/file-upload.entity';
+import { QueryOptimizationService } from '../database/query-optimization.service';
 import { Express } from 'express';
 import 'multer';
 import * as path from 'path';
@@ -32,6 +33,7 @@ export class PropertiesService {
     @InjectRepository(MarketAnalysis)
     private marketAnalysisRepository: Repository<MarketAnalysis>,
     private fileUploadService: FileUploadService,
+    private queryOptimizationService: QueryOptimizationService,
   ) {}
 
   async create(createPropertyDto: CreatePropertyDto, agentId?: string): Promise<Property> {
@@ -41,7 +43,7 @@ export class PropertiesService {
       description: createPropertyDto.description,
       type: createPropertyDto.propertyType,
       listingType: createPropertyDto.listingType,
-      status: createPropertyDto.status,
+      status: createPropertyDto.propertyStatus,
       price: createPropertyDto.price,
       bedrooms: createPropertyDto.bedrooms,
       bathrooms: createPropertyDto.bathrooms,
@@ -94,7 +96,7 @@ export class PropertiesService {
     if (updatePropertyDto.description) updateData.description = updatePropertyDto.description;
     if (updatePropertyDto.propertyType) updateData.type = updatePropertyDto.propertyType;
     if (updatePropertyDto.listingType) updateData.listingType = updatePropertyDto.listingType;
-    if (updatePropertyDto.status) updateData.status = updatePropertyDto.status;
+    if (updatePropertyDto.propertyStatus) updateData.status = updatePropertyDto.propertyStatus;
     if (updatePropertyDto.price !== undefined) updateData.price = updatePropertyDto.price;
     if (updatePropertyDto.bedrooms !== undefined) updateData.bedrooms = updatePropertyDto.bedrooms;
     if (updatePropertyDto.bathrooms !== undefined) updateData.bathrooms = updatePropertyDto.bathrooms;
@@ -134,48 +136,25 @@ export class PropertiesService {
     });
   }
 
-  async search(params: SearchParams): Promise<Property[]> {
-    const queryBuilder = this.propertiesRepository.createQueryBuilder('property')
-      .leftJoinAndSelect('property.agent', 'agent')
-      .where('property.isActive = :isActive', { isActive: true });
+  async search(searchDto: PropertySearchDto): Promise<{ properties: Property[]; total: number; page: number; limit: number }> {
+    // Use optimized search from QueryOptimizationService
+    return this.queryOptimizationService.searchPropertiesOptimized(searchDto);
+  }
 
-    if (params.query) {
-      queryBuilder.andWhere(
-        '(property.title ILIKE :query OR property.description ILIKE :query OR property.address ILIKE :query)',
-        { query: `%${params.query}%` },
-      );
-    }
-
-    if (params.location) {
-      queryBuilder.andWhere(
-        '(property.address ILIKE :location OR property.city ILIKE :location OR property.postcode ILIKE :location)',
-        { location: `%${params.location}%` },
-      );
-    }
-
-    if (params.minPrice !== undefined) {
-      queryBuilder.andWhere('property.price >= :minPrice', { minPrice: params.minPrice });
-    }
-
-    if (params.maxPrice !== undefined) {
-      queryBuilder.andWhere('property.price <= :maxPrice', { maxPrice: params.maxPrice });
-    }
-
-    if (params.propertyType) {
-      queryBuilder.andWhere('property.type = :propertyType', { propertyType: params.propertyType });
-    }
-
-    if (params.bedrooms !== undefined) {
-      queryBuilder.andWhere('property.bedrooms >= :bedrooms', { bedrooms: params.bedrooms });
-    }
-
-    if (params.bathrooms !== undefined) {
-      queryBuilder.andWhere('property.bathrooms >= :bathrooms', { bathrooms: params.bathrooms });
-    }
-
-    return queryBuilder
-      .orderBy('property.createdAt', 'DESC')
-      .getMany();
+  // Keep the old search method for backward compatibility
+  async searchLegacy(params: SearchParams): Promise<Property[]> {
+    const searchDto: PropertySearchDto = {
+      query: params.query,
+      location: params.location,
+      minPrice: params.minPrice,
+      maxPrice: params.maxPrice,
+      propertyType: params.propertyType as any,
+      minBedrooms: params.bedrooms,
+      minBathrooms: params.bathrooms
+    };
+    
+    const result = await this.search(searchDto);
+    return result.properties;
   }
 
   async getFeatured(): Promise<Property[]> {

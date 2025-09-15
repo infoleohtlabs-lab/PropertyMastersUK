@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { TenantOrganization } from '../../common/entities/tenant-organization.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -9,6 +10,9 @@ export enum UserRole {
   BUYER = 'buyer',
   SELLER = 'seller',
   SOLICITOR = 'solicitor',
+  PROPERTY_MANAGER = 'property_manager',
+  CONTRACTOR = 'contractor',
+  VIEWER = 'viewer',
 }
 
 @Entity('users')
@@ -68,6 +72,15 @@ export class User {
   @Column({ nullable: true })
   lastLoginAt: Date;
 
+  @Column({ default: 0 })
+  failedLoginAttempts: number;
+
+  @Column({ nullable: true })
+  accountLockedUntil: Date;
+
+  @Column({ default: false })
+  isAccountLocked: boolean;
+
   @ApiProperty()
   @Column({ nullable: true })
   profilePicture: string;
@@ -95,6 +108,26 @@ export class User {
   @ApiProperty()
   @Column({ default: true })
   smsNotifications: boolean;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  tenantOrganizationId: string;
+
+  @ManyToOne(() => TenantOrganization, tenantOrg => tenantOrg.users)
+  @JoinColumn({ name: 'tenantOrganizationId' })
+  tenantOrganization: TenantOrganization;
+
+  @ApiProperty()
+  @Column({ type: 'json', nullable: true })
+  permissions: string[];
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  department: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  jobTitle: string;
 
   @ApiProperty()
   @CreateDateColumn()

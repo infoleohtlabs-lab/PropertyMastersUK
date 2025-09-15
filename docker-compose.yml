@@ -61,7 +61,7 @@ services:
       JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
       CORS_ORIGIN: http://localhost:3000,http://localhost:5173
     ports:
-      - "3001:3001"
+      - "3003:3001"
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -74,7 +74,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -90,7 +90,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
-      VITE_API_URL: http://localhost:3001
+      VITE_API_URL: http://localhost:3003
     ports:
       - "3002:3000"
     volumes:
@@ -100,6 +100,8 @@ services:
       - propertymastersuk-network
     depends_on:
       - backend
+    mem_limit: 2g
+    memswap_limit: 2g
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s

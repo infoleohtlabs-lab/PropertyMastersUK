@@ -1,110 +1,498 @@
-import { Controller, Request, Post, UseGuards, Body, Get, Query, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { Controller, Post, Body, UseGuards, Request, Get, Patch } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { 
+  ApiTags, 
+  ApiOperation, 
+  ApiResponse, 
+  ApiBearerAuth, 
+  ApiBody,
+  ApiSecurity,
+  getSchemaPath
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LoginDto } from './dto/login.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { RateLimitGuard } from './guards/rate-limit.guard';
+import { RateLimit } from './decorators/rate-limit.decorator';
+import { RateLimitWindow } from './decorators/rate-limit-window.decorator';
+import { TenantAuthGuard } from './guards/tenant-auth.guard';
+import {
+  LoginDto,
+  RegisterDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  ChangePasswordDto,
+  RefreshTokenDto,
+  VerifyEmailDto,
+  ValidateResetTokenDto,
+} from './dto/auth.dto';
+import { ApiSuccessResponse, ApiErrorResponse } from '../common/dto/api-response.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(RateLimitGuard, AuthGuard('local'))
+  @RateLimit(5)
+  @RateLimitWindow(15 * 60 * 1000) // 15 minutes
   @Post('login')
-  @ApiOperation({ summary: 'User login' })
-  @ApiBody({ type: LoginDto })
-  @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiOperation({ 
+    summary: 'User login',
+    description: 'Authenticate user with email and password. Returns JWT access token and refresh token.'
+  })
+  @ApiBody({ 
+    type: LoginDto,
+    description: 'User login credentials'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Login successful',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                  description: 'JWT access token (expires in 15 minutes)'
+                },
+                refreshToken: {
+                  type: 'string',
+                  example: 'refresh_token_here',
+                  description: 'Refresh token (expires in 7 days)'
+                },
+                user: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+                    email: { type: 'string', example: 'user@example.com' },
+                    firstName: { type: 'string', example: 'John' },
+                    lastName: { type: 'string', example: 'Doe' },
+                    role: { type: 'string', example: 'tenant' },
+                    isEmailVerified: { type: 'boolean', example: true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Invalid credentials',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 429, 
+    description: 'Too many login attempts. Rate limit exceeded.',
+    type: ApiErrorResponse
+  })
   async login(@Request() req) {
-    return this.authService.login(req.user);
+    return this.authService.login(req.user, req);
   }
 
+  @UseGuards(RateLimitGuard)
+  @RateLimit(3)
+  @RateLimitWindow(60 * 60 * 1000) // 1 hour
   @Post('register')
-  @ApiOperation({ summary: 'User registration' })
-  @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  async register(@Body() createUserDto: CreateUserDto) {
-    return this.authService.register(createUserDto);
+  @ApiOperation({ 
+    summary: 'Register a new user',
+    description: 'Create a new user account. Email verification required before login.'
+  })
+  @ApiBody({ 
+    type: RegisterDto,
+    description: 'User registration details'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'User registered successfully. Verification email sent.',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Registration successful. Please check your email to verify your account.'
+                },
+                userId: {
+                  type: 'string',
+                  example: '123e4567-e89b-12d3-a456-426614174000'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Validation error or email already exists',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 429, 
+    description: 'Too many registration attempts',
+    type: ApiErrorResponse
+  })
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 
   @Post('forgot-password')
-  @ApiOperation({ summary: 'Request password reset' })
-  @ApiBody({ type: ForgotPasswordDto })
-  @ApiResponse({ status: 200, description: 'Password reset email sent' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @UseGuards(RateLimitGuard)
+  @RateLimit(3)
+  @RateLimitWindow(60 * 60 * 1000) // 1 hour
+  @ApiOperation({ 
+    summary: 'Request password reset',
+    description: 'Send password reset email to user. Always returns success for security.'
+  })
+  @ApiBody({ 
+    type: ForgotPasswordDto,
+    description: 'Email address for password reset'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Password reset email sent (if email exists)',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'If an account with this email exists, a password reset link has been sent.'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 429, 
+    description: 'Too many password reset requests',
+    type: ApiErrorResponse
+  })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto.email);
   }
 
+  @UseGuards(RateLimitGuard)
+  @RateLimit(5)
+  @RateLimitWindow(60 * 60 * 1000) // 1 hour
   @Post('reset-password')
-  @ApiOperation({ summary: 'Reset password with token' })
-  @ApiBody({ type: ResetPasswordDto })
-  @ApiResponse({ status: 200, description: 'Password reset successful' })
-  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  @ApiOperation({ 
+    summary: 'Reset password with token',
+    description: 'Reset user password using a valid reset token from email.'
+  })
+  @ApiBody({ 
+    type: ResetPasswordDto,
+    description: 'Reset token and new password'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Password reset successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Password has been reset successfully. You can now login with your new password.'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid or expired reset token',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 429, 
+    description: 'Too many password reset attempts',
+    type: ApiErrorResponse
+  })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
   }
 
-  @Post('verify-email')
-  @ApiOperation({ summary: 'Verify email address' })
-  @ApiBody({ schema: { properties: { token: { type: 'string' } } } })
-  @ApiResponse({ status: 200, description: 'Email verified successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
-  async verifyEmail(@Body('token') token: string) {
-    return this.authService.verifyEmail(token);
-  }
 
-  @Post('resend-verification')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Resend email verification' })
-  @ApiResponse({ status: 200, description: 'Verification email sent' })
-  async resendVerification(@Request() req) {
-    return this.authService.resendVerificationEmail(req.user.email);
-  }
 
   @Post('refresh')
-  @ApiOperation({ summary: 'Refresh access token' })
-  @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
-  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  @ApiOperation({ 
+    summary: 'Refresh access token',
+    description: 'Get a new access token using a valid refresh token.'
+  })
+  @ApiBody({ 
+    type: RefreshTokenDto,
+    description: 'Valid refresh token'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'New access token generated',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                accessToken: {
+                  type: 'string',
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                  description: 'New JWT access token'
+                },
+                expiresIn: {
+                  type: 'number',
+                  example: 900,
+                  description: 'Token expiration time in seconds'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Invalid or expired refresh token',
+    type: ApiErrorResponse
+  })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
   }
 
-  @Post('change-password')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Change user password' })
-  @ApiBody({ type: ChangePasswordDto })
-  @ApiResponse({ status: 200, description: 'Password changed successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid current password' })
+  @Patch('change-password')
+  @UseGuards(TenantAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Change user password',
+    description: 'Change password for authenticated user. Requires current password verification.'
+  })
+  @ApiBody({ 
+    type: ChangePasswordDto,
+    description: 'Current and new password'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Password changed successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Password changed successfully.'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid current password or validation error',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - invalid or expired token',
+    type: ApiErrorResponse
+  })
   async changePassword(@Request() req, @Body() changePasswordDto: ChangePasswordDto) {
-    return this.authService.changePassword(
-      req.user.id,
-      changePasswordDto.currentPassword,
-      changePasswordDto.newPassword
-    );
+    return this.authService.changePassword(req.user.userId, changePasswordDto.currentPassword, changePasswordDto.newPassword);
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'User logout' })
-  @ApiResponse({ status: 200, description: 'Logout successful' })
+  @UseGuards(TenantAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Logout user',
+    description: 'Logout authenticated user and invalidate refresh tokens.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Logout successful',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Logout successful.'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - invalid or expired token',
+    type: ApiErrorResponse
+  })
   async logout(@Request() req) {
-    return this.authService.logout(req.user.id);
+    return this.authService.logout(req.user.userId);
   }
 
-  @Get('validate-reset-token/:token')
-  @ApiOperation({ summary: 'Validate password reset token' })
-  @ApiParam({ name: 'token', description: 'Reset token' })
-  @ApiResponse({ status: 200, description: 'Token is valid' })
-  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
-  async validateResetToken(@Param('token') token: string) {
-    return this.authService.validateResetToken(token);
+  @Post('verify-email')
+  @ApiOperation({ 
+    summary: 'Verify email address',
+    description: 'Verify user email address using verification token from email.'
+  })
+  @ApiBody({ 
+    type: VerifyEmailDto,
+    description: 'Email verification token'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Email verified successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Email verified successfully. You can now login.'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid or expired verification token',
+    type: ApiErrorResponse
+  })
+  async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto.token);
+  }
+
+  @Post('validate-reset-token')
+  @ApiOperation({ 
+    summary: 'Validate password reset token',
+    description: 'Check if a password reset token is valid and not expired.'
+  })
+  @ApiBody({ 
+    type: ValidateResetTokenDto,
+    description: 'Reset token to validate'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Token is valid',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                valid: {
+                  type: 'boolean',
+                  example: true,
+                  description: 'Whether the token is valid'
+                },
+                expiresAt: {
+                  type: 'string',
+                  example: '2025-01-15T12:00:00Z',
+                  description: 'Token expiration time'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid or expired token',
+    type: ApiErrorResponse
+  })
+  async validateResetToken(@Body() validateResetTokenDto: ValidateResetTokenDto) {
+    return this.authService.validateResetToken(validateResetTokenDto.token);
+  }
+
+  @Post('resend-verification')
+  @UseGuards(TenantAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Resend email verification',
+    description: 'Resend email verification link to authenticated user.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Verification email sent',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: {
+                  type: 'string',
+                  example: 'Verification email sent. Please check your inbox.'
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - invalid or expired token',
+    type: ApiErrorResponse
+  })
+  async resendVerification(@Request() req) {
+    return this.authService.resendVerificationEmail(req.user.userId);
   }
 }

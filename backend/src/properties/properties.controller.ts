@@ -1,13 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, UploadedFiles, UseInterceptors, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiParam, ApiBody, ApiConsumes, getSchemaPath } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PropertiesService } from './properties.service';
 import { Property } from './entities/property.entity';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
-import { PropertySearchDto } from './dto/property-search.dto';
 import { PropertyValuationDto } from './dto/property-valuation.dto';
+import { PropertySearchDto } from './dto/property-search.dto';
+import { ApiSuccessResponse, ApiErrorResponse, PaginatedResponse } from '../common/dto/api-response.dto';
 import { Express } from 'express';
 import 'multer';
 
@@ -18,98 +19,413 @@ export class PropertiesController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create a new property' })
-  @ApiResponse({ status: 201, description: 'Property created successfully', type: Property })
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Create a new property',
+    description: 'Create a new property listing with detailed information including location, features, and pricing.'
+  })
+  @ApiBody({ 
+    type: CreatePropertyDto,
+    description: 'Property creation data'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Property created successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(Property) }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid property data',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - authentication required',
+    type: ApiErrorResponse
+  })
   create(@Body() createPropertyDto: CreatePropertyDto, @Request() req) {
     return this.propertiesService.create(createPropertyDto, req.user.id);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all properties' })
-  @ApiResponse({ status: 200, description: 'Properties retrieved successfully', type: [Property] })
+  @ApiOperation({ 
+    summary: 'Get all properties',
+    description: 'Retrieve all property listings with basic filtering and pagination support.'
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number for pagination' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page' })
+  @ApiQuery({ name: 'status', required: false, type: String, description: 'Property status filter' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Properties retrieved successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(Property) }
+            }
+          }
+        }
+      ]
+    }
+  })
   findAll() {
     return this.propertiesService.findAll();
   }
 
+  @Get('search')
+  @ApiOperation({ 
+    summary: 'Search properties with advanced filtering and pagination',
+    description: 'Advanced property search with filters for location, price range, property type, features, and more.'
+  })
+  @ApiQuery({ name: 'location', required: false, type: String, description: 'Location search term' })
+  @ApiQuery({ name: 'minPrice', required: false, type: Number, description: 'Minimum price filter' })
+  @ApiQuery({ name: 'maxPrice', required: false, type: Number, description: 'Maximum price filter' })
+  @ApiQuery({ name: 'propertyType', required: false, type: String, description: 'Property type filter' })
+  @ApiQuery({ name: 'bedrooms', required: false, type: Number, description: 'Number of bedrooms' })
+  @ApiQuery({ name: 'bathrooms', required: false, type: Number, description: 'Number of bathrooms' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Properties found successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(PaginatedResponse) }
+          }
+        }
+      ]
+    }
+  })
+  async search(@Query() searchDto: PropertySearchDto) {
+    return this.propertiesService.search(searchDto);
+  }
+
   @Get(':id')
-  @ApiOperation({ summary: 'Get property by ID' })
-  @ApiResponse({ status: 200, description: 'Property retrieved successfully', type: Property })
-  @ApiResponse({ status: 404, description: 'Property not found' })
+  @ApiOperation({ 
+    summary: 'Get property by ID',
+    description: 'Retrieve detailed information about a specific property including all features, images, and related data.'
+  })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'Property unique identifier',
+    type: String
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Property retrieved successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(Property) }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Property not found',
+    type: ApiErrorResponse
+  })
   findOne(@Param('id') id: string) {
     return this.propertiesService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update property' })
-  @ApiResponse({ status: 200, description: 'Property updated successfully', type: Property })
-  @ApiResponse({ status: 404, description: 'Property not found' })
-  update(@Param('id') id: string, @Body() updatePropertyDto: UpdatePropertyDto) {
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Update property',
+    description: 'Update property information including details, pricing, and features. Only property owner or admin can update.'
+  })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'Property unique identifier',
+    type: String
+  })
+  @ApiBody({ 
+    type: UpdatePropertyDto,
+    description: 'Property update data'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Property updated successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(Property) }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid update data',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - authentication required',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - insufficient permissions',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Property not found',
+    type: ApiErrorResponse
+  })
+  update(@Param('id') id: string, @Body() updatePropertyDto: UpdatePropertyDto, @Request() req) {
     return this.propertiesService.update(id, updatePropertyDto);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete property' })
-  @ApiResponse({ status: 200, description: 'Property deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Property not found' })
-  remove(@Param('id') id: string) {
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Delete property',
+    description: 'Permanently delete a property listing. Only property owner or admin can delete.'
+  })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'Property unique identifier',
+    type: String
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Property deleted successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: { type: 'string', example: 'Property deleted successfully' }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - authentication required',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - insufficient permissions',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Property not found',
+    type: ApiErrorResponse
+  })
+  remove(@Param('id') id: string, @Request() req) {
     return this.propertiesService.remove(id);
   }
 
-  @Get('search')
-  @ApiOperation({ summary: 'Search properties' })
-  @ApiResponse({ status: 200, description: 'Properties found successfully', type: [Property] })
-  search(
-    @Query('query') query?: string,
-    @Query('location') location?: string,
-    @Query('minPrice') minPrice?: number,
-    @Query('maxPrice') maxPrice?: number,
-    @Query('propertyType') propertyType?: string,
-    @Query('bedrooms') bedrooms?: number,
-    @Query('bathrooms') bathrooms?: number,
-  ) {
-    return this.propertiesService.search({
-      query,
-      location,
-      minPrice,
-      maxPrice,
-      propertyType,
-      bedrooms,
-      bathrooms,
-    });
-  }
-
   @Get('featured')
-  @ApiOperation({ summary: 'Get featured properties' })
-  @ApiResponse({ status: 200, description: 'Featured properties retrieved successfully', type: [Property] })
+  @ApiOperation({ 
+    summary: 'Get featured properties',
+    description: 'Retrieve a list of featured properties that are highlighted for promotion.'
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Maximum number of featured properties to return' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Featured properties retrieved successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(Property) }
+            }
+          }
+        }
+      ]
+    }
+  })
   getFeatured() {
     return this.propertiesService.getFeatured();
   }
 
   @Get('recent')
-  @ApiOperation({ summary: 'Get recent properties' })
-  @ApiResponse({ status: 200, description: 'Recent properties retrieved successfully', type: [Property] })
+  @ApiOperation({ 
+    summary: 'Get recently added properties',
+    description: 'Retrieve the most recently added property listings.'
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Maximum number of recent properties to return' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Recent properties retrieved successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(Property) }
+            }
+          }
+        }
+      ]
+    }
+  })
   getRecent(@Query('limit') limit?: number) {
     return this.propertiesService.getRecent(limit || 10);
   }
 
   @Get(':id/market-analysis')
-  @ApiOperation({ summary: 'Get market analysis for property' })
-  @ApiResponse({ status: 200, description: 'Market analysis retrieved successfully' })
+  @ApiOperation({ 
+    summary: 'Get market analysis for property',
+    description: 'Retrieve comprehensive market analysis including price trends, demand metrics, and comparative data for a specific property.'
+  })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'Property unique identifier',
+    type: String
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Market analysis retrieved successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                propertyId: { type: 'string' },
+                averagePrice: { type: 'number' },
+                priceChange: { type: 'number' },
+                demandLevel: { type: 'string' },
+                marketTrends: { type: 'array', items: { type: 'object' } }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Property not found',
+    type: ApiErrorResponse
+  })
   getMarketAnalysis(@Param('id') id: string) {
     return this.propertiesService.getMarketAnalysis(id);
   }
 
   @Post(':id/images')
   @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
+  @ApiBearerAuth('JWT-auth')
   @UseInterceptors(FilesInterceptor('images', 10))
-  @ApiOperation({ summary: 'Upload property images' })
-  @ApiResponse({ status: 201, description: 'Images uploaded successfully' })
+  @ApiOperation({ 
+    summary: 'Upload property images',
+    description: 'Upload multiple images for a property. Maximum 10 images allowed per upload.'
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ 
+    name: 'id', 
+    description: 'Property unique identifier',
+    type: String
+  })
+  @ApiBody({
+    description: 'Property images to upload',
+    schema: {
+      type: 'object',
+      properties: {
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          maxItems: 10
+        }
+      }
+    }
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Images uploaded successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                uploadedImages: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string' },
+                      url: { type: 'string' },
+                      filename: { type: 'string' }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid file format or size',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - authentication required',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - insufficient permissions',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Property not found',
+    type: ApiErrorResponse
+  })
   uploadImages(
     @Param('id') id: string,
     @UploadedFiles() files: Express.Multer.File[],
@@ -119,9 +435,55 @@ export class PropertiesController {
 
   @Delete(':id/images/:imageId')
   @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Delete property image' })
-  @ApiResponse({ status: 200, description: 'Image deleted successfully' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ 
+    summary: 'Delete property image',
+    description: 'Remove a specific image from a property listing. Only property owner or admin can delete images.'
+  })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'Property unique identifier',
+    type: String
+  })
+  @ApiParam({ 
+    name: 'imageId', 
+    description: 'Image unique identifier',
+    type: String
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Image deleted successfully',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiSuccessResponse) },
+        {
+          properties: {
+            data: {
+              type: 'object',
+              properties: {
+                message: { type: 'string', example: 'Image deleted successfully' }
+              }
+            }
+          }
+        }
+      ]
+    }
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Unauthorized - authentication required',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Forbidden - insufficient permissions',
+    type: ApiErrorResponse
+  })
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Property or image not found',
+    type: ApiErrorResponse
+  })
   deleteImage(
     @Param('id') propertyId: string,
     @Param('imageId') imageId: string,

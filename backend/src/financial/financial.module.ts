@@ -1,21 +1,25 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { FinancialService } from './financial.service';
-import { FinancialController } from './financial.controller';
-import { Transaction } from './entities/transaction.entity';
-import { Invoice } from './entities/invoice.entity';
-import { FinancialReport } from './entities/financial-report.entity';
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
+
+// Entities
+import { Payment } from './entities/payment.entity';
+
+// Services
+import { StripePaymentService } from './services/stripe-payment.service';
+
+// Controllers
+import { PaymentController } from './controllers/payment.controller';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Transaction,
-      Invoice,
-      FinancialReport,
-    ]),
+    TypeOrmModule.forFeature([Payment]),
+    HttpModule,
+    ConfigModule,
   ],
-  controllers: [FinancialController],
-  providers: [FinancialService],
-  exports: [FinancialService],
+  controllers: [PaymentController],
+  providers: [StripePaymentService],
+  exports: [StripePaymentService, TypeOrmModule],
 })
 export class FinancialModule {}

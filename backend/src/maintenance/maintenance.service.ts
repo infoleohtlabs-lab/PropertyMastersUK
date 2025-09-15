@@ -40,18 +40,20 @@ export class MaintenanceService {
   // Maintenance Request Methods
   async createMaintenanceRequest(
     createMaintenanceRequestDto: CreateMaintenanceRequestDto,
-    createdBy: string,
+    requestedById: string,
   ): Promise<MaintenanceRequest> {
+    const { assignedTo, ...restDto } = createMaintenanceRequestDto;
     const maintenanceRequest = this.maintenanceRequestRepository.create({
-      ...createMaintenanceRequestDto,
-      createdBy,
+      ...restDto,
+      requestedById,
+      assignedToId: assignedTo,
     });
     return this.maintenanceRequestRepository.save(maintenanceRequest);
   }
 
   async findAllMaintenanceRequests(): Promise<MaintenanceRequest[]> {
     return this.maintenanceRequestRepository.find({
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -59,7 +61,7 @@ export class MaintenanceService {
   async findMaintenanceRequestById(id: string): Promise<MaintenanceRequest> {
     const maintenanceRequest = await this.maintenanceRequestRepository.findOne({
       where: { id },
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
     });
     if (!maintenanceRequest) {
       throw new NotFoundException(`Maintenance request with ID ${id} not found`);
@@ -86,15 +88,15 @@ export class MaintenanceService {
   async findMaintenanceRequestsByProperty(propertyId: string): Promise<MaintenanceRequest[]> {
     return this.maintenanceRequestRepository.find({
       where: { propertyId },
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
       order: { createdAt: 'DESC' },
     });
   }
 
   async findMaintenanceRequestsByUser(userId: string): Promise<MaintenanceRequest[]> {
     return this.maintenanceRequestRepository.find({
-      where: [{ createdBy: userId }, { assignedTo: userId }],
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      where: [{ requestedById: userId }, { assignedToId: userId }],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -102,7 +104,7 @@ export class MaintenanceService {
   async findMaintenanceRequestsByStatus(status: MaintenanceRequestStatus): Promise<MaintenanceRequest[]> {
     return this.maintenanceRequestRepository.find({
       where: { status },
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -110,7 +112,7 @@ export class MaintenanceService {
   async findMaintenanceRequestsByPriority(priority: MaintenanceRequestPriority): Promise<MaintenanceRequest[]> {
     return this.maintenanceRequestRepository.find({
       where: { priority },
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -118,7 +120,7 @@ export class MaintenanceService {
   async findMaintenanceRequestsByCategory(category: MaintenanceRequestCategory): Promise<MaintenanceRequest[]> {
     return this.maintenanceRequestRepository.find({
       where: { category },
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -131,14 +133,14 @@ export class MaintenanceService {
       where: {
         createdAt: Between(new Date(startDate), new Date(endDate)),
       },
-      relations: ['createdByUser', 'assignedToUser', 'property', 'workOrders'],
+      relations: ['requestedBy', 'assignedTo', 'property', 'workOrders'],
       order: { createdAt: 'DESC' },
     });
   }
 
-  async assignMaintenanceRequest(id: string, assignedTo: string): Promise<MaintenanceRequest> {
+  async assignMaintenanceRequest(id: string, assignedToId: string): Promise<MaintenanceRequest> {
     const maintenanceRequest = await this.findMaintenanceRequestById(id);
-    maintenanceRequest.assignedTo = assignedTo;
+    maintenanceRequest.assignedToId = assignedToId;
     maintenanceRequest.status = MaintenanceRequestStatus.APPROVED;
     return this.maintenanceRequestRepository.save(maintenanceRequest);
   }
@@ -279,7 +281,7 @@ export class MaintenanceService {
 
   async findAllWorkOrders(): Promise<WorkOrder[]> {
     return this.workOrderRepository.find({
-      relations: ['maintenanceRequest', 'contractor', 'createdByUser', 'approvedByUser'],
+      relations: ['maintenanceRequest', 'contractor', 'creator', 'approver'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -287,7 +289,7 @@ export class MaintenanceService {
   async findWorkOrderById(id: string): Promise<WorkOrder> {
     const workOrder = await this.workOrderRepository.findOne({
       where: { id },
-      relations: ['maintenanceRequest', 'contractor', 'createdByUser', 'approvedByUser'],
+      relations: ['maintenanceRequest', 'contractor', 'creator', 'approver'],
     });
     if (!workOrder) {
       throw new NotFoundException(`Work order with ID ${id} not found`);
@@ -314,7 +316,7 @@ export class MaintenanceService {
   async findWorkOrdersByContractor(contractorId: string): Promise<WorkOrder[]> {
     return this.workOrderRepository.find({
       where: { contractorId },
-      relations: ['maintenanceRequest', 'contractor', 'createdByUser', 'approvedByUser'],
+      relations: ['maintenanceRequest', 'contractor', 'creator', 'approver'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -322,7 +324,7 @@ export class MaintenanceService {
   async findWorkOrdersByMaintenanceRequest(maintenanceRequestId: string): Promise<WorkOrder[]> {
     return this.workOrderRepository.find({
       where: { maintenanceRequestId },
-      relations: ['maintenanceRequest', 'contractor', 'createdByUser', 'approvedByUser'],
+      relations: ['maintenanceRequest', 'contractor', 'creator', 'approver'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -330,7 +332,7 @@ export class MaintenanceService {
   async findWorkOrdersByStatus(status: WorkOrderStatus): Promise<WorkOrder[]> {
     return this.workOrderRepository.find({
       where: { status },
-      relations: ['maintenanceRequest', 'contractor', 'createdByUser', 'approvedByUser'],
+      relations: ['maintenanceRequest', 'contractor', 'creator', 'approver'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -338,7 +340,7 @@ export class MaintenanceService {
   async findWorkOrdersByPriority(priority: WorkOrderPriority): Promise<WorkOrder[]> {
     return this.workOrderRepository.find({
       where: { priority },
-      relations: ['maintenanceRequest', 'contractor', 'createdByUser', 'approvedByUser'],
+      relations: ['maintenanceRequest', 'contractor', 'creator', 'approver'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -351,7 +353,7 @@ export class MaintenanceService {
       where: {
         createdAt: Between(new Date(startDate), new Date(endDate)),
       },
-      relations: ['maintenanceRequest', 'contractor', 'createdByUser', 'approvedByUser'],
+      relations: ['maintenanceRequest', 'contractor', 'creator', 'approver'],
       order: { createdAt: 'DESC' },
     });
   }

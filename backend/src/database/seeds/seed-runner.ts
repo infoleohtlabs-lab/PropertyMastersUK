@@ -1,42 +1,27 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import { DatabaseSeeder } from './seed';
+import { dataSource } from '../database.config';
 
 async function runSeeder() {
-  console.log('🚀 Initializing database connection...');
-  
-  const dataSource = new DataSource({
-    type: 'sqlite',
-    database: process.env.DB_PATH || 'propertymastersuk.db',
-    synchronize: false,
-    entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
-    dropSchema: true,
-  });
-  
   try {
     await dataSource.initialize();
-    console.log('✅ Database connection established');
+    console.log('Database connection established');
 
-    console.log('🗑️ Dropping existing schema...');
-    await dataSource.dropDatabase();
-    console.log('✅ Schema dropped');
+    // Run migrations first
+    await dataSource.runMigrations();
+    console.log('Migrations executed successfully');
 
-    console.log('🏗️ Creating database schema...');
-    await dataSource.synchronize();
-    console.log('✅ Schema created');
-
-    console.log('🌱 Starting database seeding...');
+    // Run the seeder
     const seeder = new DatabaseSeeder(dataSource);
     await seeder.run();
-    console.log('✅ Database seeding completed successfully!');
+    console.log('Database seeded successfully');
   } catch (error) {
-    console.error('❌ Database seeding failed:', error);
+    console.error('Error during seeding:', error);
     process.exit(1);
   } finally {
-    if (dataSource.isInitialized) {
-      await dataSource.destroy();
-      console.log('🔌 Database connection closed');
-    }
+    await dataSource.destroy();
+    console.log('Database connection closed');
   }
 }
 

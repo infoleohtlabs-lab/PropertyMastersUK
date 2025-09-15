@@ -1,0 +1,38 @@
+# Dockerfile specifically for Playwright E2E testing
+FROM mcr.microsoft.com/playwright:v1.55.0-focal
+
+# Set working directory
+WORKDIR /app
+
+# Install Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
+
+# Install additional system dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client \
+    redis-tools \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Install Playwright browsers (already included in base image, but ensure latest)
+RUN npx playwright install --with-deps
+
+# Copy source code
+COPY . .
+
+# Create test directories
+RUN mkdir -p playwright-report test-results
+
+# Set permissions
+RUN chown -R pwuser:pwuser /app
+USER pwuser
+
+# Default command for Playwright testing
+CMD ["npm", "run", "test:playwright"]

@@ -15,6 +15,7 @@ export interface PropertyLayoutProps extends LayoutProps {}
 export interface ErrorLayoutProps extends LayoutProps {}
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
+  console.log('Layout component rendering with children:', children);
   return (
     <ToastProvider>
       <div className="min-h-screen flex flex-col">

@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
+import { TenantOrganization } from '../../common/entities/tenant-organization.entity';
 
 export enum PropertyType {
   HOUSE = 'house',
@@ -205,6 +206,82 @@ export class Property {
   @ApiProperty()
   @Column({ default: false })
   isFeatured: boolean;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  tenantOrganizationId: string;
+
+  @ManyToOne(() => TenantOrganization)
+  @JoinColumn({ name: 'tenantOrganizationId' })
+  tenantOrganization: TenantOrganization;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  uprn: string; // Unique Property Reference Number
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  landRegistryTitleNumber: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  propertyAge: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  constructionType: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  heatingType: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  parkingSpaces: number;
+
+  @ApiProperty()
+  @Column({ default: false })
+  hasGarden: boolean;
+
+  @ApiProperty()
+  @Column({ default: false })
+  hasBalcony: boolean;
+
+  @ApiProperty()
+  @Column({ default: false })
+  hasGarage: boolean;
+
+  @ApiProperty()
+  @Column('simple-array', { nullable: true })
+  nearbySchools: string[];
+
+  @ApiProperty()
+  @Column('simple-array', { nullable: true })
+  transportLinks: string[];
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  floorPlan: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  virtualTourUrl: string;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  videoTourUrl: string;
+
+  @ApiProperty()
+  @Column('simple-array', { nullable: true })
+  documents: string[];
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  lastInspectionDate: Date;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  nextInspectionDate: Date;
 
   @ApiProperty()
   @Column('uuid', { nullable: true })

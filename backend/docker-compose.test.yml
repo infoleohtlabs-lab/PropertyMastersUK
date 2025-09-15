@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  # Test Database
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: propertymastersuk-postgres-test
+    environment:
+      POSTGRES_DB: propertymastersuk_test
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./test/fixtures/sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d propertymastersuk_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Test Redis
+  redis-test:
+    image: redis:7-alpine
+    container_name: propertymastersuk-redis-test
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - test-network
+
+  # Backend Test Runner
+  backend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: propertymastersuk-backend-test
+    environment:
+      NODE_ENV: test
+      DATABASE_HOST: postgres-test
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: test_user
+      DATABASE_PASSWORD: test_password
+      DATABASE_NAME: propertymastersuk_test
+      REDIS_HOST: redis-test
+      REDIS_PORT: 6379
+      JWT_SECRET: test_jwt_secret_key_for_testing_only
+      JWT_REFRESH_SECRET: test_refresh_secret_key_for_testing_only
+      SENDGRID_API_KEY: test_sendgrid_key
+      AWS_ACCESS_KEY_ID: test_aws_key
+      AWS_SECRET_ACCESS_KEY: test_aws_secret
+      AWS_REGION: us-east-1
+      AWS_S3_BUCKET: test-bucket
+      STRIPE_SECRET_KEY: sk_test_fake_key
+      STRIPE_WEBHOOK_SECRET: whsec_test_fake_secret
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - test_coverage:/app/coverage
+      - test_reports:/app/test-results
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        echo 'Waiting for services to be ready...'
+        sleep 10
+        echo 'Running database migrations...'
+        npm run migration:run
+        echo 'Running all tests...'
+        npm run test:ci
+      "
+
+  # Playwright Test Runner (separate service for E2E tests)
+  playwright-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.playwright
+    container_name: propertymastersuk-playwright-test
+    environment:
+      NODE_ENV: test
+      DATABASE_HOST: postgres-test
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: test_user
+      DATABASE_PASSWORD: test_password
+      DATABASE_NAME: propertymastersuk_test
+      REDIS_HOST: redis-test
+      REDIS_PORT: 6379
+      JWT_SECRET: test_jwt_secret_key_for_testing_only
+      JWT_REFRESH_SECRET: test_refresh_secret_key_for_testing_only
+      BASE_URL: http://backend-test:3000
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+      backend-test:
+        condition: service_started
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - playwright_reports:/app/playwright-report
+      - test_results:/app/test-results
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        echo 'Waiting for backend to be ready...'
+        sleep 30
+        echo 'Running Playwright tests...'
+        npm run test:playwright
+      "
+
+volumes:
+  postgres_test_data:
+  redis_test_data:
+  test_coverage:
+  test_reports:
+  playwright_reports:
+  test_results:
+
+networks:
+  test-network:
+    driver: bridge

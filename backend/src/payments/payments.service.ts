@@ -15,8 +15,7 @@ export class PaymentsService {
   async create(createPaymentDto: CreatePaymentDto): Promise<Payment> {
     const payment = this.paymentRepository.create({
       ...createPaymentDto,
-      paymentReference: this.generatePaymentReference(),
-      netAmount: createPaymentDto.amount - (createPaymentDto.feeAmount || 0),
+      reference: this.generatePaymentReference(),
     });
     return this.paymentRepository.save(payment);
   }
@@ -24,16 +23,16 @@ export class PaymentsService {
   async findAll(filters?: any): Promise<Payment[]> {
     const queryBuilder = this.paymentRepository.createQueryBuilder('payment')
       .leftJoinAndSelect('payment.payer', 'payer')
-      .leftJoinAndSelect('payment.payee', 'payee')
+      .leftJoinAndSelect('payment.recipient', 'recipient')
       .leftJoinAndSelect('payment.property', 'property')
-      .leftJoinAndSelect('payment.tenant', 'tenant');
+      .leftJoinAndSelect('payment.tenancy', 'tenancy');
 
     if (filters?.payerId) {
       queryBuilder.andWhere('payment.payerId = :payerId', { payerId: filters.payerId });
     }
 
-    if (filters?.payeeId) {
-      queryBuilder.andWhere('payment.payeeId = :payeeId', { payeeId: filters.payeeId });
+    if (filters?.recipientId) {
+      queryBuilder.andWhere('payment.recipientId = :recipientId', { recipientId: filters.recipientId });
     }
 
     if (filters?.propertyId) {
@@ -64,7 +63,7 @@ export class PaymentsService {
   async findOne(id: string): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
       where: { id },
-      relations: ['payer', 'payee', 'property', 'tenant'],
+      relations: ['payer', 'recipient', 'property', 'tenancy'],
     });
 
     if (!payment) {
@@ -76,8 +75,8 @@ export class PaymentsService {
 
   async findByReference(reference: string): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
-      where: { paymentReference: reference },
-      relations: ['payer', 'payee', 'property', 'tenant'],
+      where: { reference: reference },
+      relations: ['payer', 'recipient', 'property', 'tenancy'],
     });
 
     if (!payment) {
@@ -90,13 +89,6 @@ export class PaymentsService {
   async update(id: string, updatePaymentDto: UpdatePaymentDto): Promise<Payment> {
     const payment = await this.findOne(id);
     
-    // Recalculate net amount if amount or fee changes
-    if (updatePaymentDto.amount !== undefined || updatePaymentDto.feeAmount !== undefined) {
-      const amount = updatePaymentDto.amount ?? payment.amount;
-      const feeAmount = updatePaymentDto.feeAmount ?? payment.feeAmount;
-      updatePaymentDto.netAmount = amount - feeAmount;
-    }
-
     Object.assign(payment, updatePaymentDto);
     return this.paymentRepository.save(payment);
   }
@@ -109,9 +101,8 @@ export class PaymentsService {
       payment.metadata = { ...payment.metadata, ...metadata };
     }
 
-    if (status === PaymentStatus.COMPLETED && !payment.paidDate) {
-      payment.paidDate = new Date();
-      payment.processedDate = new Date();
+    if (status === PaymentStatus.COMPLETED && !payment.processedAt) {
+      payment.processedAt = new Date();
     }
 
     return this.paymentRepository.save(payment);
@@ -129,7 +120,7 @@ export class PaymentsService {
     }
 
     payment.refundedAmount += refundAmount;
-    payment.refundedDate = new Date();
+    payment.refundedAt = new Date();
     payment.refundReason = reason;
     
     if (payment.refundedAmount >= payment.amount) {
@@ -148,8 +139,8 @@ export class PaymentsService {
       queryBuilder.andWhere('payment.payerId = :payerId', { payerId: filters.payerId });
     }
 
-    if (filters?.payeeId) {
-      queryBuilder.andWhere('payment.payeeId = :payeeId', { payeeId: filters.payeeId });
+    if (filters?.recipientId) {
+      queryBuilder.andWhere('payment.recipientId = :recipientId', { recipientId: filters.recipientId });
     }
 
     if (filters?.propertyId) {

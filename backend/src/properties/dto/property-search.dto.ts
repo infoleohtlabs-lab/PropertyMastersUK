@@ -1,129 +1,256 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsEnum, IsBoolean, IsArray } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional, IsEnum, IsBoolean, IsArray, Min, Max } from 'class-validator';
 import { PropertyType, ListingType } from './create-property.dto';
 
 export class PropertySearchDto {
-  @ApiProperty({ description: 'Search query/keywords', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Search keywords for property title, description, or features',
+    example: 'Victorian house garden',
+    maxLength: 100
+  })
   @IsString()
   @IsOptional()
   query?: string;
 
-  @ApiProperty({ description: 'Location (city, postcode, area)', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Location search including city, postcode, area, or street name',
+    example: 'London SW1A',
+    maxLength: 100
+  })
   @IsString()
   @IsOptional()
   location?: string;
 
-  @ApiProperty({ description: 'Minimum price', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Minimum price filter in GBP',
+    example: 200000,
+    minimum: 0,
+    maximum: 50000000
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
   minPrice?: number;
 
-  @ApiProperty({ description: 'Maximum price', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Maximum price filter in GBP',
+    example: 1000000,
+    minimum: 0,
+    maximum: 50000000
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
   maxPrice?: number;
 
-  @ApiProperty({ enum: PropertyType, description: 'Property type', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter by specific property type',
+    enum: PropertyType,
+    example: PropertyType.HOUSE,
+    enumName: 'PropertyType'
+  })
   @IsEnum(PropertyType)
   @IsOptional()
   propertyType?: PropertyType;
 
-  @ApiProperty({ enum: ListingType, description: 'Listing type', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter by listing type (sale or rental)',
+    enum: ListingType,
+    example: ListingType.SALE,
+    enumName: 'ListingType'
+  })
   @IsEnum(ListingType)
   @IsOptional()
   listingType?: ListingType;
 
-  @ApiProperty({ description: 'Minimum bedrooms', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Minimum number of bedrooms required',
+    example: 2,
+    minimum: 0,
+    maximum: 20
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
+  @Max(20)
   minBedrooms?: number;
 
-  @ApiProperty({ description: 'Maximum bedrooms', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Maximum number of bedrooms',
+    example: 4,
+    minimum: 0,
+    maximum: 20
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
+  @Max(20)
   maxBedrooms?: number;
 
-  @ApiProperty({ description: 'Minimum bathrooms', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Minimum number of bathrooms required',
+    example: 1,
+    minimum: 0,
+    maximum: 10
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
+  @Max(10)
   minBathrooms?: number;
 
-  @ApiProperty({ description: 'Maximum bathrooms', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Maximum number of bathrooms',
+    example: 3,
+    minimum: 0,
+    maximum: 10
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
+  @Max(10)
   maxBathrooms?: number;
 
-  @ApiProperty({ description: 'Minimum square feet', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Minimum property size in square feet',
+    example: 800,
+    minimum: 0,
+    maximum: 50000
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
   minSquareFeet?: number;
 
-  @ApiProperty({ description: 'Maximum square feet', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Maximum property size in square feet',
+    example: 2500,
+    minimum: 0,
+    maximum: 50000
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0)
   maxSquareFeet?: number;
 
-  @ApiProperty({ description: 'Has garden', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter properties that have a garden',
+    example: true
+  })
   @IsBoolean()
   @IsOptional()
   hasGarden?: boolean;
 
-  @ApiProperty({ description: 'Has parking', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter properties that have parking available',
+    example: true
+  })
   @IsBoolean()
   @IsOptional()
   hasParking?: boolean;
 
-  @ApiProperty({ description: 'Has garage', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter properties that have a garage',
+    example: false
+  })
   @IsBoolean()
   @IsOptional()
   hasGarage?: boolean;
 
-  @ApiProperty({ description: 'Is furnished', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter properties that come furnished',
+    example: true
+  })
   @IsBoolean()
   @IsOptional()
   isFurnished?: boolean;
 
-  @ApiProperty({ description: 'Pet friendly', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter properties that allow pets',
+    example: false
+  })
   @IsBoolean()
   @IsOptional()
   petFriendly?: boolean;
 
-  @ApiProperty({ description: 'Search radius in kilometers', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Search radius from location in kilometers',
+    example: 5,
+    minimum: 0.1,
+    maximum: 100
+  })
   @IsNumber()
   @IsOptional()
+  @Min(0.1)
+  @Max(100)
   radius?: number;
 
-  @ApiProperty({ description: 'Sort by field', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Field to sort results by',
+    example: 'price',
+    enum: ['price', 'createdAt', 'bedrooms', 'bathrooms', 'title']
+  })
   @IsString()
   @IsOptional()
   sortBy?: string;
 
-  @ApiProperty({ description: 'Sort order (asc/desc)', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Sort order for results',
+    example: 'asc',
+    enum: ['asc', 'desc']
+  })
   @IsString()
   @IsOptional()
   sortOrder?: 'asc' | 'desc';
 
-  @ApiProperty({ description: 'Page number', required: false, default: 1 })
+  @ApiPropertyOptional({ 
+    description: 'Page number for pagination',
+    example: 1,
+    default: 1,
+    minimum: 1
+  })
   @IsNumber()
   @IsOptional()
+  @Min(1)
   page?: number;
 
-  @ApiProperty({ description: 'Items per page', required: false, default: 20 })
+  @ApiPropertyOptional({ 
+    description: 'Number of items per page',
+    example: 20,
+    default: 20,
+    minimum: 1,
+    maximum: 100
+  })
   @IsNumber()
   @IsOptional()
+  @Min(1)
+  @Max(100)
   limit?: number;
 
-  @ApiProperty({ description: 'Search name for saving', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Name for saving this search criteria',
+    example: 'London Houses Under 500k',
+    maxLength: 100
+  })
   @IsString()
   @IsOptional()
   searchName?: string;
 
-  @ApiProperty({ description: 'Enable email alerts for this search', required: false })
+  @ApiPropertyOptional({ 
+    description: 'Enable email notifications for new properties matching this search',
+    example: false,
+    default: false
+  })
   @IsBoolean()
   @IsOptional()
   emailAlerts?: boolean;
 
-  @ApiProperty({ description: 'Property tags to filter by', type: [String], required: false })
+  @ApiPropertyOptional({ 
+    description: 'Filter by specific property tags',
+    type: [String],
+    example: ['modern', 'garden', 'near-station'],
+    maxItems: 10
+  })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
