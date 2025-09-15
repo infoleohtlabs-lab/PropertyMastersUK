@@ -4,6 +4,7 @@
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "postgis";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- Users table (extends Supabase auth.users)
 CREATE TABLE public.users (
@@ -21,7 +22,7 @@ CREATE TABLE public.users (
 
 -- Properties table
 CREATE TABLE public.properties (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     property_type VARCHAR(50) NOT NULL CHECK (property_type IN ('house', 'apartment', 'commercial', 'land')),
@@ -53,7 +54,7 @@ CREATE TABLE public.properties (
 
 -- Property images table
 CREATE TABLE public.property_images (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     property_id UUID REFERENCES public.properties(id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
     alt_text VARCHAR(255),
@@ -64,7 +65,7 @@ CREATE TABLE public.property_images (
 
 -- Property features table
 CREATE TABLE public.property_features (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     property_id UUID REFERENCES public.properties(id) ON DELETE CASCADE,
     feature_name VARCHAR(100) NOT NULL,
     feature_value VARCHAR(255),
@@ -73,7 +74,7 @@ CREATE TABLE public.property_features (
 
 -- Inquiries table
 CREATE TABLE public.inquiries (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     property_id UUID REFERENCES public.properties(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.users(id),
     name VARCHAR(100) NOT NULL,
@@ -89,7 +90,7 @@ CREATE TABLE public.inquiries (
 
 -- Viewings table
 CREATE TABLE public.viewings (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     property_id UUID REFERENCES public.properties(id) ON DELETE CASCADE,
     user_id UUID REFERENCES public.users(id),
     agent_id UUID REFERENCES public.users(id),
@@ -105,7 +106,7 @@ CREATE TABLE public.viewings (
 
 -- Favorites table
 CREATE TABLE public.favorites (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     property_id UUID REFERENCES public.properties(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -114,7 +115,7 @@ CREATE TABLE public.favorites (
 
 -- Saved searches table
 CREATE TABLE public.saved_searches (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     search_criteria JSONB NOT NULL,

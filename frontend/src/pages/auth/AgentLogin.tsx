@@ -63,6 +63,58 @@ const AgentLogin: React.FC = () => {
     }
   };
 
+  const handleDemoLogin = async (role: string) => {
+    const credentials = {
+      admin: { email: 'admin@propertymasters.com', password: 'PropertyTest2024!' },
+      agent: { email: 'agent@propertymasters.com', password: 'PropertyTest2024!' },
+      landlord: { email: 'landlord@propertymasters.com', password: 'PropertyTest2024!' },
+      tenant: { email: 'tenant@propertymasters.com', password: 'PropertyTest2024!' },
+      buyer: { email: 'buyer@propertymasters.com', password: 'PropertyTest2024!' },
+      solicitor: { email: 'solicitor@propertymasters.com', password: 'PropertyTest2024!' }
+    };
+
+    const creds = credentials[role as keyof typeof credentials];
+    if (creds) {
+      try {
+        await login({ email: creds.email, password: creds.password, rememberMe: false });
+        showToast.success(`Welcome back, ${role.charAt(0).toUpperCase() + role.slice(1)}!`);
+        
+        // Redirect based on role
+        const redirectPaths = {
+          admin: '/dashboard/admin',
+          agent: '/dashboard/agent',
+          landlord: '/dashboard/landlord',
+          tenant: '/dashboard/tenant',
+          buyer: '/dashboard/buyer',
+          solicitor: '/dashboard/solicitor'
+        };
+        
+        navigate(redirectPaths[role as keyof typeof redirectPaths] || '/dashboard', { replace: true });
+      } catch (error: any) {
+        showToast.error(error.message || `${role} login failed. Please check credentials.`);
+      }
+    }
+  };
+
+  const handleAutoFill = (role: string) => {
+    const credentials = {
+      admin: { email: 'admin@propertymasters.com', password: 'PropertyTest2024!' },
+      agent: { email: 'agent@propertymasters.com', password: 'PropertyTest2024!' },
+      landlord: { email: 'landlord@propertymasters.com', password: 'PropertyTest2024!' },
+      tenant: { email: 'tenant@propertymasters.com', password: 'PropertyTest2024!' },
+      buyer: { email: 'buyer@propertymasters.com', password: 'PropertyTest2024!' },
+      solicitor: { email: 'solicitor@propertymasters.com', password: 'PropertyTest2024!' }
+    };
+
+    const creds = credentials[role as keyof typeof credentials];
+    if (creds) {
+      // Update form values using the form validation hook
+      handleChange({ target: { name: 'email', value: creds.email } } as any);
+      handleChange({ target: { name: 'password', value: creds.password } } as any);
+      showToast.success(`${role.charAt(0).toUpperCase() + role.slice(1)} credentials filled`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -181,6 +233,128 @@ const AgentLogin: React.FC = () => {
               </Button>
             </div>
           </form>
+
+          {/* Demo Login Section */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Demo Accounts</span>
+              </div>
+            </div>
+
+            {/* Auto Login Buttons */}
+            <div className="mt-4">
+              <p className="text-xs text-gray-600 mb-3 text-center">Quick Login (Auto-login)</p>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  onClick={() => handleDemoLogin('admin')}
+                  className="btn-secondary text-xs py-2"
+                  disabled={isLoading}
+                >
+                  Admin
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleDemoLogin('agent')}
+                  className="btn-primary text-xs py-2"
+                  disabled={isLoading}
+                >
+                  Agent
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleDemoLogin('landlord')}
+                  className="btn-secondary text-xs py-2"
+                  disabled={isLoading}
+                >
+                  Landlord
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleDemoLogin('tenant')}
+                  className="btn-secondary text-xs py-2"
+                  disabled={isLoading}
+                >
+                  Tenant
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleDemoLogin('buyer')}
+                  className="btn-secondary text-xs py-2"
+                  disabled={isLoading}
+                >
+                  Buyer
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleDemoLogin('solicitor')}
+                  className="btn-secondary text-xs py-2"
+                  disabled={isLoading}
+                >
+                  Solicitor
+                </Button>
+              </div>
+            </div>
+
+            {/* Auto Fill Buttons */}
+            <div className="mt-4">
+              <p className="text-xs text-gray-600 mb-3 text-center">Auto-fill Credentials</p>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  type="button"
+                  onClick={() => handleAutoFill('admin')}
+                  className="btn-outline text-xs py-1"
+                  disabled={isLoading}
+                >
+                  Admin
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleAutoFill('agent')}
+                  className="btn-outline text-xs py-1"
+                  disabled={isLoading}
+                >
+                  Agent
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleAutoFill('landlord')}
+                  className="btn-outline text-xs py-1"
+                  disabled={isLoading}
+                >
+                  Landlord
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleAutoFill('tenant')}
+                  className="btn-outline text-xs py-1"
+                  disabled={isLoading}
+                >
+                  Tenant
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleAutoFill('buyer')}
+                  className="btn-outline text-xs py-1"
+                  disabled={isLoading}
+                >
+                  Buyer
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleAutoFill('solicitor')}
+                  className="btn-outline text-xs py-1"
+                  disabled={isLoading}
+                >
+                  Solicitor
+                </Button>
+              </div>
+            </div>
+          </div>
 
           {/* Footer Links */}
           <div className="mt-6">

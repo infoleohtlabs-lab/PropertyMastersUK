@@ -1,5 +1,6 @@
 -- Additional tables for PropertyMasters UK comprehensive platform
 -- Created: 2024
+-- Migration version: 003
 -- Description: Tenancy, Financial, Maintenance, Communication, Document, Booking, Market Analysis, GDPR, and Audit tables
 
 -- =============================================
