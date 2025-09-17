@@ -5,6 +5,7 @@ import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { User, UserRole } from '../../types/auth';
 import { formatCurrency } from '../../utils';
+import AdminSidebar from '../../components/admin/AdminSidebar';
 import {
   Users,
   Building,
@@ -305,12 +306,17 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 container-responsive component-spacing">
-      {/* Header */}
-      <div className="stack-lg">
-        <h1 className="text-heading-1">Admin Dashboard</h1>
-        <p className="text-body-lg text-gray-600">Manage users, properties, and system settings</p>
-      </div>
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminSidebar />
+      
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-0">
+        <div className="container-responsive component-spacing">
+          {/* Header */}
+          <div className="stack-lg">
+            <h1 className="text-heading-1">Admin Dashboard</h1>
+            <p className="text-body-lg text-gray-600">Manage users, properties, and system settings</p>
+          </div>
 
       {/* Navigation Tabs */}
       <div className="stack-md">
@@ -2451,6 +2457,8 @@ const AdminDashboard: React.FC = () => {
           </Card>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };

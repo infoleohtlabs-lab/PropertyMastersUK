@@ -49,7 +49,7 @@ import { usePropertyStore } from '../stores/propertyStore';
 import { Property, PropertyType, PropertyStatus, PriceType } from '../types';
 import { PropertyOwnership } from '../components/land-registry/PropertyOwnership';
 import { PriceHistoryChart } from '../components/land-registry/PriceHistoryChart';
-import { LandRegistryApiService } from '../services/land-registry.service';
+import landRegistryService from '../services/land-registry.service';
 import { PropertyOwnershipData, PricePaidData } from '../types/land-registry';
 
 const PropertyDetail: React.FC = () => {
@@ -75,7 +75,7 @@ const PropertyDetail: React.FC = () => {
   const [landRegistryLoading, setLandRegistryLoading] = useState(false);
   const [landRegistryError, setLandRegistryError] = useState<string | null>(null);
   
-  const landRegistryService = new LandRegistryApiService();
+  // landRegistryService is imported as singleton
 
   // Mock property data with UK-specific features
   const mockProperty: Property = {
