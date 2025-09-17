@@ -5,6 +5,10 @@ import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/Textarea';
+import PostcodeInput from '../components/PostcodeInput';
+import AddressSearch from '../components/AddressSearch';
+import { RoyalMailAddress, AddressFormData } from '../types/royal-mail';
+import { royalMailService } from '../services/royal-mail.service';
 import {
   Calculator,
   TrendingUp,
@@ -31,8 +35,10 @@ interface PropertyDetails {
   sqft: number;
   yearBuilt: number;
   condition: string;
-  features: string[];
   description: string;
+  // Royal Mail address data
+  royalMailAddress?: RoyalMailAddress;
+  uprn?: string;
 }
 
 interface ValuationResult {
@@ -67,9 +73,31 @@ const PropertyValuation: React.FC = () => {
     sqft: 0,
     yearBuilt: 0,
     condition: '',
-    features: [],
     description: ''
   });
+
+  // Handle Royal Mail address selection
+  const handleAddressSelect = (address: RoyalMailAddress) => {
+    setPropertyDetails(prev => ({
+      ...prev,
+      address: royalMailService.formatAddress(address),
+      postcode: address.postcode,
+      royalMailAddress: address,
+      uprn: address.uprn
+    }));
+  };
+
+  // Handle postcode validation and lookup
+  const handlePostcodeSelect = (postcode: string, addresses: RoyalMailAddress[]) => {
+    setPropertyDetails(prev => ({
+      ...prev,
+      postcode: postcode
+    }));
+    // If only one address found, auto-select it
+    if (addresses.length === 1) {
+      handleAddressSelect(addresses[0]);
+    }
+  };
 
   const [valuationResult, setValuationResult] = useState<ValuationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -171,24 +199,41 @@ const PropertyValuation: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="address">Property Address</Label>
-          <Input
-            id="address"
-            placeholder="Enter full address"
+          <Label>Property Address</Label>
+          <AddressSearch
+            placeholder="Start typing your address..."
+            onAddressSelect={handleAddressSelect}
             value={propertyDetails.address}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('address', e.target.value)}
+            className="w-full"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="postcode">Postcode</Label>
-          <Input
-            id="postcode"
-            placeholder="M1 1AA"
+          <Label>Postcode</Label>
+          <PostcodeInput
+            placeholder="Enter postcode (e.g., M1 1AA)"
+            onPostcodeValidated={handlePostcodeSelect}
             value={propertyDetails.postcode}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('postcode', e.target.value)}
+            className="w-full"
           />
         </div>
       </div>
+
+      {propertyDetails.royalMailAddress && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2 text-green-700">
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-medium">Address Verified</span>
+          </div>
+          <p className="text-sm text-green-600 mt-1">
+            {royalMailService.formatAddress(propertyDetails.royalMailAddress)}
+          </p>
+          {propertyDetails.uprn && (
+            <p className="text-xs text-green-500 mt-1">
+              UPRN: {propertyDetails.uprn}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">

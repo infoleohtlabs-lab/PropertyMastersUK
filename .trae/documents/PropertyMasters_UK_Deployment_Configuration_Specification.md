@@ -1,8 +1,8 @@
 # PropertyMasters UK - Deployment Configuration Specification
 
-**Version:** 1.0  
-**Date:** January 2025  
-**Project:** Multi-Tenant SaaS Property Platform - Production Deployment Guide  
+**Version:** 1.0\
+**Date:** January 2025\
+**Project:** Multi-Tenant SaaS Property Platform - Production Deployment Guide\
 **Document Type:** Comprehensive Deployment Configuration
 
 ***
@@ -54,12 +54,17 @@ end
 
 ### 1.2 Deployment Objectives
 
-- **Zero Downtime**: Seamless deployments with no service interruption
-- **Scalability**: Auto-scaling based on demand
-- **Security**: Secure configuration and data protection
-- **Monitoring**: Comprehensive observability and alerting
-- **Performance**: Optimized for speed and reliability
-- **Compliance**: GDPR and UK data protection compliance
+* **Zero Downtime**: Seamless deployments with no service interruption
+
+* **Scalability**: Auto-scaling based on demand
+
+* **Security**: Secure configuration and data protection
+
+* **Monitoring**: Comprehensive observability and alerting
+
+* **Performance**: Optimized for speed and reliability
+
+* **Compliance**: GDPR and UK data protection compliance
 
 ## 2. Environment Configuration
 
@@ -1142,25 +1147,28 @@ SELECT cron.schedule('daily-backup', '0 2 * * *', 'SELECT create_backup();');
 **Recovery Procedures:**
 
 1. **Database Recovery:**
+
    ```bash
    # Restore from backup
    psql -h localhost -U postgres -d propertymastersuk_recovery < backup.sql
-   
+
    # Verify data integrity
    psql -h localhost -U postgres -d propertymastersuk_recovery -c "SELECT COUNT(*) FROM users;"
    ```
 
 2. **Application Recovery:**
+
    ```bash
    # Redeploy from last known good commit
    git checkout <last-good-commit>
    npm run deploy:production
-   
+
    # Verify deployment
    curl -f https://propertymastersuk.com/api/health
    ```
 
 3. **DNS Failover:**
+
    ```bash
    # Update DNS to point to backup infrastructure
    # This would be automated through your DNS provider's API
@@ -1342,8 +1350,14 @@ SELECT cron.schedule('monthly-cleanup', '0 0 1 * *', 'SELECT cleanup_old_data();
 ***
 
 **Document Control**
-- **Version**: 1.0
-- **Last Updated**: January 2025
-- **Next Review**: February 2025
-- **Approved By**: DevOps Team
-- **Status**: Production Ready
+
+* **Version**: 1.0
+
+* **Last Updated**: January 2025
+
+* **Next Review**: February 2025
+
+* **Approved By**: DevOps Team
+
+* **Status**: Production Ready
+

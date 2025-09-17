@@ -64,7 +64,7 @@
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/database.config.ts"
   },
   "dependencies": {
-    "@nestjs-modules/mailer": "^1.9.1",
+    "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.0",
@@ -113,7 +113,7 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^10.0.0",
+    "@nestjs/cli": "^11.0.10",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
     "@playwright/test": "^1.55.0",

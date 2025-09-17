@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Building2, User, Mail, Phone, Lock, Eye, EyeOff, MapPin } from 'lucide-react';
+import { Building2, User, Mail, Phone, Lock, Eye, EyeOff, MapPin, CheckCircle } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { showToast } from '../../components/ui/Toast';
@@ -8,6 +8,10 @@ import { useAuthStore } from '../../stores/authStore';
 import { useFormValidation } from '../../hooks';
 import { validateEmail, validateUKPhone, validateUKPostcode } from '../../utils';
 import { RegisterData, UserRole, Address } from '../../types';
+import PostcodeInput from '../../components/PostcodeInput';
+import AddressSearch from '../../components/AddressSearch';
+import { RoyalMailAddress } from '../../types/royal-mail';
+import { royalMailService } from '../../services/royal-mail.service';
 
 interface RegisterFormData {
   firstName: string;
@@ -21,6 +25,9 @@ interface RegisterFormData {
   address?: Address;
   agreeToTerms: boolean;
   subscribeToNewsletter?: boolean;
+  // Royal Mail address data
+  royalMailAddress?: RoyalMailAddress;
+  uprn?: string;
 }
 
 const Register: React.FC = () => {
@@ -127,6 +134,36 @@ const Register: React.FC = () => {
       ...values.address!,
       [field]: value
     });
+  };
+
+  // Handle Royal Mail address selection
+  const handleAddressSelect = (address: RoyalMailAddress) => {
+    const formattedAddress = royalMailService.formatAddress(address);
+    const addressComponents = royalMailService.extractAddressComponents(address);
+    
+    setValue('address', {
+      street: addressComponents.street,
+      city: addressComponents.city,
+      county: addressComponents.county,
+      postcode: address.postcode,
+      country: 'UK'
+    });
+    
+    setValue('royalMailAddress', address);
+    setValue('uprn', address.uprn);
+  };
+
+  // Handle postcode validation and lookup
+  const handlePostcodeSelect = (postcode: string, addresses: RoyalMailAddress[]) => {
+    setValue('address', {
+      ...values.address!,
+      postcode: postcode
+    });
+    
+    // If only one address found, auto-select it
+    if (addresses.length === 1) {
+      handleAddressSelect(addresses[0]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -395,71 +432,78 @@ const Register: React.FC = () => {
 
         {/* Address Information */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-gray-900">Address Information</h3>
+          <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Address Information
+          </h3>
           
-          <div className="form-group">
-            <Input
-              id="address.street"
-              name="address.street"
-              type="text"
-              label="Street Address"
-              placeholder="Enter your street address"
-              value={values.address?.street || ''}
-              onChange={(e) => handleAddressChange('street', e.target.value)}
-              onBlur={handleBlur}
-              error={touched.address ? errors.address : ''}
-              leftIcon={<MapPin className="h-4 w-4" />}
-              required
-              className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+          <div className="space-y-4">
+            {/* Address Search */}
+            <AddressSearch
+              onAddressSelect={handleAddressSelect}
+              placeholder="Search for your address..."
+              label="Address Search"
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="form-group">
+            
+            {/* Postcode Input */}
+            <PostcodeInput
+              onPostcodeSelect={handlePostcodeSelect}
+              onAddressSelect={handleAddressSelect}
+              placeholder="Enter postcode (e.g., SW1A 1AA)"
+              label="Postcode"
+            />
+            
+            {/* Verified Address Display */}
+            {values.royalMailAddress && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <span className="text-sm font-medium text-green-800">Verified Address</span>
+                </div>
+                <div className="text-sm text-green-700">
+                  <div>{royalMailService.formatAddress(values.royalMailAddress)}</div>
+                  {values.uprn && (
+                    <div className="text-xs text-green-600 mt-1">UPRN: {values.uprn}</div>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Manual Address Override */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                id="address.city"
-                name="address.city"
-                type="text"
+                label="Street Address"
+                value={values.address?.street || ''}
+                onChange={(e) => handleAddressChange('street', e.target.value)}
+                error={errors.address?.street}
+                required
+                placeholder="Manual entry if needed"
+              />
+              
+              <Input
                 label="City"
-                placeholder="Enter your city"
                 value={values.address?.city || ''}
                 onChange={(e) => handleAddressChange('city', e.target.value)}
-                onBlur={handleBlur}
-                error={touched.address ? errors.address : ''}
+                error={errors.address?.city}
                 required
-                className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+                placeholder="Manual entry if needed"
               />
-            </div>
-
-            <div className="form-group">
+              
               <Input
-                id="address.county"
-                name="address.county"
-                type="text"
                 label="County"
-                placeholder="Enter your county"
                 value={values.address?.county || ''}
                 onChange={(e) => handleAddressChange('county', e.target.value)}
-                onBlur={handleBlur}
-                error={touched.address ? errors.address : ''}
-                required
-                className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+                error={errors.address?.county}
+                placeholder="Manual entry if needed"
               />
-            </div>
-
-            <div className="form-group">
+              
               <Input
-                id="address.postcode"
-                name="address.postcode"
-                type="text"
                 label="Postcode"
-                placeholder="Enter your postcode"
                 value={values.address?.postcode || ''}
                 onChange={(e) => handleAddressChange('postcode', e.target.value)}
-                onBlur={handleBlur}
-                error={touched.address ? errors.address : ''}
+                error={errors.address?.postcode}
                 required
-                className={`input-field transition-all duration-300 ${touched.address && errors.address ? 'animate-shake border-danger-300 focus:border-danger-500 focus:ring-danger-500' : 'hover:border-primary-400 focus:border-primary-500'}`}
+                placeholder="Manual entry if needed"
               />
             </div>
           </div>
