@@ -65,12 +65,12 @@ const AgentLogin: React.FC = () => {
 
   const handleDemoLogin = async (role: string) => {
     const credentials = {
-      admin: { email: 'admin@propertymasters.com', password: 'PropertyTest2024!' },
-      agent: { email: 'agent@propertymasters.com', password: 'PropertyTest2024!' },
-      landlord: { email: 'landlord@propertymasters.com', password: 'PropertyTest2024!' },
-      tenant: { email: 'tenant@propertymasters.com', password: 'PropertyTest2024!' },
-      buyer: { email: 'buyer@propertymasters.com', password: 'PropertyTest2024!' },
-      solicitor: { email: 'solicitor@propertymasters.com', password: 'PropertyTest2024!' }
+      admin: { email: 'admin.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      agent: { email: 'agent.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      landlord: { email: 'landlord.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      tenant: { email: 'tenant.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      buyer: { email: 'buyer.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      solicitor: { email: 'solicitor.propertymastersuk@gmail.com', password: 'PropertyTest2024!' }
     };
 
     const creds = credentials[role as keyof typeof credentials];
@@ -98,12 +98,12 @@ const AgentLogin: React.FC = () => {
 
   const handleAutoFill = (role: string) => {
     const credentials = {
-      admin: { email: 'admin@propertymasters.com', password: 'PropertyTest2024!' },
-      agent: { email: 'agent@propertymasters.com', password: 'PropertyTest2024!' },
-      landlord: { email: 'landlord@propertymasters.com', password: 'PropertyTest2024!' },
-      tenant: { email: 'tenant@propertymasters.com', password: 'PropertyTest2024!' },
-      buyer: { email: 'buyer@propertymasters.com', password: 'PropertyTest2024!' },
-      solicitor: { email: 'solicitor@propertymasters.com', password: 'PropertyTest2024!' }
+      admin: { email: 'admin.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      agent: { email: 'agent.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      landlord: { email: 'landlord.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      tenant: { email: 'tenant.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      buyer: { email: 'buyer.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+      solicitor: { email: 'solicitor.propertymastersuk@gmail.com', password: 'PropertyTest2024!' }
     };
 
     const creds = credentials[role as keyof typeof credentials];

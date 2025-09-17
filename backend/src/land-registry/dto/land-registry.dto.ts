@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsNumber, IsBoolean, IsArray, IsEnum, IsDateString, Min, Max } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { PropertyType, ExportFormat, TenureType } from '../../../shared/types/land-registry.types';
+import { PropertyType, ExportFormat, TenureType } from '../../shared/types/land-registry.types';
 
 export class PropertySearchDto {
   @ApiProperty({ description: 'Property postcode', required: false, example: 'SW1A 1AA' })

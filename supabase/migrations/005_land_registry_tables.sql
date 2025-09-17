@@ -1,6 +1,18 @@
 -- Land Registry API Integration Database Schema
 -- Creates tables for property ownership, price paid data, and API management
 
+-- Rename existing properties table to avoid conflict
+DO $$ 
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'properties' AND table_schema = 'public') THEN
+        -- Check if uprn column exists (Land Registry table)
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'properties' AND column_name = 'uprn' AND table_schema = 'public') THEN
+            -- This is the original properties table, rename it
+            ALTER TABLE properties RENAME TO property_listings;
+        END IF;
+    END IF;
+END $$;
+
 -- Create properties table for Land Registry data
 CREATE TABLE IF NOT EXISTS properties (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -15,6 +15,14 @@ export enum UserRole {
   VIEWER = 'viewer',
 }
 
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  SUSPENDED = 'suspended',
+  PENDING = 'pending',
+  DELETED = 'deleted',
+}
+
 @Entity('users')
 export class User {
   @ApiProperty()
@@ -50,6 +58,13 @@ export class User {
   @ApiProperty()
   @Column({ default: true })
   isActive: boolean;
+
+  @ApiProperty({ enum: UserStatus })
+  @Column({
+    type: 'varchar',
+    default: UserStatus.ACTIVE,
+  })
+  status: UserStatus;
 
   @ApiProperty()
   @Column({ default: false })

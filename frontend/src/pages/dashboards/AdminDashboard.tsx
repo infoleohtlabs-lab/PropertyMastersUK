@@ -43,7 +43,23 @@ import {
   Monitor,
   Server,
   Wifi,
-  Settings
+  Settings,
+  Wrench,
+  Lock,
+  Upload,
+  FileText,
+  RefreshCw,
+  Key,
+  FileCheck,
+  CreditCard,
+  Receipt,
+  Bell,
+  Mail,
+  Phone,
+  MapPin,
+  Home,
+  Car,
+  Briefcase
 } from 'lucide-react';
 
 interface AdminStats {
@@ -300,13 +316,16 @@ const AdminDashboard: React.FC = () => {
       <div className="stack-md">
         <nav className="flex flex-wrap gap-sm lg:gap-lg lg:flex-nowrap">
           {[
-            { id: 'overview', label: 'Overview', icon: Users },
-            { id: 'users', label: 'Users', icon: Users },
-            { id: 'properties', label: 'Properties', icon: Building },
-            { id: 'analytics', label: 'Analytics', icon: Banknote },
-            { id: 'land-registry', label: 'Land Registry', icon: Database },
-            { id: 'system', label: 'System', icon: Shield },
-            { id: 'reports', label: 'Reports', icon: Download }
+            { id: 'overview', label: 'System Overview', icon: BarChart3 },
+            { id: 'users', label: 'User Management', icon: Users },
+            { id: 'system-config', label: 'System Config', icon: Settings },
+            { id: 'analytics', label: 'Analytics & Reports', icon: TrendingUp },
+            { id: 'gdpr', label: 'GDPR Compliance', icon: Shield },
+            { id: 'financial', label: 'Financial Management', icon: Banknote },
+            { id: 'maintenance', label: 'Maintenance', icon: Wrench },
+            { id: 'integrations', label: 'Integration Services', icon: Database },
+            { id: 'security', label: 'Security Monitoring', icon: Lock },
+            { id: 'land-registry', label: 'Land Registry Import', icon: Upload }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -543,6 +562,684 @@ const AdminDashboard: React.FC = () => {
                         ) : (
                           <Clock className="h-4 w-4 text-yellow-500" />
                         )}
+
+      {/* System Configuration Tab */}
+      {activeTab === 'system-config' && (
+        <div className="space-y-6">
+          {/* System Settings Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  General Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Globe className="h-4 w-4 mr-2" />
+                    Site Configuration
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Email Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Bell className="h-4 w-4 mr-2" />
+                    Notification Preferences
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Key className="h-4 w-4 mr-2" />
+                    API Configuration
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Database className="h-5 w-5 mr-2" />
+                  Database Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Backup & Restore
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Performance Monitoring
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <HardDrive className="h-4 w-4 mr-2" />
+                    Storage Management
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Query Optimization
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Security Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Lock className="h-4 w-4 mr-2" />
+                    Access Control
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Key className="h-4 w-4 mr-2" />
+                    Authentication
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileCheck className="h-4 w-4 mr-2" />
+                    Audit Logs
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Security Alerts
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* GDPR Compliance Tab */}
+      {activeTab === 'gdpr' && (
+        <div className="space-y-6">
+          {/* GDPR Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Data Requests</p>
+                    <p className="text-2xl font-bold text-blue-600">23</p>
+                    <p className="text-xs text-gray-500">This month</p>
+                  </div>
+                  <FileCheck className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Consent Rate</p>
+                    <p className="text-2xl font-bold text-green-600">94.2%</p>
+                    <p className="text-xs text-gray-500">User consent</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Data Breaches</p>
+                    <p className="text-2xl font-bold text-red-600">0</p>
+                    <p className="text-xs text-gray-500">Last 12 months</p>
+                  </div>
+                  <Shield className="h-8 w-8 text-red-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Compliance Score</p>
+                    <p className="text-2xl font-bold text-purple-600">98%</p>
+                    <p className="text-xs text-gray-500">Overall rating</p>
+                  </div>
+                  <Award className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* GDPR Management Tools */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Data Subject Requests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Data Requests
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export User Data
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete User Data
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileCheck className="h-4 w-4 mr-2" />
+                    Consent Management
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Privacy Controls
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Privacy Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Bell className="h-4 w-4 mr-2" />
+                    Breach Notifications
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Privacy Policy Updates
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Activity className="h-4 w-4 mr-2" />
+                    Audit Trail
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Financial Management Tab */}
+      {activeTab === 'financial' && (
+        <div className="space-y-6">
+          {/* Financial Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                    <p className="text-2xl font-bold text-green-600">£{stats.monthlyRevenue.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">This month</p>
+                  </div>
+                  <Banknote className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Commission Earned</p>
+                    <p className="text-2xl font-bold text-blue-600">£{Math.round(stats.monthlyRevenue * 0.15).toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">15% commission</p>
+                  </div>
+                  <Receipt className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Pending Payments</p>
+                    <p className="text-2xl font-bold text-yellow-600">£{Math.round(stats.monthlyRevenue * 0.08).toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">Awaiting processing</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-yellow-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Refunds Issued</p>
+                    <p className="text-2xl font-bold text-red-600">£{Math.round(stats.monthlyRevenue * 0.02).toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">2% of revenue</p>
+                  </div>
+                  <CreditCard className="h-8 w-8 text-red-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Financial Management Tools */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <CreditCard className="h-5 w-5 mr-2" />
+                  Payment Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Transactions
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Process Refunds
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Receipt className="h-4 w-4 mr-2" />
+                    Generate Invoices
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Financial Data
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  Financial Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    Revenue Trends
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <PieChart className="h-4 w-4 mr-2" />
+                    Commission Breakdown
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Target className="h-4 w-4 mr-2" />
+                    Performance Metrics
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Financial Forecasting
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Maintenance Tab */}
+      {activeTab === 'maintenance' && (
+        <div className="space-y-6">
+          {/* System Health Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">System Uptime</p>
+                    <p className="text-2xl font-bold text-green-600">{stats.platformUptime}%</p>
+                    <p className="text-xs text-gray-500">Last 30 days</p>
+                  </div>
+                  <Server className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Issues</p>
+                    <p className="text-2xl font-bold text-yellow-600">3</p>
+                    <p className="text-xs text-gray-500">Requires attention</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-yellow-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Last Backup</p>
+                    <p className="text-2xl font-bold text-blue-600">2h ago</p>
+                    <p className="text-xs text-gray-500">Successful</p>
+                  </div>
+                  <HardDrive className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Scheduled Tasks</p>
+                    <p className="text-2xl font-bold text-purple-600">12</p>
+                    <p className="text-xs text-gray-500">Running</p>
+                  </div>
+                  <Wrench className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Maintenance Tools */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Wrench className="h-5 w-5 mr-2" />
+                  System Maintenance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    System Updates
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <HardDrive className="h-4 w-4 mr-2" />
+                    Database Maintenance
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Performance Optimization
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Health Checks
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Activity className="h-5 w-5 mr-2" />
+                  Monitoring & Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Bell className="h-4 w-4 mr-2" />
+                    Alert Configuration
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Eye className="h-4 w-4 mr-2" />
+                    System Logs
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Performance Metrics
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Diagnostics
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Integration Services Tab */}
+      {activeTab === 'integrations' && (
+        <div className="space-y-6">
+          {/* Integration Status Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Integrations</p>
+                    <p className="text-2xl font-bold text-green-600">8</p>
+                    <p className="text-xs text-gray-500">Connected services</p>
+                  </div>
+                  <Database className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">API Calls Today</p>
+                    <p className="text-2xl font-bold text-blue-600">{Math.round(stats.apiCalls / 30).toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">Successful requests</p>
+                  </div>
+                  <Globe className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Failed Requests</p>
+                    <p className="text-2xl font-bold text-red-600">12</p>
+                    <p className="text-xs text-gray-500">Last 24 hours</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Response Time</p>
+                    <p className="text-2xl font-bold text-purple-600">245ms</p>
+                    <p className="text-xs text-gray-500">Average</p>
+                  </div>
+                  <Zap className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Integration Management */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Database className="h-5 w-5 mr-2" />
+                  External Services
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Home className="h-4 w-4 mr-2" />
+                    Land Registry API
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Briefcase className="h-4 w-4 mr-2" />
+                    Companies House
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Royal Mail PAF
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Globe className="h-4 w-4 mr-2" />
+                    Ordnance Survey
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  API Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Key className="h-4 w-4 mr-2" />
+                    API Keys
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Rate Limits
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Activity className="h-4 w-4 mr-2" />
+                    Usage Analytics
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    API Documentation
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Security Monitoring Tab */}
+      {activeTab === 'security' && (
+        <div className="space-y-6">
+          {/* Security Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Security Score</p>
+                    <p className="text-2xl font-bold text-green-600">95%</p>
+                    <p className="text-xs text-gray-500">Excellent</p>
+                  </div>
+                  <Shield className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Failed Logins</p>
+                    <p className="text-2xl font-bold text-red-600">23</p>
+                    <p className="text-xs text-gray-500">Last 24 hours</p>
+                  </div>
+                  <Lock className="h-8 w-8 text-red-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Sessions</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.activeUsers}</p>
+                    <p className="text-xs text-gray-500">Current users</p>
+                  </div>
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Threats Blocked</p>
+                    <p className="text-2xl font-bold text-purple-600">156</p>
+                    <p className="text-xs text-gray-500">This week</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Security Management Tools */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Lock className="h-5 w-5 mr-2" />
+                  Access Control
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Users className="h-4 w-4 mr-2" />
+                    User Permissions
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Key className="h-4 w-4 mr-2" />
+                    Role Management
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Two-Factor Auth
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Activity className="h-4 w-4 mr-2" />
+                    Session Management
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Eye className="h-5 w-5 mr-2" />
+                  Security Monitoring
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Threat Detection
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Audit Logs
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Real-time Monitoring
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Download className="h-4 w-4 mr-2" />
+                    Security Reports
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
                       </div>
                     </div>
                   ))}

@@ -9,7 +9,6 @@ import {
   OwnershipRecord,
   PricePaidRecord,
   TitleRecord,
-  BulkExport,
   ApiUsageLog,
   PropertySearchRequest,
   PropertySearchResponse,
@@ -25,7 +24,8 @@ import {
   LandRegistryError,
   PropertyValuation,
   MarketAnalysis
-} from '../../shared/types/land-registry.types';
+} from '../shared/types/land-registry.types';
+import { BulkExport } from './entities/bulk-export.entity';
 
 @Injectable()
 export class LandRegistryService {
@@ -184,7 +184,7 @@ export class LandRegistryService {
           data: cachedResult,
           metadata: {
             requestId: this.generateRequestId(),
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
             processingTime: Date.now() - startTime
           }
         };
@@ -268,7 +268,7 @@ export class LandRegistryService {
         data: response,
         metadata: {
           requestId: this.generateRequestId(),
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           processingTime: Date.now() - startTime
         }
       };
@@ -302,7 +302,7 @@ export class LandRegistryService {
           data: cachedResult,
           metadata: {
             requestId: this.generateRequestId(),
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
             processingTime: Date.now() - startTime
           }
         };
@@ -383,7 +383,7 @@ export class LandRegistryService {
         data: response,
         metadata: {
           requestId: this.generateRequestId(),
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           processingTime: Date.now() - startTime
         }
       };
@@ -417,7 +417,7 @@ export class LandRegistryService {
           data: cachedResult,
           metadata: {
             requestId: this.generateRequestId(),
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
             processingTime: Date.now() - startTime
           }
         };
@@ -521,7 +521,7 @@ export class LandRegistryService {
         data: response,
         metadata: {
           requestId: this.generateRequestId(),
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           processingTime: Date.now() - startTime
         }
       };
@@ -552,7 +552,7 @@ export class LandRegistryService {
         userId,
         exportId,
         searchCriteria: exportRequest.searchCriteria,
-        format: exportRequest.format,
+        exportFormat: exportRequest.exportFormat,
         status: 'pending'
       });
 
@@ -566,7 +566,7 @@ export class LandRegistryService {
       const response: BulkExportResponse = {
         exportId,
         status: 'pending',
-        estimatedCompletionTime: new Date(Date.now() + 300000).toISOString() // 5 minutes
+        createdAt: new Date()
       };
 
       await this.logApiUsage(
@@ -582,7 +582,7 @@ export class LandRegistryService {
         data: response,
         metadata: {
           requestId: this.generateRequestId(),
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           processingTime: Date.now() - startTime
         }
       };
@@ -628,7 +628,7 @@ export class LandRegistryService {
         data: bulkExport,
         metadata: {
           requestId: this.generateRequestId(),
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           processingTime: Date.now() - startTime
         }
       };
@@ -661,7 +661,7 @@ export class LandRegistryService {
           data: cachedResult,
           metadata: {
             requestId: this.generateRequestId(),
-            timestamp: new Date().toISOString(),
+            timestamp: new Date(),
             processingTime: Date.now() - startTime
           }
         };
@@ -687,11 +687,19 @@ export class LandRegistryService {
         totalProperties: properties.length,
         averagePrice: 0,
         medianPrice: 0,
-        priceRange: { min: 0, max: 0 },
-        propertyTypeDistribution: { 'D': 0, 'S': 0, 'T': 0, 'F': 0, 'O': 0 },
-        tenureDistribution: { 'F': 0, 'L': 0 },
-        salesByYear: {},
-        priceGrowth: { oneYear: 0, fiveYear: 0, tenYear: 0 }
+        priceDistribution: [],
+        propertyTypeDistribution: [
+          { type: 'D', count: 0, percentage: 0 },
+          { type: 'S', count: 0, percentage: 0 },
+          { type: 'T', count: 0, percentage: 0 },
+          { type: 'F', count: 0, percentage: 0 },
+          { type: 'O', count: 0, percentage: 0 }
+        ],
+        tenureDistribution: [
+          { tenure: 'F', count: 0, percentage: 0 },
+          { tenure: 'L', count: 0, percentage: 0 }
+        ],
+        salesTrends: []
       };
 
       // Cache the result
@@ -702,7 +710,7 @@ export class LandRegistryService {
         data: stats,
         metadata: {
           requestId: this.generateRequestId(),
-          timestamp: new Date().toISOString(),
+          timestamp: new Date(),
           processingTime: Date.now() - startTime
         }
       };
@@ -722,7 +730,7 @@ export class LandRegistryService {
       await new Promise(resolve => setTimeout(resolve, 5000));
 
       // Generate download URL (would be actual file generation in production)
-      const downloadUrl = `https://api.propertymasters.uk/downloads/${bulkExportId}.${exportRequest.format}`;
+      const downloadUrl = `https://api.propertymasters.uk/downloads/${bulkExportId}.${exportRequest.exportFormat}`;
 
       // Update with completion
       await this.bulkExportRepository.update(bulkExportId, {

@@ -12,7 +12,8 @@ import {
   ValidationPipe,
   UsePipes,
   Logger,
-  BadRequestException
+  BadRequestException,
+  HttpException
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -29,7 +30,7 @@ import {
   PropertyStatistics,
   LandRegistryApiResponse,
   BulkExport
-} from '../../shared/types/land-registry.types';
+} from '../shared/types/land-registry.types';
 import {
   PropertySearchDto,
   OwnershipLookupDto,
@@ -450,7 +451,7 @@ export class LandRegistryController {
         },
         metadata: {
           requestId: `val_${Date.now()}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date()
         }
       };
     } catch (error) {
