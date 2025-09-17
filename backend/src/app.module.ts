@@ -15,6 +15,7 @@ import { HealthModule } from './health/health.module';
 import { LoggingModule } from './logging/logging.module';
 import { SecurityModule } from './security/security.module';
 import { DatabaseModule } from './database/database.module';
+import { LandRegistryModule } from './land-registry/land-registry.module';
 import configuration from './config/configuration';
 import { envValidationSchema } from './config/env.validation';
 
@@ -42,6 +43,7 @@ import { envValidationSchema } from './config/env.validation';
     HealthModule,
     LoggingModule,
     SecurityModule,
+    LandRegistryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -304,6 +304,7 @@ const AdminDashboard: React.FC = () => {
             { id: 'users', label: 'Users', icon: Users },
             { id: 'properties', label: 'Properties', icon: Building },
             { id: 'analytics', label: 'Analytics', icon: Banknote },
+            { id: 'land-registry', label: 'Land Registry', icon: Database },
             { id: 'system', label: 'System', icon: Shield },
             { id: 'reports', label: 'Reports', icon: Download }
           ].map((tab) => {
@@ -1340,6 +1341,302 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'land-registry' && (
+        <div className="space-y-6">
+          {/* Land Registry API Status */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardContent className="card-compact">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-label text-gray-600">API Status</p>
+                    <p className="text-heading-3 text-green-600">Online</p>
+                    <div className="flex items-center mt-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                      <span className="text-caption text-gray-500">99.9% uptime</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <Wifi className="h-8 w-8 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="card-compact">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-label text-gray-600">Daily Requests</p>
+                    <p className="text-heading-3">12,847</p>
+                    <div className="flex items-center mt-2">
+                      <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
+                      <span className="text-caption text-green-500 font-medium">+15.3%</span>
+                      <span className="text-caption text-gray-500 ml-1">vs yesterday</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <Activity className="h-8 w-8 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="card-compact">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-label text-gray-600">Cache Hit Rate</p>
+                    <p className="text-heading-3">94.2%</p>
+                    <div className="flex items-center mt-2">
+                      <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
+                      <span className="text-caption text-green-500 font-medium">+2.1%</span>
+                      <span className="text-caption text-gray-500 ml-1">efficiency</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <Database className="h-8 w-8 text-purple-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="card-compact">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-label text-gray-600">Error Rate</p>
+                    <p className="text-heading-3 text-red-600">0.3%</p>
+                    <div className="flex items-center mt-2">
+                      <ArrowDown className="h-4 w-4 text-green-500 mr-1" />
+                      <span className="text-caption text-green-500 font-medium">-0.2%</span>
+                      <span className="text-caption text-gray-500 ml-1">improvement</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-red-100 rounded-lg">
+                    <AlertTriangle className="h-8 w-8 text-red-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* API Endpoints Monitoring */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Monitor className="h-5 w-5 mr-2" />
+                  API Endpoints Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                      <div>
+                        <p className="text-sm font-medium">Property Ownership Lookup</p>
+                        <p className="text-xs text-gray-500">Average response: 245ms</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-green-600 font-medium">Healthy</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                      <div>
+                        <p className="text-sm font-medium">Price Paid Data Search</p>
+                        <p className="text-xs text-gray-500">Average response: 312ms</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-green-600 font-medium">Healthy</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                      <div>
+                        <p className="text-sm font-medium">Bulk Data Processing</p>
+                        <p className="text-xs text-gray-500">Average response: 1.2s</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-yellow-600 font-medium">Slow</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                      <div>
+                        <p className="text-sm font-medium">Transaction History</p>
+                        <p className="text-xs text-gray-500">Average response: 189ms</p>
+                      </div>
+                    </div>
+                    <span className="text-sm text-green-600 font-medium">Healthy</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  Usage Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Most Used Endpoint</span>
+                    <span className="text-sm text-blue-600">Property Ownership (45%)</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Peak Usage Time</span>
+                    <span className="text-sm text-gray-600">2:00 PM - 4:00 PM</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Average Daily Requests</span>
+                    <span className="text-sm text-gray-600">12,847</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Data Sync Status</span>
+                    <span className="text-sm text-green-600">Last synced: 2 hours ago</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Data Management */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Database className="h-5 w-5 mr-2" />
+                  Data Synchronization
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Last Full Sync</span>
+                    <span className="text-sm text-gray-600">2024-01-15 02:00</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Records Synced</span>
+                    <span className="text-sm text-gray-600">2,847,392</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Sync Status</span>
+                    <span className="text-sm text-green-600">Up to date</span>
+                  </div>
+                  <Button className="w-full" variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Force Sync Now
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <HardDrive className="h-5 w-5 mr-2" />
+                  Storage Usage
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Property Data</span>
+                    <span className="text-sm text-gray-600">2.4 GB</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Price History</span>
+                    <span className="text-sm text-gray-600">1.8 GB</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Cache Storage</span>
+                    <span className="text-sm text-gray-600">512 MB</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '68%' }}></div>
+                  </div>
+                  <p className="text-xs text-gray-500">68% of allocated storage used</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Settings className="h-4 w-4 mr-2" />
+                    API Rate Limits
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Database className="h-4 w-4 mr-2" />
+                    Cache Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Monitoring Alerts
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Logs
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Activity Log */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Activity className="h-5 w-5 mr-2" />
+                Recent Land Registry Activity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Bulk search completed for SW1A postcodes</p>
+                    <p className="text-xs text-gray-500">2 minutes ago • 1,247 properties processed</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Price history data updated</p>
+                    <p className="text-xs text-gray-500">15 minutes ago • 3,892 new transactions</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">API rate limit warning</p>
+                    <p className="text-xs text-gray-500">1 hour ago • Approaching daily limit (85%)</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Data synchronization completed</p>
+                    <p className="text-xs text-gray-500">2 hours ago • All systems synchronized</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 

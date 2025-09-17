@@ -31,7 +31,9 @@ import {
   Star,
   Scale,
   History,
-  Copy
+  Copy,
+  FileText,
+  Users
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -45,6 +47,10 @@ import { formatCurrency } from '../utils';
 import { useAuthStore } from '../stores/authStore';
 import { usePropertyStore } from '../stores/propertyStore';
 import { Property, PropertyType, PropertyStatus, PriceType } from '../types';
+import { PropertyOwnership } from '../components/land-registry/PropertyOwnership';
+import { PriceHistoryChart } from '../components/land-registry/PriceHistoryChart';
+import { LandRegistryApiService } from '../services/land-registry.service';
+import { PropertyOwnershipData, PricePaidData } from '../types/land-registry';
 
 const PropertyDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -64,6 +70,12 @@ const PropertyDetail: React.FC = () => {
   const [showPropertyComparison, setShowPropertyComparison] = useState(false);
   const [showPropertyHistory, setShowPropertyHistory] = useState(false);
   const [showShareDropdown, setShowShareDropdown] = useState(false);
+  const [landRegistryData, setLandRegistryData] = useState<PropertyOwnershipData | null>(null);
+  const [priceHistoryData, setPriceHistoryData] = useState<PricePaidData[]>([]);
+  const [landRegistryLoading, setLandRegistryLoading] = useState(false);
+  const [landRegistryError, setLandRegistryError] = useState<string | null>(null);
+  
+  const landRegistryService = new LandRegistryApiService();
 
   // Mock property data with UK-specific features
   const mockProperty: Property = {
@@ -174,6 +186,42 @@ const PropertyDetail: React.FC = () => {
       setProperty(mockProperty);
     }
   }, [selectedProperty]);
+
+  // Fetch Land Registry data when property is loaded
+  useEffect(() => {
+    const fetchLandRegistryData = async () => {
+      if (!property?.address?.postcode) return;
+      
+      setLandRegistryLoading(true);
+      setLandRegistryError(null);
+      
+      try {
+        // Fetch ownership data
+        const ownershipData = await landRegistryService.getOwnershipLookup({
+          postcode: property.address.postcode,
+          propertyNumber: property.address.street.split(' ')[0]
+        });
+        setLandRegistryData(ownershipData);
+        
+        // Fetch price history
+        const priceHistory = await landRegistryService.getPricePaidData({
+          postcode: property.address.postcode,
+          fromDate: new Date(Date.now() - 10 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Last 10 years
+          toDate: new Date().toISOString().split('T')[0]
+        });
+        setPriceHistoryData(priceHistory.data || []);
+      } catch (error) {
+        console.error('Failed to fetch Land Registry data:', error);
+        setLandRegistryError('Failed to load Land Registry data');
+      } finally {
+        setLandRegistryLoading(false);
+      }
+    };
+    
+    if (property) {
+      fetchLandRegistryData();
+    }
+  }, [property]);
 
   // Close share dropdown when clicking outside
   useEffect(() => {
@@ -596,6 +644,98 @@ const PropertyDetail: React.FC = () => {
                   </CardContent>
                 </Card>
               )}
+            </div>
+
+            {/* Land Registry Information */}
+            <div className="grid grid-cols-1 gap-6">
+              {/* Property Ownership */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <FileText className="h-5 w-5 text-purple-600" />
+                    <span>Property Ownership</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {landRegistryLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                      <span className="ml-2 text-gray-600">Loading ownership data...</span>
+                    </div>
+                  ) : landRegistryError ? (
+                    <div className="text-center py-8">
+                      <p className="text-red-600 mb-2">{landRegistryError}</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          if (property) {
+                            const fetchData = async () => {
+                              setLandRegistryLoading(true);
+                              setLandRegistryError(null);
+                              try {
+                                const ownershipData = await landRegistryService.getOwnershipLookup({
+                                  postcode: property.address.postcode,
+                                  propertyNumber: property.address.street.split(' ')[0]
+                                });
+                                setLandRegistryData(ownershipData);
+                              } catch (error) {
+                                setLandRegistryError('Failed to load Land Registry data');
+                              } finally {
+                                setLandRegistryLoading(false);
+                              }
+                            };
+                            fetchData();
+                          }
+                        }}
+                      >
+                        Retry
+                      </Button>
+                    </div>
+                  ) : landRegistryData ? (
+                    <PropertyOwnership 
+                      data={landRegistryData}
+                      loading={false}
+                      error={null}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Users className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p>No ownership data available</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Price History Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <PoundSterling className="h-5 w-5 text-green-600" />
+                    <span>Price History</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {landRegistryLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                      <span className="ml-2 text-gray-600">Loading price history...</span>
+                    </div>
+                  ) : priceHistoryData.length > 0 ? (
+                    <PriceHistoryChart 
+                      data={priceHistoryData}
+                      loading={false}
+                      error={null}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <BarChart3 className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p>No price history data available</p>
+                      <p className="text-sm text-gray-400 mt-1">Price data may not be available for all properties</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
             {/* Location & Transport */}
