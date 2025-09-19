@@ -39,6 +39,12 @@ import BuyerDashboard from './pages/dashboards/BuyerDashboard';
 import LandlordDashboard from './pages/dashboards/LandlordDashboard';
 import TenantDashboard from './pages/dashboards/TenantDashboard';
 import SolicitorDashboard from './pages/dashboards/SolicitorDashboard';
+import SuperAdminDashboard from './pages/dashboards/SuperAdminDashboard';
+import PropertyManagerDashboard from './pages/dashboards/PropertyManagerDashboard';
+import ContractorDashboard from './pages/dashboards/ContractorDashboard';
+import SellerDashboard from './pages/dashboards/SellerDashboard';
+import DashboardOverview from './pages/dashboards/DashboardOverview';
+import { Navigate } from 'react-router-dom';
 
 // Protected pages
 import Profile from './pages/Profile';
@@ -159,42 +165,97 @@ function App() {
             </ProtectedRoute>
           } />
           
-          {/* Dashboard routes - Role-based access */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardLayout><Dashboard /></DashboardLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/admin" element={
-            <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-              <DashboardLayout><AdminDashboard /></DashboardLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/agent" element={
-            <ProtectedRoute allowedRoles={[UserRole.AGENT]}>
-              <DashboardLayout><AgentDashboard /></DashboardLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/buyer" element={
-            <ProtectedRoute allowedRoles={[UserRole.BUYER]}>
-              <DashboardLayout><BuyerDashboard /></DashboardLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/landlord" element={
-            <ProtectedRoute allowedRoles={[UserRole.LANDLORD]}>
-              <DashboardLayout><LandlordDashboard /></DashboardLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/tenant" element={
-            <ProtectedRoute allowedRoles={[UserRole.TENANT]}>
-              <DashboardLayout><TenantDashboard /></DashboardLayout>
-            </ProtectedRoute>
-          } />
-          <Route path="/dashboard/solicitor" element={
-            <ProtectedRoute allowedRoles={[UserRole.SOLICITOR]}>
-              <DashboardLayout><SolicitorDashboard /></DashboardLayout>
-            </ProtectedRoute>
-          } />
+          {/* Dashboard Routes */}
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Navigate to="/dashboard/overview" replace />} />
+            <Route 
+              path="overview" 
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'agent', 'buyer', 'landlord', 'tenant', 'solicitor', 'super_admin', 'property_manager', 'contractor', 'seller', 'manager', 'viewer', 'user']}>
+                  <DashboardOverview />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="super-admin" 
+              element={
+                <ProtectedRoute allowedRoles={['super_admin']}>
+                  <SuperAdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="admin" 
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="property-manager" 
+              element={
+                <ProtectedRoute allowedRoles={['property_manager']}>
+                  <PropertyManagerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="agent" 
+              element={
+                <ProtectedRoute allowedRoles={['agent']}>
+                  <AgentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="contractor" 
+              element={
+                <ProtectedRoute allowedRoles={['contractor']}>
+                  <ContractorDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="seller" 
+              element={
+                <ProtectedRoute allowedRoles={['seller']}>
+                  <SellerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="buyer" 
+              element={
+                <ProtectedRoute allowedRoles={['buyer']}>
+                  <BuyerDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="landlord" 
+              element={
+                <ProtectedRoute allowedRoles={['landlord']}>
+                  <LandlordDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="tenant" 
+              element={
+                <ProtectedRoute allowedRoles={['tenant']}>
+                  <TenantDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="solicitor" 
+              element={
+                <ProtectedRoute allowedRoles={['solicitor']}>
+                  <SolicitorDashboard />
+                </ProtectedRoute>
+              } 
+            />
           
           {/* Common protected routes */}
           <Route path="/profile" element={

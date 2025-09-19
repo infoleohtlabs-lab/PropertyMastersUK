@@ -16,22 +16,32 @@ const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const from = location.state?.from?.pathname || '/admin/dashboard';
 
-  const { values, errors, touched, handleChange, handleBlur, isValid, handleSubmit } = useFormValidation({
-    email: '',
-    password: '',
-    rememberMe: false,
-  }, {
-    email: (value) => {
-      if (!value) return 'Email is required';
-      return validateEmail(value);
+  const {
+    values,
+    errors,
+    touched,
+    isValid,
+    handleChange,
+    handleBlur,
+    handleSubmit,
+  } = useFormValidation({
+    initialValues: {
+      email: '',
+      password: '',
+      rememberMe: false,
     },
-    password: (value) => {
-      if (!value) return 'Password is required';
-      if (value.length < 6) return 'Password must be at least 6 characters';
-      return '';
+    validationRules: {
+      email: (value) => {
+        if (!value) return 'Email is required';
+        return validateEmail(value);
+      },
+      password: (value) => {
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        return '';
+      },
+      rememberMe: () => ''
     },
-    rememberMe: () => ''
-  }, {
     onSubmit: async (formValues) => {
       try {
         const credentials: LoginCredentials = {

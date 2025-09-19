@@ -24,12 +24,15 @@ const ForgotPassword: React.FC = () => {
     isValid,
     validateField
   } = useFormValidation<ForgotPasswordForm>({
-    email: ''
-  }, {
-    email: (value) => {
-      if (!value) return 'Email is required';
-      if (!validateEmail(value)) return 'Please enter a valid email address';
-      return '';
+    initialValues: {
+      email: ''
+    },
+    validationRules: {
+      email: (value) => {
+        if (!value) return 'Email is required';
+        if (!validateEmail(value)) return 'Please enter a valid email address';
+        return '';
+      }
     }
   });
 

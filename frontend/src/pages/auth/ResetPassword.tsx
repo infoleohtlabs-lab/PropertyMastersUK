@@ -32,22 +32,25 @@ const ResetPassword: React.FC = () => {
     isValid,
     validateField
   } = useFormValidation<ResetPasswordForm>({
-    password: '',
-    confirmPassword: ''
-  }, {
-    password: (value) => {
-      if (!value) return 'Password is required';
-      if (value.length < 8) return 'Password must be at least 8 characters';
-      if (!/(?=.*[a-z])/.test(value)) return 'Password must contain at least one lowercase letter';
-      if (!/(?=.*[A-Z])/.test(value)) return 'Password must contain at least one uppercase letter';
-      if (!/(?=.*\d)/.test(value)) return 'Password must contain at least one number';
-      if (!/(?=.*[@$!%*?&])/.test(value)) return 'Password must contain at least one special character';
-      return '';
+    initialValues: {
+      password: '',
+      confirmPassword: ''
     },
-    confirmPassword: (value) => {
-      if (!value) return 'Please confirm your password';
-      if (value !== values.password) return 'Passwords do not match';
-      return '';
+    validationRules: {
+      password: (value) => {
+        if (!value) return 'Password is required';
+        if (value.length < 8) return 'Password must be at least 8 characters';
+        if (!/(?=.*[a-z])/.test(value)) return 'Password must contain at least one lowercase letter';
+        if (!/(?=.*[A-Z])/.test(value)) return 'Password must contain at least one uppercase letter';
+        if (!/(?=.*\d)/.test(value)) return 'Password must contain at least one number';
+        if (!/(?=.*[@$!%*?&])/.test(value)) return 'Password must contain at least one special character';
+        return '';
+      },
+      confirmPassword: (value) => {
+        if (!value) return 'Please confirm your password';
+        if (value !== values.password) return 'Passwords do not match';
+        return '';
+      }
     }
   });
 

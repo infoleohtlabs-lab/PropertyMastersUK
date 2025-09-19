@@ -47,24 +47,26 @@ const Register: React.FC = () => {
     validateField,
     setValue
   } = useFormValidation<RegisterFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    phone: '',
-    role: UserRole.TENANT,
-    companyName: '',
-    address: {
-      street: '',
-      city: '',
-      county: '',
-      postcode: '',
-      country: 'UK'
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      phone: '',
+      role: UserRole.TENANT,
+      companyName: '',
+      address: {
+        street: '',
+        city: '',
+        county: '',
+        postcode: '',
+        country: 'UK'
+      },
+      agreeToTerms: false,
+      subscribeToNewsletter: false
     },
-    agreeToTerms: false,
-    subscribeToNewsletter: false
-  }, {
+    validationRules: {
     firstName: (value) => {
       if (!value) return 'First name is required';
       if (value.length < 2) return 'First name must be at least 2 characters';
@@ -121,6 +123,7 @@ const Register: React.FC = () => {
     },
     subscribeToNewsletter: (value: boolean) => {
       return '';
+    }
     }
   });
 

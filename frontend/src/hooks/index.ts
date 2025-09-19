@@ -199,9 +199,13 @@ export function useKeyboardShortcut(
 
 // Hook for form validation
 export function useFormValidation<T extends Record<string, any>>(
-  initialValues: T,
-  validationRules: Record<keyof T, (value: any) => string | null>
+  config: {
+    initialValues: T;
+    validationRules: Record<keyof T, (value: any) => string | null>;
+    onSubmit?: (values: T) => void | Promise<void>;
+  }
 ) {
+  const { initialValues, validationRules, onSubmit } = config;
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
@@ -268,6 +272,13 @@ export function useFormValidation<T extends Record<string, any>>(
     setTouched({});
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateAll() && onSubmit) {
+      await onSubmit(values);
+    }
+  };
+
   const isValid = Object.values(errors).every(error => !error) && Object.keys(touched).length > 0;
 
   return {
@@ -278,6 +289,7 @@ export function useFormValidation<T extends Record<string, any>>(
     setTouched: setFieldTouched,
     handleChange,
     handleBlur,
+    handleSubmit,
     validateField,
     validateAll,
     reset,

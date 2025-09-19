@@ -26,21 +26,24 @@ const AgentLogin: React.FC = () => {
     isValid,
     validateField
   } = useFormValidation<LoginCredentials>({
-    email: '',
-    password: '',
-    rememberMe: false
-  }, {
-    email: (value) => {
-      if (!value) return 'Email is required';
-      if (!validateEmail(value)) return 'Please enter a valid email address';
-      return '';
+    initialValues: {
+      email: '',
+      password: '',
+      rememberMe: false
     },
-    password: (value) => {
-      if (!value) return 'Password is required';
-      if (value.length < 6) return 'Password must be at least 6 characters';
-      return '';
-    },
-    rememberMe: () => ''
+    validationRules: {
+      email: (value) => {
+        if (!value) return 'Email is required';
+        if (!validateEmail(value)) return 'Please enter a valid email address';
+        return '';
+      },
+      password: (value) => {
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        return '';
+      },
+      rememberMe: () => ''
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent) => {

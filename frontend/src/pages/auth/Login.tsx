@@ -25,7 +25,6 @@ const Login: React.FC = () => {
     handleChange,
     handleBlur,
     handleSubmit,
-    setFieldError,
   } = useFormValidation({
     initialValues: {
       email: '',
@@ -33,14 +32,16 @@ const Login: React.FC = () => {
       rememberMe: false,
     },
     validationRules: {
-      email: {
-        required: true,
-        email: true,
+      email: (value) => {
+        if (!value) return 'Email is required';
+        return validateEmail(value);
       },
-      password: {
-        required: true,
-        minLength: 6,
+      password: (value) => {
+        if (!value) return 'Password is required';
+        if (value.length < 6) return 'Password must be at least 6 characters';
+        return '';
       },
+      rememberMe: () => ''
     },
     onSubmit: async (formValues) => {
       try {
