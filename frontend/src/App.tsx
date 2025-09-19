@@ -43,7 +43,7 @@ import SuperAdminDashboard from './pages/dashboards/SuperAdminDashboard';
 import PropertyManagerDashboard from './pages/dashboards/PropertyManagerDashboard';
 import ContractorDashboard from './pages/dashboards/ContractorDashboard';
 import SellerDashboard from './pages/dashboards/SellerDashboard';
-import DashboardOverview from './pages/dashboards/DashboardOverview';
+import DashboardOverview from './pages/dashboard/DashboardOverview';
 import { Navigate } from 'react-router-dom';
 
 // Protected pages
@@ -256,6 +256,7 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+          </Route>
           
           {/* Common protected routes */}
           <Route path="/profile" element={

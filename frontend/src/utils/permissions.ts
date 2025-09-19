@@ -1,5 +1,8 @@
 import { UserRole } from '@/types/auth';
 
+// Re-export UserRole for convenience
+export { UserRole };
+
 // Define granular permissions
 export enum Permission {
   // System Administration

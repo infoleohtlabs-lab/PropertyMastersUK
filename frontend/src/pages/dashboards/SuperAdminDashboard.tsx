@@ -402,3 +402,21 @@ const SuperAdminDashboard: React.FC = () => {
                   <Users className="h-6 w-6 mb-2" />
                   Manage Users
                 </Button>
+                <Button className="h-20 flex-col">
+                  <Shield className="h-6 w-6 mb-2" />
+                  Role Management
+                </Button>
+                <Button className="h-20 flex-col">
+                  <Settings className="h-6 w-6 mb-2" />
+                  Permissions
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default SuperAdminDashboard;
