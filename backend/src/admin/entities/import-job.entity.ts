@@ -34,17 +34,7 @@ export class ImportJob {
   fileSize: number;
 
   @Column({
-    type: 'enum',
-    enum: [
-      'uploaded',
-      'validating',
-      'validated',
-      'validation_failed',
-      'processing',
-      'completed',
-      'processing_failed',
-      'cancelled',
-    ],
+    type: 'varchar',
     default: 'uploaded',
   })
   status: ImportJobStatus;
@@ -56,7 +46,7 @@ export class ImportJob {
   @JoinColumn({ name: 'uploadedBy' })
   uploadedByUser: User;
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   metadata: {
     originalName?: string;
     mimeType?: string;
@@ -64,10 +54,10 @@ export class ImportJob {
     [key: string]: any;
   };
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   validationResults: any[];
 
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   stats: {
     totalRows?: number;
     validRows?: number;
@@ -83,16 +73,16 @@ export class ImportJob {
   @Column({ type: 'text', nullable: true })
   errorMessage: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   validationStartedAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   validationCompletedAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   processingStartedAt: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   processingCompletedAt: Date;
 
   @CreateDateColumn()

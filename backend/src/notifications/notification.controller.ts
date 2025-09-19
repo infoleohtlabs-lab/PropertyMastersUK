@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -15,35 +16,35 @@ export class NotificationController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new notification' })
-  @ApiResponse({ status: 201, description: 'Notification created successfully', type: Notification })
+  @ApiResponse({ status: 201, description: 'Notification created successfully', schema: { $ref: getSchemaPath(Notification) } })
   create(@Body() createNotificationDto: CreateNotificationDto) {
     return this.notificationService.create(createNotificationDto);
   }
 
   @Post('bulk')
   @ApiOperation({ summary: 'Create multiple notifications' })
-  @ApiResponse({ status: 201, description: 'Notifications created successfully', type: [Notification] })
+  @ApiResponse({ status: 201, description: 'Notifications created successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Notification) } } })
   createBulk(@Body() notifications: CreateNotificationDto[]) {
     return this.notificationService.createBulkNotifications(notifications);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all notifications' })
-  @ApiResponse({ status: 200, description: 'Notifications retrieved successfully', type: [Notification] })
+  @ApiResponse({ status: 200, description: 'Notifications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Notification) } } })
   findAll() {
     return this.notificationService.findAll();
   }
 
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get notifications for a user' })
-  @ApiResponse({ status: 200, description: 'User notifications retrieved successfully', type: [Notification] })
+  @ApiResponse({ status: 200, description: 'User notifications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Notification) } } })
   findByUser(@Param('userId') userId: string) {
     return this.notificationService.findByUser(userId);
   }
 
   @Get('user/:userId/unread')
   @ApiOperation({ summary: 'Get unread notifications for a user' })
-  @ApiResponse({ status: 200, description: 'Unread notifications retrieved successfully', type: [Notification] })
+  @ApiResponse({ status: 200, description: 'Unread notifications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Notification) } } })
   findUnread(@Param('userId') userId: string) {
     return this.notificationService.findUnread(userId);
   }
@@ -57,7 +58,7 @@ export class NotificationController {
 
   @Get('user/:userId/type/:type')
   @ApiOperation({ summary: 'Get notifications by type for a user' })
-  @ApiResponse({ status: 200, description: 'Notifications retrieved successfully', type: [Notification] })
+  @ApiResponse({ status: 200, description: 'Notifications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Notification) } } })
   findByType(
     @Param('userId') userId: string,
     @Param('type') type: string,
@@ -74,7 +75,7 @@ export class NotificationController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get notification by ID' })
-  @ApiResponse({ status: 200, description: 'Notification retrieved successfully', type: Notification })
+  @ApiResponse({ status: 200, description: 'Notification retrieved successfully', schema: { $ref: getSchemaPath(Notification) } })
   @ApiResponse({ status: 404, description: 'Notification not found' })
   findOne(@Param('id') id: string) {
     return this.notificationService.findOne(id);
@@ -82,7 +83,7 @@ export class NotificationController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update notification' })
-  @ApiResponse({ status: 200, description: 'Notification updated successfully', type: Notification })
+  @ApiResponse({ status: 200, description: 'Notification updated successfully', schema: { $ref: getSchemaPath(Notification) } })
   @ApiResponse({ status: 404, description: 'Notification not found' })
   update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
     return this.notificationService.update(id, updateNotificationDto);
@@ -90,7 +91,7 @@ export class NotificationController {
 
   @Post(':id/read')
   @ApiOperation({ summary: 'Mark notification as read' })
-  @ApiResponse({ status: 200, description: 'Notification marked as read', type: Notification })
+  @ApiResponse({ status: 200, description: 'Notification marked as read', schema: { $ref: getSchemaPath(Notification) } })
   markAsRead(@Param('id') id: string) {
     return this.notificationService.markAsRead(id);
   }

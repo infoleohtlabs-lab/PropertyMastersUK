@@ -16,7 +16,8 @@ import {
   UsePipes,
   ForbiddenException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiProperty ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -794,7 +795,7 @@ export class MaintenanceController {
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD, UserRole.TENANT)
   @ApiOperation({ summary: 'Create a new maintenance request' })
-  @ApiResponse({ status: 201, description: 'Maintenance request created successfully', type: MaintenanceRequest })
+  @ApiResponse({ status: 201, description: 'Maintenance request created successfully', schema: { $ref: getSchemaPath(MaintenanceRequest) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -900,7 +901,7 @@ export class MaintenanceController {
   @Get('requests/:id')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD, UserRole.TENANT, UserRole.CONTRACTOR)
   @ApiOperation({ summary: 'Get maintenance request by ID' })
-  @ApiResponse({ status: 200, description: 'Maintenance request retrieved successfully', type: MaintenanceRequest })
+  @ApiResponse({ status: 200, description: 'Maintenance request retrieved successfully', schema: { $ref: getSchemaPath(MaintenanceRequest) } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Maintenance request not found' })
@@ -933,7 +934,7 @@ export class MaintenanceController {
   @Patch('requests/:id')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD, UserRole.CONTRACTOR)
   @ApiOperation({ summary: 'Update maintenance request' })
-  @ApiResponse({ status: 200, description: 'Maintenance request updated successfully', type: MaintenanceRequest })
+  @ApiResponse({ status: 200, description: 'Maintenance request updated successfully', schema: { $ref: getSchemaPath(MaintenanceRequest) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -987,7 +988,7 @@ export class MaintenanceController {
   @Post('requests/:id/assign')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Assign maintenance request to contractor' })
-  @ApiResponse({ status: 200, description: 'Maintenance request assigned successfully', type: MaintenanceRequest })
+  @ApiResponse({ status: 200, description: 'Maintenance request assigned successfully', schema: { $ref: getSchemaPath(MaintenanceRequest) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -1019,7 +1020,7 @@ export class MaintenanceController {
   @Post('requests/:id/complete')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD, UserRole.CONTRACTOR)
   @ApiOperation({ summary: 'Complete maintenance request' })
-  @ApiResponse({ status: 200, description: 'Maintenance request completed successfully', type: MaintenanceRequest })
+  @ApiResponse({ status: 200, description: 'Maintenance request completed successfully', schema: { $ref: getSchemaPath(MaintenanceRequest) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -1058,7 +1059,7 @@ export class MaintenanceController {
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Create a new maintenance schedule' })
-  @ApiResponse({ status: 201, description: 'Maintenance schedule created successfully', type: MaintenanceSchedule })
+  @ApiResponse({ status: 201, description: 'Maintenance schedule created successfully', schema: { $ref: getSchemaPath(MaintenanceSchedule) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -1170,7 +1171,7 @@ export class MaintenanceController {
   @Get('schedules/:id')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD, UserRole.CONTRACTOR)
   @ApiOperation({ summary: 'Get maintenance schedule by ID' })
-  @ApiResponse({ status: 200, description: 'Maintenance schedule retrieved successfully', type: MaintenanceSchedule })
+  @ApiResponse({ status: 200, description: 'Maintenance schedule retrieved successfully', schema: { $ref: getSchemaPath(MaintenanceSchedule) } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Maintenance schedule not found' })
@@ -1199,7 +1200,7 @@ export class MaintenanceController {
   @Patch('schedules/:id')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Update maintenance schedule' })
-  @ApiResponse({ status: 200, description: 'Maintenance schedule updated successfully', type: MaintenanceSchedule })
+  @ApiResponse({ status: 200, description: 'Maintenance schedule updated successfully', schema: { $ref: getSchemaPath(MaintenanceSchedule) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -1252,7 +1253,7 @@ export class MaintenanceController {
   @Post('schedules/:id/pause')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Pause maintenance schedule' })
-  @ApiResponse({ status: 200, description: 'Maintenance schedule paused successfully', type: MaintenanceSchedule })
+  @ApiResponse({ status: 200, description: 'Maintenance schedule paused successfully', schema: { $ref: getSchemaPath(MaintenanceSchedule) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -1282,7 +1283,7 @@ export class MaintenanceController {
   @Post('schedules/:id/resume')
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Resume maintenance schedule' })
-  @ApiResponse({ status: 200, description: 'Maintenance schedule resumed successfully', type: MaintenanceSchedule })
+  @ApiResponse({ status: 200, description: 'Maintenance schedule resumed successfully', schema: { $ref: getSchemaPath(MaintenanceSchedule) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })

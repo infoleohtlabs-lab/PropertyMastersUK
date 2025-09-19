@@ -74,16 +74,14 @@ export class Availability {
 
   @ApiProperty({ enum: AvailabilityType, description: 'Type of availability' })
   @Column({
-    type: 'enum',
-    enum: AvailabilityType,
+    type: 'varchar',
     default: AvailabilityType.AVAILABLE,
   })
   type: AvailabilityType;
 
   @ApiProperty({ enum: AvailabilityStatus, description: 'Current status of the availability' })
   @Column({
-    type: 'enum',
-    enum: AvailabilityStatus,
+    type: 'varchar',
     default: AvailabilityStatus.ACTIVE,
   })
   status: AvailabilityStatus;
@@ -107,11 +105,11 @@ export class Availability {
 
   // Time and Date
   @ApiProperty({ description: 'Start date and time of availability' })
-  @Column('timestamp with time zone')
+  @Column('datetime')
   startDateTime: Date;
 
   @ApiProperty({ description: 'End date and time of availability' })
-  @Column('timestamp with time zone')
+  @Column('datetime')
   endDateTime: Date;
 
   @ApiProperty({ description: 'Duration in minutes' })
@@ -133,8 +131,7 @@ export class Availability {
 
   @ApiProperty({ enum: AvailabilityRecurrenceType, description: 'Recurrence pattern' })
   @Column({
-    type: 'enum',
-    enum: AvailabilityRecurrenceType,
+    type: 'varchar',
     default: AvailabilityRecurrenceType.NONE,
   })
   recurrenceType: AvailabilityRecurrenceType;
@@ -152,7 +149,7 @@ export class Availability {
   recurrenceDayOfMonth?: number;
 
   @ApiProperty({ description: 'End date for recurrence', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   recurrenceEndDate?: Date;
 
   @ApiProperty({ description: 'Maximum number of occurrences', required: false })
@@ -227,7 +224,7 @@ export class Availability {
   currency: string;
 
   @ApiProperty({ description: 'Pricing rules', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   pricingRules?: Array<{
     condition: string;
     priceModifier: number;
@@ -309,7 +306,7 @@ export class Availability {
 
   // Seasonal and Special Conditions
   @ApiProperty({ description: 'Seasonal availability rules', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   seasonalRules?: Array<{
     startDate: string;
     endDate: string;
@@ -319,7 +316,7 @@ export class Availability {
   }>;
 
   @ApiProperty({ description: 'Holiday availability rules', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   holidayRules?: Array<{
     holidayName: string;
     date: string;
@@ -350,7 +347,7 @@ export class Availability {
   externalReference?: string;
 
   @ApiProperty({ description: 'Last sync timestamp', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   lastSyncAt?: Date;
 
   @ApiProperty({ description: 'Sync status', required: false })
@@ -404,7 +401,7 @@ export class Availability {
   revenueGenerated?: number;
 
   @ApiProperty({ description: 'Last booking date', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   lastBookingDate?: Date;
 
   // Metadata and Custom Fields
@@ -413,11 +410,11 @@ export class Availability {
   tags?: string[];
 
   @ApiProperty({ description: 'Custom fields', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   customFields?: Record<string, any>;
 
   @ApiProperty({ description: 'Additional metadata', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   // Audit Fields
@@ -446,7 +443,7 @@ export class Availability {
   updater?: User;
 
   @ApiProperty({ description: 'Soft delete timestamp', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   deletedAt?: Date;
 
   @ApiProperty({ description: 'User who deleted the availability', required: false })

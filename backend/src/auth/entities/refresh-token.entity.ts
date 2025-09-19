@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
+
 @Entity('refresh_tokens')
 export class RefreshToken {
   @PrimaryGeneratedColumn('uuid')
@@ -21,7 +22,7 @@ export class RefreshToken {
 
   @Column({ 
     name: 'expires_at', 
-    type: process.env.DATABASE_TYPE === 'sqlite' ? 'datetime' : 'timestamp' 
+    type: 'datetime' 
   })
   expiresAt: Date;
 

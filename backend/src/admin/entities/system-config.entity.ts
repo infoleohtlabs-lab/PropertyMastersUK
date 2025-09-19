@@ -4,12 +4,46 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
   Index,
 } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+
+export enum ConfigCategory {
+  DATABASE = 'database',
+  EMAIL = 'email',
+  API = 'api',
+  SECURITY = 'security',
+  INTEGRATION = 'integration',
+  NOTIFICATION = 'notification',
+  BACKUP = 'backup',
+  ANALYTICS = 'analytics',
+  GENERAL = 'general',
+}
+
+export enum ConfigType {
+  STRING = 'string',
+  NUMBER = 'number',
+  BOOLEAN = 'boolean',
+  JSON = 'json',
+  ARRAY = 'array',
+  PASSWORD = 'password',
+  URL = 'url',
+  EMAIL = 'email',
+}
+
+export enum ConfigEnvironment {
+  DEVELOPMENT = 'development',
+  STAGING = 'staging',
+  PRODUCTION = 'production',
+  ALL = 'all',
+}
 
 @Entity('system_configs')
-@Index(['key'], { unique: true })
 @Index(['category', 'key'])
+@Index(['environment', 'active'])
+@Index(['key'], { unique: true })
 export class SystemConfig {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -17,38 +51,88 @@ export class SystemConfig {
   @Column({ length: 100, unique: true })
   key: string;
 
-  @Column('text')
-  value: string;
+  @Column({ length: 200 })
+  name: string;
 
-  @Column({ length: 50 })
-  category: string; // api, cache, monitoring, security, etc.
-
-  @Column({ length: 200, nullable: true })
+  @Column('text', { nullable: true })
   description: string;
 
-  @Column({ length: 50, default: 'string' })
-  type: string; // string, number, boolean, json, array
+  @Column({
+    type: 'varchar',
+  })
+  category: ConfigCategory;
 
-  @Column({ default: false })
-  encrypted: boolean;
+  @Column({
+    type: 'varchar',
+  })
+  type: ConfigType;
+
+  @Column({
+    type: 'varchar',
+    default: ConfigEnvironment.ALL,
+  })
+  environment: ConfigEnvironment;
+
+  @Column('text', { nullable: true })
+  value: string;
+
+  @Column('text', { nullable: true })
+  defaultValue: string;
 
   @Column({ default: true })
-  editable: boolean;
+  active: boolean;
 
   @Column({ default: false })
   required: boolean;
 
-  @Column('text', { nullable: true })
-  validation: string; // JSON schema or regex for validation
+  @Column({ default: false })
+  sensitive: boolean;
 
-  @Column({ name: 'default_value', type: 'text', nullable: true })
-  defaultValue: string;
+  @Column({ default: false })
+  readonly: boolean;
+
+  @Column('text', { nullable: true })
+  validationRules: string; // JSON string of validation rules
+
+  @Column('text', { nullable: true })
+  possibleValues: string; // JSON array of possible values for enum-like configs
+
+  @Column({ name: 'min_value', nullable: true })
+  minValue: number;
+
+  @Column({ name: 'max_value', nullable: true })
+  maxValue: number;
+
+  @Column({ name: 'min_length', nullable: true })
+  minLength: number;
+
+  @Column({ name: 'max_length', nullable: true })
+  maxLength: number;
+
+  @Column('text', { nullable: true })
+  pattern: string; // Regex pattern for validation
 
   @Column({ name: 'display_order', default: 0 })
   displayOrder: number;
 
-  @Column({ default: true })
-  active: boolean;
+  @Column({ name: 'group_name', length: 100, nullable: true })
+  groupName: string;
+
+  @Column('text', { nullable: true })
+  metadata: Record<string, any>;
+
+  @Column({ name: 'last_modified_by', nullable: true })
+  lastModifiedBy: string;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'last_modified_by' })
+  lastModifiedByUser: User;
+
+  @Column({ name: 'last_modified_at', nullable: true })
+  lastModifiedAt: Date;
+
+  @Column({ name: 'version', default: 1 })
+  version: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -56,57 +140,12 @@ export class SystemConfig {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @Column({ name: 'created_by', nullable: true })
-  createdBy: string;
+  @Column('text', { nullable: true })
+  notes: string;
 
-  @Column({ name: 'updated_by', nullable: true })
-  updatedBy: string;
+  @Column({ name: 'restart_required', default: false })
+  restartRequired: boolean;
 
-  // Helper methods
-  getParsedValue(): any {
-    try {
-      switch (this.type) {
-        case 'number':
-          return parseFloat(this.value);
-        case 'boolean':
-          return this.value === 'true';
-        case 'json':
-        case 'array':
-          return JSON.parse(this.value);
-        default:
-          return this.value;
-      }
-    } catch (error) {
-      return this.defaultValue ? this.getParsedDefaultValue() : null;
-    }
-  }
-
-  getParsedDefaultValue(): any {
-    try {
-      switch (this.type) {
-        case 'number':
-          return parseFloat(this.defaultValue);
-        case 'boolean':
-          return this.defaultValue === 'true';
-        case 'json':
-        case 'array':
-          return JSON.parse(this.defaultValue);
-        default:
-          return this.defaultValue;
-      }
-    } catch (error) {
-      return null;
-    }
-  }
-
-  setValue(value: any): void {
-    switch (this.type) {
-      case 'json':
-      case 'array':
-        this.value = JSON.stringify(value);
-        break;
-      default:
-        this.value = String(value);
-    }
-  }
+  @Column({ name: 'backup_before_change', default: false })
+  backupBeforeChange: boolean;
 }

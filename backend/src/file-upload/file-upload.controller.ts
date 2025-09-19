@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, UploadedFile, UseInterceptors, Res } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -21,7 +22,7 @@ export class FileUploadController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload a file' })
-  @ApiResponse({ status: 201, description: 'File uploaded successfully', type: FileUpload })
+  @ApiResponse({ status: 201, description: 'File uploaded successfully', schema: { $ref: getSchemaPath(FileUpload) } })
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() createFileUploadDto: CreateFileUploadDto,
@@ -31,21 +32,21 @@ export class FileUploadController {
 
   @Get()
   @ApiOperation({ summary: 'Get all file uploads' })
-  @ApiResponse({ status: 200, description: 'File uploads retrieved successfully', type: [FileUpload] })
+  @ApiResponse({ status: 200, description: 'File uploads retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(FileUpload) } } })
   findAll() {
     return this.fileUploadService.findAll();
   }
 
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get file uploads for a user' })
-  @ApiResponse({ status: 200, description: 'User file uploads retrieved successfully', type: [FileUpload] })
+  @ApiResponse({ status: 200, description: 'User file uploads retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(FileUpload) } } })
   findByUser(@Param('userId') userId: string) {
     return this.fileUploadService.findByUser(userId);
   }
 
   @Get('entity/:entityType/:entityId')
   @ApiOperation({ summary: 'Get file uploads for an entity' })
-  @ApiResponse({ status: 200, description: 'Entity file uploads retrieved successfully', type: [FileUpload] })
+  @ApiResponse({ status: 200, description: 'Entity file uploads retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(FileUpload) } } })
   findByEntity(
     @Param('entityType') entityType: string,
     @Param('entityId') entityId: string,
@@ -55,7 +56,7 @@ export class FileUploadController {
 
   @Get('type/:fileType')
   @ApiOperation({ summary: 'Get file uploads by type' })
-  @ApiResponse({ status: 200, description: 'File uploads retrieved successfully', type: [FileUpload] })
+  @ApiResponse({ status: 200, description: 'File uploads retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(FileUpload) } } })
   findByType(@Param('fileType') fileType: string) {
     return this.fileUploadService.findByType(fileType);
   }
@@ -69,7 +70,7 @@ export class FileUploadController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get file upload by ID' })
-  @ApiResponse({ status: 200, description: 'File upload retrieved successfully', type: FileUpload })
+  @ApiResponse({ status: 200, description: 'File upload retrieved successfully', schema: { $ref: getSchemaPath(FileUpload) } })
   @ApiResponse({ status: 404, description: 'File upload not found' })
   findOne(@Param('id') id: string) {
     return this.fileUploadService.findOne(id);
@@ -128,7 +129,7 @@ export class FileUploadController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update file upload metadata' })
-  @ApiResponse({ status: 200, description: 'File upload updated successfully', type: FileUpload })
+  @ApiResponse({ status: 200, description: 'File upload updated successfully', schema: { $ref: getSchemaPath(FileUpload) } })
   @ApiResponse({ status: 404, description: 'File upload not found' })
   update(@Param('id') id: string, @Body() updateFileUploadDto: UpdateFileUploadDto) {
     return this.fileUploadService.update(id, updateFileUploadDto);

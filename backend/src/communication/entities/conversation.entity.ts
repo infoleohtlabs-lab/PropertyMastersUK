@@ -64,24 +64,21 @@ export class Conversation {
 
   @ApiProperty({ enum: ConversationType, description: 'Conversation type' })
   @Column({
-    type: 'enum',
-    enum: ConversationType,
+    type: 'varchar',
     default: ConversationType.DIRECT,
   })
   type: ConversationType;
 
   @ApiProperty({ enum: ConversationStatus, description: 'Conversation status' })
   @Column({
-    type: 'enum',
-    enum: ConversationStatus,
+    type: 'varchar',
     default: ConversationStatus.ACTIVE,
   })
   status: ConversationStatus;
 
   @ApiProperty({ enum: ConversationPrivacy, description: 'Conversation privacy' })
   @Column({
-    type: 'enum',
-    enum: ConversationPrivacy,
+    type: 'varchar',
     default: ConversationPrivacy.PRIVATE,
   })
   privacy: ConversationPrivacy;
@@ -241,11 +238,11 @@ export class Conversation {
   activeParticipantCount: number;
 
   @ApiProperty({ description: 'Last message at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   lastMessageAt?: Date;
 
   @ApiProperty({ description: 'Last activity at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   lastActivityAt?: Date;
 
   // Flags and Status
@@ -348,15 +345,15 @@ export class Conversation {
   updatedAt: Date;
 
   @ApiProperty({ description: 'Deleted at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   deletedAt?: Date;
 
   @ApiProperty({ description: 'Archived at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   archivedAt?: Date;
 
   @ApiProperty({ description: 'Closed at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   closedAt?: Date;
 
   @ApiProperty({ description: 'Closed by user ID', required: false })

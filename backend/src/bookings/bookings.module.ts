@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
@@ -21,9 +21,9 @@ import { CommunicationModule } from '../communication/communication.module';
     UsersModule,
     PropertiesModule,
     TenantOrganizationsModule,
-    MaintenanceModule,
+    forwardRef(() => MaintenanceModule),
     PaymentsModule,
-    CommunicationModule,
+    forwardRef(() => CommunicationModule),
   ],
   controllers: [BookingController],
   providers: [BookingService],

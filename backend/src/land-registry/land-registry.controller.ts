@@ -13,29 +13,51 @@ import {
   UsePipes,
   Logger,
   BadRequestException,
-  HttpException
+  HttpException,
+  UseInterceptors,
+  Delete,
+  Put,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LandRegistryService } from './land-registry.service';
 import {
   PropertySearchRequest,
-  PropertySearchResponse,
   OwnershipLookupRequest,
-  OwnershipLookupResponse,
   PricePaidSearchRequest,
-  PricePaidSearchResponse,
   BulkExportRequest,
-  BulkExportResponse,
-  PropertyStatistics,
-  LandRegistryApiResponse,
-  BulkExport
+  LandRegistryApiResponse
 } from '../shared/types/land-registry.types';
+import { BulkExport } from './entities/bulk-export.entity';
+import { BulkExportResponse } from './entities/bulk-export-response.entity';
+import { PropertyStatistics } from './entities/property-statistics.entity';
+import { PropertySearchResponse } from './entities/property-search-response.entity';
+import { OwnershipLookupResponse } from './entities/ownership-lookup-response.entity';
+import { PricePaidSearchResponse } from './entities/price-paid-search-response.entity';
 import {
   PropertySearchDto,
   OwnershipLookupDto,
   PricePaidSearchDto,
-  BulkExportDto
+  BulkExportDto,
+  PropertyValuationDto,
+  SyncPropertyDataDto,
+  ClearCacheDto,
+  CsvImportDto,
+  CsvImportResponseDto,
+  CsvImportStatusDto,
+  ApiResponseDto,
+  ErrorResponseDto,
+  HealthCheckResponseDto,
+  SyncResponseDto,
+  CacheResponseDto
 } from './dto/land-registry.dto';
 
 @ApiTags('Land Registry')
@@ -52,9 +74,7 @@ export class LandRegistryController {
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'Properties found successfully',
-    type: PropertySearchResponse
-  })
+    description: 'Properties found successfully', schema: { $ref: getSchemaPath(PropertySearchResponse) } })
   @ApiResponse({ status: 400, description: 'Invalid search parameters' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   @ApiQuery({ name: 'postcode', required: false, description: 'Property postcode' })
@@ -102,9 +122,7 @@ export class LandRegistryController {
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'Ownership information retrieved successfully',
-    type: OwnershipLookupResponse
-  })
+    description: 'Ownership information retrieved successfully', schema: { $ref: getSchemaPath(OwnershipLookupResponse) } })
   @ApiResponse({ status: 404, description: 'Property not found' })
   @ApiResponse({ status: 400, description: 'Invalid lookup parameters' })
   @ApiQuery({ name: 'titleNumber', required: false, description: 'Land Registry title number' })
@@ -151,9 +169,7 @@ export class LandRegistryController {
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'Price paid data retrieved successfully',
-    type: PricePaidSearchResponse
-  })
+    description: 'Price paid data retrieved successfully', schema: { $ref: getSchemaPath(PricePaidSearchResponse) } })
   @ApiResponse({ status: 400, description: 'Invalid search parameters' })
   @ApiQuery({ name: 'postcode', required: false, description: 'Property postcode' })
   @ApiQuery({ name: 'address', required: false, description: 'Property address' })
@@ -221,9 +237,7 @@ export class LandRegistryController {
   })
   @ApiResponse({ 
     status: 201, 
-    description: 'Bulk export created successfully',
-    type: BulkExportResponse
-  })
+    description: 'Bulk export created successfully', schema: { $ref: getSchemaPath(BulkExportResponse) } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'Invalid export parameters' })
   @HttpCode(HttpStatus.CREATED)
@@ -237,7 +251,7 @@ export class LandRegistryController {
       
       const bulkExportRequest: BulkExportRequest = {
         searchCriteria: exportRequest.searchCriteria,
-        format: exportRequest.format,
+        exportFormat: exportRequest.format,
         includeFields: exportRequest.includeFields
       };
 
@@ -258,9 +272,7 @@ export class LandRegistryController {
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'Export status retrieved successfully',
-    type: BulkExport
-  })
+    description: 'Export status retrieved successfully', schema: { $ref: getSchemaPath(BulkExport) } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Export not found' })
   async getBulkExportStatus(
@@ -285,9 +297,7 @@ export class LandRegistryController {
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'Statistics retrieved successfully',
-    type: PropertyStatistics
-  })
+    description: 'Statistics retrieved successfully', schema: { $ref: getSchemaPath(PropertyStatistics) } })
   @ApiResponse({ status: 400, description: 'Invalid parameters' })
   @ApiQuery({ name: 'postcode', required: false, description: 'Property postcode' })
   @ApiQuery({ name: 'address', required: false, description: 'Property address' })
@@ -444,7 +454,7 @@ export class LandRegistryController {
           priceHistory: priceHistory.data.transactions,
           areaStatistics: areaStats.data,
           valuation: {
-            estimatedValue: priceHistory.data.averagePrice,
+            estimatedValue: priceHistory.data.statistics?.averagePrice || 0,
             confidence: 'medium',
             lastUpdated: new Date().toISOString()
           }
@@ -456,6 +466,130 @@ export class LandRegistryController {
       };
     } catch (error) {
       this.logger.error('Property valuation failed:', error);
+      throw error;
+    }
+  }
+
+  @Post('import/csv')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ 
+    summary: 'Import Land Registry data from CSV',
+    description: 'Upload and import Land Registry property data from CSV file'
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'CSV import started successfully', schema: { $ref: getSchemaPath(CsvImportResponseDto) } })
+  @ApiResponse({ status: 400, description: 'Invalid file or parameters' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async importCsv(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 50 * 1024 * 1024 }), // 50MB
+          new FileTypeValidator({ fileType: 'text/csv' })
+        ]
+      })
+    ) file: Express.Multer.File,
+    @Body() importOptions: CsvImportDto,
+    @Request() req: any
+  ): Promise<CsvImportResponseDto> {
+    try {
+      this.logger.log(`CSV import request from user: ${req.user.id}, file: ${file.originalname}`);
+      
+      const userId = req.user.id;
+      return await this.landRegistryService.importCsv(file, importOptions, userId);
+    } catch (error) {
+      this.logger.error('CSV import failed:', error);
+      throw error;
+    }
+  }
+
+  @Get('import/:importId/status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Get CSV import status',
+    description: 'Check the status and progress of a CSV import job'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Import status retrieved successfully', schema: { $ref: getSchemaPath(CsvImportStatusDto) } })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Import job not found' })
+  async getImportStatus(
+    @Param('importId') importId: string,
+    @Request() req: any
+  ): Promise<CsvImportStatusDto> {
+    try {
+      this.logger.log(`Get import status: ${importId}`);
+      
+      const userId = req.user.id;
+      return await this.landRegistryService.getImportStatus(importId, userId);
+    } catch (error) {
+      this.logger.error('Get import status failed:', error);
+      throw error;
+    }
+  }
+
+  @Get('import/history')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Get import history',
+    description: 'Get list of previous CSV import jobs'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Import history retrieved successfully'
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Number of records to return', type: Number })
+  @ApiQuery({ name: 'offset', required: false, description: 'Number of records to skip', type: Number })
+  async getImportHistory(
+    @Query('limit') limit: number = 20,
+    @Query('offset') offset: number = 0,
+    @Request() req: any
+  ): Promise<{ imports: CsvImportResponseDto[]; total: number }> {
+    try {
+      this.logger.log(`Get import history for user: ${req.user.id}`);
+      
+      const userId = req.user.id;
+      return await this.landRegistryService.getImportHistory(userId, limit, offset);
+    } catch (error) {
+      this.logger.error('Get import history failed:', error);
+      throw error;
+    }
+  }
+
+  @Delete('import/:importId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Cancel CSV import',
+    description: 'Cancel a running CSV import job'
+  })
+  @ApiResponse({ status: 200, description: 'Import cancelled successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Import job not found' })
+  async cancelImport(
+    @Param('importId') importId: string,
+    @Request() req: any
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      this.logger.log(`Cancel import: ${importId}`);
+      
+      const userId = req.user.id;
+      await this.landRegistryService.cancelImport(importId, userId);
+      
+      return {
+        success: true,
+        message: `Import ${importId} cancelled successfully`
+      };
+    } catch (error) {
+      this.logger.error('Cancel import failed:', error);
       throw error;
     }
   }

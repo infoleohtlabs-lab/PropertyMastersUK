@@ -19,7 +19,8 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiParam,
-} from '@nestjs/swagger';
+
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -43,7 +44,7 @@ export class CampaignController {
   // Campaign Management
   @Get()
   @ApiOperation({ summary: 'Get all campaigns' })
-  @ApiResponse({ status: 200, description: 'Campaigns retrieved successfully', type: [Campaign] })
+  @ApiResponse({ status: 200, description: 'Campaigns retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Campaign) } } })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'status', required: false, type: String })
@@ -66,7 +67,7 @@ export class CampaignController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get campaign by ID' })
-  @ApiResponse({ status: 200, description: 'Campaign retrieved successfully', type: Campaign })
+  @ApiResponse({ status: 200, description: 'Campaign retrieved successfully', schema: { $ref: getSchemaPath(Campaign) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async getCampaign(@Param('id') id: string, @Request() req) {
@@ -75,7 +76,7 @@ export class CampaignController {
 
   @Post()
   @ApiOperation({ summary: 'Create new campaign' })
-  @ApiResponse({ status: 201, description: 'Campaign created successfully', type: Campaign })
+  @ApiResponse({ status: 201, description: 'Campaign created successfully', schema: { $ref: getSchemaPath(Campaign) } })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async createCampaign(@Body() campaignData: Partial<Campaign>, @Request() req) {
     return this.campaignService.createCampaign(campaignData, req.user.id);
@@ -83,7 +84,7 @@ export class CampaignController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update campaign' })
-  @ApiResponse({ status: 200, description: 'Campaign updated successfully', type: Campaign })
+  @ApiResponse({ status: 200, description: 'Campaign updated successfully', schema: { $ref: getSchemaPath(Campaign) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async updateCampaign(
@@ -162,7 +163,7 @@ export class CampaignController {
   // Campaign Emails
   @Get(':id/emails')
   @ApiOperation({ summary: 'Get campaign emails' })
-  @ApiResponse({ status: 200, description: 'Campaign emails retrieved successfully', type: [CampaignEmail] })
+  @ApiResponse({ status: 200, description: 'Campaign emails retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(CampaignEmail) } } })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -225,7 +226,7 @@ export class CampaignController {
   // Email Templates
   @Get('templates')
   @ApiOperation({ summary: 'Get all email templates' })
-  @ApiResponse({ status: 200, description: 'Email templates retrieved successfully', type: [EmailTemplate] })
+  @ApiResponse({ status: 200, description: 'Email templates retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(EmailTemplate) } } })
   @ApiQuery({ name: 'type', required: false, type: String })
   @ApiQuery({ name: 'category', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, type: String })
@@ -243,7 +244,7 @@ export class CampaignController {
 
   @Get('templates/:id')
   @ApiOperation({ summary: 'Get email template by ID' })
-  @ApiResponse({ status: 200, description: 'Email template retrieved successfully', type: EmailTemplate })
+  @ApiResponse({ status: 200, description: 'Email template retrieved successfully', schema: { $ref: getSchemaPath(EmailTemplate) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async getEmailTemplate(@Param('id') id: string, @Request() req) {
@@ -252,7 +253,7 @@ export class CampaignController {
 
   @Post('templates')
   @ApiOperation({ summary: 'Create new email template' })
-  @ApiResponse({ status: 201, description: 'Email template created successfully', type: EmailTemplate })
+  @ApiResponse({ status: 201, description: 'Email template created successfully', schema: { $ref: getSchemaPath(EmailTemplate) } })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async createEmailTemplate(@Body() templateData: Partial<EmailTemplate>, @Request() req) {
     return this.emailService.createEmailTemplate(templateData, req.user.id);
@@ -260,7 +261,7 @@ export class CampaignController {
 
   @Put('templates/:id')
   @ApiOperation({ summary: 'Update email template' })
-  @ApiResponse({ status: 200, description: 'Email template updated successfully', type: EmailTemplate })
+  @ApiResponse({ status: 200, description: 'Email template updated successfully', schema: { $ref: getSchemaPath(EmailTemplate) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async updateEmailTemplate(

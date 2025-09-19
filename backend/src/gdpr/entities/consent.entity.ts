@@ -70,22 +70,19 @@ export class Consent {
   // Consent details
   @ApiProperty({ description: 'Type of consent', enum: ConsentType })
   @Column({
-    type: 'enum',
-    enum: ConsentType,
+    type: 'varchar',
   })
   type: ConsentType;
 
   @ApiProperty({ description: 'Current status of consent', enum: ConsentStatus })
   @Column({
-    type: 'enum',
-    enum: ConsentStatus,
+    type: 'varchar',
   })
   status: ConsentStatus;
 
   @ApiProperty({ description: 'Method used to obtain consent', enum: ConsentMethod })
   @Column({
-    type: 'enum',
-    enum: ConsentMethod,
+    type: 'varchar',
   })
   method: ConsentMethod;
 
@@ -103,15 +100,15 @@ export class Consent {
 
   // Consent lifecycle
   @ApiProperty({ description: 'When consent was given or denied' })
-  @Column('timestamp')
+  @Column('datetime')
   consentGivenAt: Date;
 
   @ApiProperty({ description: 'When consent expires (if applicable)' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   expiresAt?: Date;
 
   @ApiProperty({ description: 'When consent was withdrawn (if applicable)' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   withdrawnAt?: Date;
 
   @ApiProperty({ description: 'Reason for withdrawal' })
@@ -162,7 +159,7 @@ export class Consent {
   renewalIntervalDays?: number;
 
   @ApiProperty({ description: 'When last renewal reminder was sent' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   lastReminderSent?: Date;
 
   @ApiProperty({ description: 'Number of renewal reminders sent' })
@@ -171,11 +168,11 @@ export class Consent {
 
   // Granular permissions
   @ApiProperty({ description: 'Specific permissions granted within this consent type' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   permissions?: Record<string, boolean>;
 
   @ApiProperty({ description: 'Additional metadata for consent record' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   // Parent/child consent relationships
@@ -210,7 +207,7 @@ export class Consent {
   isVerified: boolean;
 
   @ApiProperty({ description: 'When consent was verified' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   verifiedAt?: Date;
 
   @ApiProperty({ description: 'Who verified the consent' })

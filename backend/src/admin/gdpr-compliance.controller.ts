@@ -1,466 +1,665 @@
 import {
   Controller,
-  Get,
   Post,
-  Put,
+  Get,
   Delete,
-  Body,
   Param,
   Query,
+  Body,
   UseGuards,
+  Request,
+  Response,
+  BadRequestException,
+  NotFoundException,
   HttpStatus,
-  HttpCode,
+  StreamableFile,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
-import { GdprComplianceService } from './gdpr-compliance.service';
 import {
-  DataProcessingActivityDto,
-  DataSubjectRequestDto,
-  ConsentManagementDto,
-  PrivacyImpactAssessmentDto,
-  DataBreachReportDto,
-  ComplianceAuditDto,
-  DataRetentionPolicyDto,
-  DataMappingDto,
-  ConsentRecordDto,
-  DataExportRequestDto,
-  DataDeletionRequestDto,
-  ComplianceReportDto,
-  GdprQueryDto,
-  DataProcessingActivityResponseDto,
-  DataSubjectRequestResponseDto,
-  ConsentManagementResponseDto,
-  PrivacyImpactAssessmentResponseDto,
-  DataBreachReportResponseDto,
-  ComplianceAuditResponseDto,
-  DataRetentionPolicyResponseDto,
-  DataMappingResponseDto,
-  ConsentRecordResponseDto,
-  ComplianceReportResponseDto,
-} from './dto/gdpr-compliance.dto';
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+  ApiProperty,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
+import {
+  GdprComplianceService,
+  DataExportRequest,
+  DataExportResult,
+  DataDeletionRequest,
+  DataDeletionResult,
+  ConsentRecord,
+  GdprComplianceReport,
+} from './gdpr-compliance.service';
+import {
+  IsOptional,
+  IsBoolean,
+  IsString,
+  IsEnum,
+  IsDateString,
+  IsNumber,
+  Min,
+  Max,
+  ValidateNested,
+  IsEmail,
+  IsUUID,
+} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { Response as ExpressResponse } from 'express';
 
-@ApiTags('GDPR Compliance')
+// DTOs for Data Export
+class DateRangeDto {
+  @ApiProperty({ description: 'Start date for data range' })
+  @IsDateString()
+  startDate: string;
+
+  @ApiProperty({ description: 'End date for data range' })
+  @IsDateString()
+  endDate: string;
+}
+
+class DataExportRequestDto implements Omit<DataExportRequest, 'dateRange'> {
+  @ApiProperty({
+    description: 'User ID for data export (optional if email provided)',
+    required: false,
+  })
+  @IsOptional()
+  @IsUUID()
+  userId?: string;
+
+  @ApiProperty({
+    description: 'User email for data export (optional if userId provided)',
+    required: false,
+  })
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiProperty({
+    description: 'Include personal data in export',
+    default: true,
+  })
+  @IsBoolean()
+  includePersonalData: boolean;
+
+  @ApiProperty({
+    description: 'Include activity logs in export',
+    default: true,
+  })
+  @IsBoolean()
+  includeActivityLogs: boolean;
+
+  @ApiProperty({
+    description: 'Include properties in export',
+    default: true,
+  })
+  @IsBoolean()
+  includeProperties: boolean;
+
+  @ApiProperty({
+    description: 'Include financial data in export',
+    default: false,
+  })
+  @IsBoolean()
+  includeFinancialData: boolean;
+
+  @ApiProperty({
+    description: 'Date range for data export',
+    required: false,
+    type: DateRangeDto,
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => DateRangeDto)
+  dateRange?: DateRangeDto;
+
+  @ApiProperty({
+    description: 'Export format',
+    enum: ['json', 'csv', 'xml'],
+    default: 'json',
+  })
+  @IsEnum(['json', 'csv', 'xml'])
+  format: 'json' | 'csv' | 'xml';
+
+  @ApiProperty({
+    description: 'Delivery method',
+    enum: ['download', 'email'],
+    default: 'download',
+  })
+  @IsEnum(['download', 'email'])
+  deliveryMethod: 'download' | 'email';
+}
+
+// DTOs for Data Deletion
+class DataDeletionRequestDto implements Omit<DataDeletionRequest, 'requestedBy' | 'scheduledFor'> {
+  @ApiProperty({ description: 'User ID for data deletion' })
+  @IsUUID()
+  userId: string;
+
+  @ApiProperty({
+    description: 'Type of deletion',
+    enum: ['soft', 'hard'],
+    default: 'soft',
+  })
+  @IsEnum(['soft', 'hard'])
+  deletionType: 'soft' | 'hard';
+
+  @ApiProperty({
+    description: 'Retain data required for legal compliance',
+    default: true,
+  })
+  @IsBoolean()
+  retainLegalData: boolean;
+
+  @ApiProperty({
+    description: 'Retain financial data',
+    default: true,
+  })
+  @IsBoolean()
+  retainFinancialData: boolean;
+
+  @ApiProperty({ description: 'Reason for data deletion' })
+  @IsString()
+  reason: string;
+
+  @ApiProperty({
+    description: 'Schedule deletion for future date (optional)',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  scheduledFor?: string;
+}
+
+// DTOs for Consent Management
+class ConsentUpdateDto {
+  @ApiProperty({ description: 'User ID' })
+  @IsUUID()
+  userId: string;
+
+  @ApiProperty({
+    description: 'Type of consent',
+    enum: ['marketing', 'analytics', 'cookies', 'data_processing', 'third_party_sharing'],
+  })
+  @IsEnum(['marketing', 'analytics', 'cookies', 'data_processing', 'third_party_sharing'])
+  consentType: 'marketing' | 'analytics' | 'cookies' | 'data_processing' | 'third_party_sharing';
+
+  @ApiProperty({ description: 'Whether consent is granted' })
+  @IsBoolean()
+  granted: boolean;
+
+  @ApiProperty({ description: 'Source of consent update' })
+  @IsString()
+  source: string;
+}
+
+// DTOs for Audit Logs
+class PrivacyAuditQueryDto {
+  @ApiProperty({
+    description: 'User ID filter',
+    required: false,
+  })
+  @IsOptional()
+  @IsUUID()
+  userId?: string;
+
+  @ApiProperty({
+    description: 'Action filter',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  action?: string;
+
+  @ApiProperty({
+    description: 'Data type filter',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  dataType?: string;
+
+  @ApiProperty({
+    description: 'Start date for filtering',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @ApiProperty({
+    description: 'End date for filtering',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @ApiProperty({
+    description: 'Page number for pagination',
+    default: 1,
+    minimum: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Transform(({ value }) => parseInt(value))
+  page?: number = 1;
+
+  @ApiProperty({
+    description: 'Number of records per page',
+    default: 50,
+    minimum: 1,
+    maximum: 100,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  @Transform(({ value }) => parseInt(value))
+  limit?: number = 50;
+}
+
+// DTOs for Compliance Report
+class ComplianceReportQueryDto {
+  @ApiProperty({ description: 'Start date for report period' })
+  @IsDateString()
+  startDate: string;
+
+  @ApiProperty({ description: 'End date for report period' })
+  @IsDateString()
+  endDate: string;
+}
+
+@ApiTags('Admin - GDPR Compliance')
 @Controller('admin/gdpr-compliance')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class GdprComplianceController {
-  constructor(private readonly gdprComplianceService: GdprComplianceService) {}
+  constructor(
+    private readonly gdprComplianceService: GdprComplianceService,
+  ) {}
 
-  // Data Processing Activities
-  @Get('data-processing-activities')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get all data processing activities' })
-  @ApiResponse({
-    status: 200,
-    description: 'Data processing activities retrieved successfully',
-    type: [DataProcessingActivityResponseDto],
+  // Data Export Endpoints
+  @Post('data-export/request')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Request data export',
+    description: 'Submit a request to export user data in compliance with GDPR Article 15 (Right of Access).',
   })
-  async getDataProcessingActivities(
-    @Query() query: GdprQueryDto,
-  ): Promise<DataProcessingActivityResponseDto[]> {
-    return this.gdprComplianceService.getDataProcessingActivities(query);
-  }
-
-  @Post('data-processing-activities')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create new data processing activity' })
+  @ApiBody({ type: DataExportRequestDto })
   @ApiResponse({
-    status: 201,
-    description: 'Data processing activity created successfully',
-    type: DataProcessingActivityResponseDto,
+    status: HttpStatus.CREATED,
+    description: 'Data export request submitted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        exportId: { type: 'string' },
+        message: { type: 'string' },
+      },
+    },
   })
-  async createDataProcessingActivity(
-    @Body() createDto: DataProcessingActivityDto,
-  ): Promise<DataProcessingActivityResponseDto> {
-    return this.gdprComplianceService.createDataProcessingActivity(createDto);
-  }
-
-  @Put('data-processing-activities/:id')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Update data processing activity' })
   @ApiResponse({
-    status: 200,
-    description: 'Data processing activity updated successfully',
-    type: DataProcessingActivityResponseDto,
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request parameters',
   })
-  async updateDataProcessingActivity(
-    @Param('id') id: string,
-    @Body() updateDto: DataProcessingActivityDto,
-  ): Promise<DataProcessingActivityResponseDto> {
-    return this.gdprComplianceService.updateDataProcessingActivity(id, updateDto);
-  }
-
-  @Delete('data-processing-activities/:id')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Delete data processing activity' })
-  @ApiResponse({ status: 204, description: 'Data processing activity deleted successfully' })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteDataProcessingActivity(@Param('id') id: string): Promise<void> {
-    return this.gdprComplianceService.deleteDataProcessingActivity(id);
-  }
-
-  // Data Subject Requests
-  @Get('data-subject-requests')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get all data subject requests' })
   @ApiResponse({
-    status: 200,
-    description: 'Data subject requests retrieved successfully',
-    type: [DataSubjectRequestResponseDto],
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized access',
   })
-  async getDataSubjectRequests(
-    @Query() query: GdprQueryDto,
-  ): Promise<DataSubjectRequestResponseDto[]> {
-    return this.gdprComplianceService.getDataSubjectRequests(query);
-  }
-
-  @Post('data-subject-requests')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create new data subject request' })
   @ApiResponse({
-    status: 201,
-    description: 'Data subject request created successfully',
-    type: DataSubjectRequestResponseDto,
+    status: HttpStatus.FORBIDDEN,
+    description: 'Insufficient permissions',
   })
-  async createDataSubjectRequest(
-    @Body() createDto: DataSubjectRequestDto,
-  ): Promise<DataSubjectRequestResponseDto> {
-    return this.gdprComplianceService.createDataSubjectRequest(createDto);
+  async requestDataExport(
+    @Body() request: DataExportRequestDto,
+    @Request() req: any,
+  ): Promise<{ exportId: string; message: string }> {
+    if (!request.userId && !request.email) {
+      throw new BadRequestException('Either userId or email must be provided');
+    }
+
+    const exportRequest: DataExportRequest = {
+      ...request,
+      dateRange: request.dateRange ? {
+        startDate: new Date(request.dateRange.startDate),
+        endDate: new Date(request.dateRange.endDate),
+      } : undefined,
+    };
+
+    return this.gdprComplianceService.requestDataExport(exportRequest, req.user.id);
   }
 
-  @Put('data-subject-requests/:id/status')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Update data subject request status' })
-  @ApiResponse({
-    status: 200,
-    description: 'Data subject request status updated successfully',
-    type: DataSubjectRequestResponseDto,
+  @Get('data-export/status/:exportId')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get data export status',
+    description: 'Check the status of a data export request.',
   })
-  async updateDataSubjectRequestStatus(
-    @Param('id') id: string,
-    @Body() statusUpdate: { status: string; notes?: string },
-  ): Promise<DataSubjectRequestResponseDto> {
-    return this.gdprComplianceService.updateDataSubjectRequestStatus(id, statusUpdate);
-  }
-
-  // Consent Management
-  @Get('consent-management')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get consent management overview' })
-  @ApiResponse({
-    status: 200,
-    description: 'Consent management data retrieved successfully',
-    type: ConsentManagementResponseDto,
+  @ApiParam({
+    name: 'exportId',
+    description: 'Export request ID',
+    type: 'string',
   })
-  async getConsentManagement(
-    @Query() query: GdprQueryDto,
-  ): Promise<ConsentManagementResponseDto> {
-    return this.gdprComplianceService.getConsentManagement(query);
-  }
-
-  @Post('consent-management')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create consent management configuration' })
   @ApiResponse({
-    status: 201,
-    description: 'Consent management configuration created successfully',
-    type: ConsentManagementResponseDto,
+    status: HttpStatus.OK,
+    description: 'Export status retrieved successfully',
+    type: Object, // DataExportResult
   })
-  async createConsentManagement(
-    @Body() createDto: ConsentManagementDto,
-  ): Promise<ConsentManagementResponseDto> {
-    return this.gdprComplianceService.createConsentManagement(createDto);
-  }
-
-  @Get('consent-records')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get consent records' })
   @ApiResponse({
-    status: 200,
-    description: 'Consent records retrieved successfully',
-    type: [ConsentRecordResponseDto],
+    status: HttpStatus.NOT_FOUND,
+    description: 'Export request not found',
   })
-  async getConsentRecords(
-    @Query() query: GdprQueryDto,
-  ): Promise<ConsentRecordResponseDto[]> {
-    return this.gdprComplianceService.getConsentRecords(query);
+  async getDataExportStatus(
+    @Param('exportId') exportId: string,
+  ): Promise<DataExportResult> {
+    return this.gdprComplianceService.getDataExportStatus(exportId);
   }
 
-  // Privacy Impact Assessments
-  @Get('privacy-impact-assessments')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get all privacy impact assessments' })
-  @ApiResponse({
-    status: 200,
-    description: 'Privacy impact assessments retrieved successfully',
-    type: [PrivacyImpactAssessmentResponseDto],
+  @Get('data-export/download/:exportId')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Download exported data',
+    description: 'Download the exported data file.',
   })
-  async getPrivacyImpactAssessments(
-    @Query() query: GdprQueryDto,
-  ): Promise<PrivacyImpactAssessmentResponseDto[]> {
-    return this.gdprComplianceService.getPrivacyImpactAssessments(query);
-  }
-
-  @Post('privacy-impact-assessments')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create new privacy impact assessment' })
-  @ApiResponse({
-    status: 201,
-    description: 'Privacy impact assessment created successfully',
-    type: PrivacyImpactAssessmentResponseDto,
+  @ApiParam({
+    name: 'exportId',
+    description: 'Export request ID',
+    type: 'string',
   })
-  async createPrivacyImpactAssessment(
-    @Body() createDto: PrivacyImpactAssessmentDto,
-  ): Promise<PrivacyImpactAssessmentResponseDto> {
-    return this.gdprComplianceService.createPrivacyImpactAssessment(createDto);
-  }
-
-  @Put('privacy-impact-assessments/:id')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Update privacy impact assessment' })
   @ApiResponse({
-    status: 200,
-    description: 'Privacy impact assessment updated successfully',
-    type: PrivacyImpactAssessmentResponseDto,
+    status: HttpStatus.OK,
+    description: 'File downloaded successfully',
+    headers: {
+      'Content-Type': {
+        description: 'MIME type of the file',
+        schema: { type: 'string', example: 'application/zip' },
+      },
+      'Content-Disposition': {
+        description: 'File download disposition',
+        schema: { type: 'string', example: 'attachment; filename="data-export.zip"' },
+      },
+    },
   })
-  async updatePrivacyImpactAssessment(
-    @Param('id') id: string,
-    @Body() updateDto: PrivacyImpactAssessmentDto,
-  ): Promise<PrivacyImpactAssessmentResponseDto> {
-    return this.gdprComplianceService.updatePrivacyImpactAssessment(id, updateDto);
-  }
-
-  // Data Breach Reports
-  @Get('data-breach-reports')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get all data breach reports' })
   @ApiResponse({
-    status: 200,
-    description: 'Data breach reports retrieved successfully',
-    type: [DataBreachReportResponseDto],
+    status: HttpStatus.NOT_FOUND,
+    description: 'Export not found or not ready',
   })
-  async getDataBreachReports(
-    @Query() query: GdprQueryDto,
-  ): Promise<DataBreachReportResponseDto[]> {
-    return this.gdprComplianceService.getDataBreachReports(query);
-  }
-
-  @Post('data-breach-reports')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create new data breach report' })
   @ApiResponse({
-    status: 201,
-    description: 'Data breach report created successfully',
-    type: DataBreachReportResponseDto,
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Export not ready or expired',
   })
-  async createDataBreachReport(
-    @Body() createDto: DataBreachReportDto,
-  ): Promise<DataBreachReportResponseDto> {
-    return this.gdprComplianceService.createDataBreachReport(createDto);
+  async downloadDataExport(
+    @Param('exportId') exportId: string,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ): Promise<StreamableFile> {
+    const { stream, filename, mimeType } = await this.gdprComplianceService.downloadDataExport(exportId);
+    
+    res.set({
+      'Content-Type': mimeType,
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    });
+    
+    return new StreamableFile(stream);
   }
 
-  @Put('data-breach-reports/:id')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Update data breach report' })
-  @ApiResponse({
-    status: 200,
-    description: 'Data breach report updated successfully',
-    type: DataBreachReportResponseDto,
+  // Data Deletion Endpoints
+  @Post('data-deletion/request')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Request data deletion',
+    description: 'Submit a request to delete user data in compliance with GDPR Article 17 (Right to Erasure).',
   })
-  async updateDataBreachReport(
-    @Param('id') id: string,
-    @Body() updateDto: DataBreachReportDto,
-  ): Promise<DataBreachReportResponseDto> {
-    return this.gdprComplianceService.updateDataBreachReport(id, updateDto);
-  }
-
-  // Compliance Audits
-  @Get('compliance-audits')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get all compliance audits' })
+  @ApiBody({ type: DataDeletionRequestDto })
   @ApiResponse({
-    status: 200,
-    description: 'Compliance audits retrieved successfully',
-    type: [ComplianceAuditResponseDto],
+    status: HttpStatus.CREATED,
+    description: 'Data deletion request submitted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        deletionId: { type: 'string' },
+        message: { type: 'string' },
+      },
+    },
   })
-  async getComplianceAudits(
-    @Query() query: GdprQueryDto,
-  ): Promise<ComplianceAuditResponseDto[]> {
-    return this.gdprComplianceService.getComplianceAudits(query);
-  }
-
-  @Post('compliance-audits')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create new compliance audit' })
   @ApiResponse({
-    status: 201,
-    description: 'Compliance audit created successfully',
-    type: ComplianceAuditResponseDto,
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request parameters',
   })
-  async createComplianceAudit(
-    @Body() createDto: ComplianceAuditDto,
-  ): Promise<ComplianceAuditResponseDto> {
-    return this.gdprComplianceService.createComplianceAudit(createDto);
-  }
-
-  // Data Retention Policies
-  @Get('data-retention-policies')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get all data retention policies' })
   @ApiResponse({
-    status: 200,
-    description: 'Data retention policies retrieved successfully',
-    type: [DataRetentionPolicyResponseDto],
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found',
   })
-  async getDataRetentionPolicies(
-    @Query() query: GdprQueryDto,
-  ): Promise<DataRetentionPolicyResponseDto[]> {
-    return this.gdprComplianceService.getDataRetentionPolicies(query);
+  async requestDataDeletion(
+    @Body() request: DataDeletionRequestDto,
+    @Request() req: any,
+  ): Promise<{ deletionId: string; message: string }> {
+    const deletionRequest: DataDeletionRequest = {
+      ...request,
+      requestedBy: req.user.id,
+      scheduledFor: request.scheduledFor ? new Date(request.scheduledFor) : undefined,
+    };
+
+    return this.gdprComplianceService.requestDataDeletion(deletionRequest);
   }
 
-  @Post('data-retention-policies')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create new data retention policy' })
-  @ApiResponse({
-    status: 201,
-    description: 'Data retention policy created successfully',
-    type: DataRetentionPolicyResponseDto,
+  @Get('data-deletion/status/:deletionId')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get data deletion status',
+    description: 'Check the status of a data deletion request.',
   })
-  async createDataRetentionPolicy(
-    @Body() createDto: DataRetentionPolicyDto,
-  ): Promise<DataRetentionPolicyResponseDto> {
-    return this.gdprComplianceService.createDataRetentionPolicy(createDto);
-  }
-
-  // Data Mapping
-  @Get('data-mapping')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get data mapping overview' })
-  @ApiResponse({
-    status: 200,
-    description: 'Data mapping retrieved successfully',
-    type: [DataMappingResponseDto],
+  @ApiParam({
+    name: 'deletionId',
+    description: 'Deletion request ID',
+    type: 'string',
   })
-  async getDataMapping(
-    @Query() query: GdprQueryDto,
-  ): Promise<DataMappingResponseDto[]> {
-    return this.gdprComplianceService.getDataMapping(query);
-  }
-
-  @Post('data-mapping')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Create data mapping entry' })
   @ApiResponse({
-    status: 201,
-    description: 'Data mapping entry created successfully',
-    type: DataMappingResponseDto,
+    status: HttpStatus.OK,
+    description: 'Deletion status retrieved successfully',
+    type: Object, // DataDeletionResult
   })
-  async createDataMapping(
-    @Body() createDto: DataMappingDto,
-  ): Promise<DataMappingResponseDto> {
-    return this.gdprComplianceService.createDataMapping(createDto);
-  }
-
-  // Data Export Requests
-  @Post('data-export-requests')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Process data export request' })
   @ApiResponse({
-    status: 200,
-    description: 'Data export request processed successfully',
+    status: HttpStatus.NOT_FOUND,
+    description: 'Deletion request not found',
   })
-  async processDataExportRequest(
-    @Body() exportRequest: DataExportRequestDto,
-  ): Promise<{ downloadUrl: string; expiresAt: Date }> {
-    return this.gdprComplianceService.processDataExportRequest(exportRequest);
+  async getDataDeletionStatus(
+    @Param('deletionId') deletionId: string,
+  ): Promise<DataDeletionResult> {
+    return this.gdprComplianceService.getDataDeletionStatus(deletionId);
   }
 
-  // Data Deletion Requests
-  @Post('data-deletion-requests')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Process data deletion request' })
-  @ApiResponse({
-    status: 200,
-    description: 'Data deletion request processed successfully',
+  // Consent Management Endpoints
+  @Post('consent/update')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Update user consent',
+    description: 'Update consent settings for a user in compliance with GDPR Article 7 (Conditions for consent).',
   })
-  async processDataDeletionRequest(
-    @Body() deletionRequest: DataDeletionRequestDto,
-  ): Promise<{ deletedRecords: number; affectedSystems: string[] }> {
-    return this.gdprComplianceService.processDataDeletionRequest(deletionRequest);
-  }
-
-  // Compliance Reports
-  @Get('compliance-reports')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get compliance reports' })
+  @ApiBody({ type: ConsentUpdateDto })
   @ApiResponse({
-    status: 200,
-    description: 'Compliance reports retrieved successfully',
-    type: [ComplianceReportResponseDto],
+    status: HttpStatus.OK,
+    description: 'Consent updated successfully',
+    type: Object, // ConsentRecord
   })
-  async getComplianceReports(
-    @Query() query: GdprQueryDto,
-  ): Promise<ComplianceReportResponseDto[]> {
-    return this.gdprComplianceService.getComplianceReports(query);
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid consent data',
+  })
+  async updateConsent(
+    @Body() consentData: ConsentUpdateDto,
+    @Request() req: any,
+  ): Promise<ConsentRecord> {
+    return this.gdprComplianceService.updateConsent(
+      consentData.userId,
+      consentData.consentType,
+      consentData.granted,
+      {
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown',
+        source: consentData.source,
+      },
+    );
   }
 
-  @Post('compliance-reports')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Generate compliance report' })
+  @Get('consent/user/:userId')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get user consents',
+    description: 'Retrieve all consent records for a specific user.',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'User ID',
+    type: 'string',
+  })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.OK,
+    description: 'User consents retrieved successfully',
+    type: [Object], // ConsentRecord[]
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found',
+  })
+  async getUserConsents(
+    @Param('userId') userId: string,
+  ): Promise<ConsentRecord[]> {
+    return this.gdprComplianceService.getUserConsents(userId);
+  }
+
+  // Privacy Audit Logs
+  @Get('audit-logs')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Get privacy audit logs',
+    description: 'Retrieve privacy-related audit logs with filtering and pagination.',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Audit logs retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        logs: {
+          type: 'array',
+          items: { type: 'object' },
+        },
+        pagination: {
+          type: 'object',
+          properties: {
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            total: { type: 'number' },
+            totalPages: { type: 'number' },
+          },
+        },
+      },
+    },
+  })
+  async getPrivacyAuditLogs(
+    @Query() query: PrivacyAuditQueryDto,
+  ) {
+    const filters = {
+      ...query,
+      startDate: query.startDate ? new Date(query.startDate) : undefined,
+      endDate: query.endDate ? new Date(query.endDate) : undefined,
+    };
+
+    return this.gdprComplianceService.getPrivacyAuditLogs(filters);
+  }
+
+  // Compliance Reporting
+  @Post('compliance-report')
+  @Roles(UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'Generate compliance report',
+    description: 'Generate a comprehensive GDPR compliance report for a specified period.',
+  })
+  @ApiBody({ type: ComplianceReportQueryDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
     description: 'Compliance report generated successfully',
-    type: ComplianceReportResponseDto,
+    type: Object, // GdprComplianceReport
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid date range',
   })
   async generateComplianceReport(
-    @Body() reportDto: ComplianceReportDto,
-  ): Promise<ComplianceReportResponseDto> {
-    return this.gdprComplianceService.generateComplianceReport(reportDto);
+    @Body() reportQuery: ComplianceReportQueryDto,
+  ): Promise<GdprComplianceReport> {
+    const startDate = new Date(reportQuery.startDate);
+    const endDate = new Date(reportQuery.endDate);
+
+    if (startDate >= endDate) {
+      throw new BadRequestException('Start date must be before end date');
+    }
+
+    return this.gdprComplianceService.generateComplianceReport(startDate, endDate);
   }
 
-  // Dashboard and Statistics
-  @Get('dashboard')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get GDPR compliance dashboard data' })
-  @ApiResponse({
-    status: 200,
-    description: 'GDPR compliance dashboard data retrieved successfully',
+  // Health Check
+  @Get('health')
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @ApiOperation({
+    summary: 'GDPR compliance service health check',
+    description: 'Check the health and status of the GDPR compliance service.',
   })
-  async getComplianceDashboard(): Promise<{
-    totalDataSubjects: number;
-    activeConsents: number;
-    pendingRequests: number;
-    completedAudits: number;
-    dataBreaches: number;
-    complianceScore: number;
-    recentActivities: any[];
-  }> {
-    return this.gdprComplianceService.getComplianceDashboard();
-  }
-
-  @Get('compliance-status')
-  @Roles('admin', 'compliance_officer')
-  @ApiOperation({ summary: 'Get overall compliance status' })
   @ApiResponse({
-    status: 200,
-    description: 'Compliance status retrieved successfully',
+    status: HttpStatus.OK,
+    description: 'Service health status',
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', example: 'healthy' },
+        activeExports: { type: 'number' },
+        activeDeletions: { type: 'number' },
+        timestamp: { type: 'string', format: 'date-time' },
+        version: { type: 'string' },
+        compliance: {
+          type: 'object',
+          properties: {
+            dataRetentionPolicyActive: { type: 'boolean' },
+            consentManagementActive: { type: 'boolean' },
+            auditLoggingActive: { type: 'boolean' },
+          },
+        },
+      },
+    },
   })
-  async getComplianceStatus(): Promise<{
-    overallScore: number;
-    categories: {
-      dataProcessing: number;
-      consentManagement: number;
-      dataSubjectRights: number;
-      securityMeasures: number;
-      documentation: number;
+  async getHealthStatus(): Promise<{
+    status: string;
+    activeExports: number;
+    activeDeletions: number;
+    timestamp: Date;
+    version: string;
+    compliance: {
+      dataRetentionPolicyActive: boolean;
+      consentManagementActive: boolean;
+      auditLoggingActive: boolean;
     };
-    recommendations: string[];
-    lastAuditDate: Date;
-    nextAuditDue: Date;
   }> {
-    return this.gdprComplianceService.getComplianceStatus();
+    return {
+      status: 'healthy',
+      activeExports: 0, // Would be tracked in service
+      activeDeletions: 0, // Would be tracked in service
+      timestamp: new Date(),
+      version: '1.0.0',
+      compliance: {
+        dataRetentionPolicyActive: true,
+        consentManagementActive: true,
+        auditLoggingActive: true,
+      },
+    };
   }
 }

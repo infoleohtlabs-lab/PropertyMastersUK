@@ -110,24 +110,21 @@ export class Booking {
 
   @ApiProperty({ enum: BookingType, description: 'Type of booking' })
   @Column({
-    type: process.env.DATABASE_TYPE === 'sqlite' ? 'varchar' : 'enum',
-    enum: process.env.DATABASE_TYPE === 'sqlite' ? undefined : BookingType,
+    type: 'varchar',
     default: BookingType.VIEWING,
   })
   type: BookingType;
 
   @ApiProperty({ enum: BookingStatus, description: 'Current status of the booking' })
   @Column({
-    type: process.env.DATABASE_TYPE === 'sqlite' ? 'varchar' : 'enum',
-    enum: process.env.DATABASE_TYPE === 'sqlite' ? undefined : BookingStatus,
+    type: 'varchar',
     default: BookingStatus.PENDING,
   })
   status: BookingStatus;
 
   @ApiProperty({ enum: BookingPriority, description: 'Priority level of the booking' })
   @Column({
-    type: process.env.DATABASE_TYPE === 'sqlite' ? 'varchar' : 'enum',
-    enum: process.env.DATABASE_TYPE === 'sqlite' ? undefined : BookingPriority,
+    type: 'varchar',
     default: BookingPriority.MEDIUM,
   })
   priority: BookingPriority;
@@ -167,11 +164,11 @@ export class Booking {
 
   // Scheduling
   @ApiProperty({ description: 'Start date and time of the booking' })
-  @Column('timestamp with time zone')
+  @Column('datetime')
   startDateTime: Date;
 
   @ApiProperty({ description: 'End date and time of the booking' })
-  @Column('timestamp with time zone')
+  @Column('datetime')
   endDateTime: Date;
 
   @ApiProperty({ description: 'Duration in minutes' })
@@ -193,8 +190,7 @@ export class Booking {
 
   @ApiProperty({ enum: BookingRecurrenceType, description: 'Recurrence pattern' })
   @Column({
-    type: process.env.DATABASE_TYPE === 'sqlite' ? 'varchar' : 'enum',
-    enum: process.env.DATABASE_TYPE === 'sqlite' ? undefined : BookingRecurrenceType,
+    type: 'varchar',
     default: BookingRecurrenceType.NONE,
   })
   recurrenceType: BookingRecurrenceType;
@@ -212,7 +208,7 @@ export class Booking {
   recurrenceDayOfMonth?: number;
 
   @ApiProperty({ description: 'End date for recurrence', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   recurrenceEndDate?: Date;
 
   @ApiProperty({ description: 'Maximum number of occurrences', required: false })
@@ -258,8 +254,7 @@ export class Booking {
   // Access and Security
   @ApiProperty({ enum: BookingAccessType, description: 'Type of property access' })
   @Column({
-    type: process.env.DATABASE_TYPE === 'sqlite' ? 'varchar' : 'enum',
-    enum: process.env.DATABASE_TYPE === 'sqlite' ? undefined : BookingAccessType,
+    type: 'varchar',
     default: BookingAccessType.ACCOMPANIED,
   })
   accessType: BookingAccessType;
@@ -303,7 +298,7 @@ export class Booking {
 
   // Confirmation and Reminders
   @ApiProperty({ description: 'Booking confirmed date', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   confirmedAt?: Date;
 
   @ApiProperty({ description: 'User who confirmed the booking', required: false })
@@ -327,16 +322,16 @@ export class Booking {
   reminderIntervals?: number[];
 
   @ApiProperty({ description: 'Last reminder sent date', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   lastReminderSentAt?: Date;
 
   // Check-in/Check-out
   @ApiProperty({ description: 'Actual check-in time', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   actualStartTime?: Date;
 
   @ApiProperty({ description: 'Actual check-out time', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   actualEndTime?: Date;
 
   @ApiProperty({ description: 'Check-in notes', required: false })
@@ -412,7 +407,7 @@ export class Booking {
 
   // Status Tracking
   @ApiProperty({ description: 'Status history', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   statusHistory?: Array<{
     status: BookingStatus;
     changedAt: Date;
@@ -422,7 +417,7 @@ export class Booking {
   }>;
 
   @ApiProperty({ description: 'Assignment history', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   assignmentHistory?: Array<{
     assignedTo: string;
     assignedBy: string;
@@ -440,7 +435,7 @@ export class Booking {
   externalReference?: string;
 
   @ApiProperty({ description: 'Integration metadata', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   integrationMetadata?: Record<string, any>;
 
   // Flags and Settings
@@ -478,11 +473,11 @@ export class Booking {
   tags?: string[];
 
   @ApiProperty({ description: 'Custom fields', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   customFields?: Record<string, any>;
 
   @ApiProperty({ description: 'Additional metadata', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   // Audit Fields
@@ -511,7 +506,7 @@ export class Booking {
   updater?: User;
 
   @ApiProperty({ description: 'Soft delete timestamp', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   deletedAt?: Date;
 
   @ApiProperty({ description: 'User who deleted the booking', required: false })

@@ -54,7 +54,6 @@ export enum NotificationChannel {
 @Index(['tenantOrganizationId', 'userId'])
 @Index(['type', 'status'])
 @Index(['createdAt'])
-@Index(['scheduledAt'])
 export class Notification {
   @ApiProperty({ description: 'Unique identifier for the notification' })
   @PrimaryGeneratedColumn('uuid')
@@ -72,34 +71,29 @@ export class Notification {
 
   @ApiProperty({ description: 'Notification type', enum: NotificationType })
   @Column({
-    type: 'enum',
-    enum: NotificationType,
+    type: 'varchar',
     default: NotificationType.SYSTEM,
   })
   type: NotificationType;
 
   @ApiProperty({ description: 'Notification priority', enum: NotificationPriority })
   @Column({
-    type: 'enum',
-    enum: NotificationPriority,
+    type: 'varchar',
     default: NotificationPriority.NORMAL,
   })
   priority: NotificationPriority;
 
   @ApiProperty({ description: 'Notification status', enum: NotificationStatus })
   @Column({
-    type: 'enum',
-    enum: NotificationStatus,
+    type: 'varchar',
     default: NotificationStatus.PENDING,
   })
   status: NotificationStatus;
 
   @ApiProperty({ description: 'Notification channels', enum: NotificationChannel, isArray: true })
   @Column({
-    type: 'enum',
-    enum: NotificationChannel,
-    array: true,
-    default: [NotificationChannel.IN_APP],
+    type: 'simple-array',
+    default: 'in_app',
   })
   channels: NotificationChannel[];
 
@@ -155,7 +149,7 @@ export class Notification {
   property: Property;
 
   @ApiProperty({ description: 'Notification metadata and additional data' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata: Record<string, any>;
 
   @ApiProperty({ description: 'Notification template ID' })
@@ -163,32 +157,32 @@ export class Notification {
   templateId: string;
 
   @ApiProperty({ description: 'Template variables for dynamic content' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   templateVariables: Record<string, any>;
 
   @ApiProperty({ description: 'Scheduled send time' })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   @Index()
   scheduledAt: Date;
 
   @ApiProperty({ description: 'Notification sent timestamp' })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   sentAt: Date;
 
   @ApiProperty({ description: 'Notification delivered timestamp' })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   deliveredAt: Date;
 
   @ApiProperty({ description: 'Notification read timestamp' })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   readAt: Date;
 
   @ApiProperty({ description: 'Notification dismissed timestamp' })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   dismissedAt: Date;
 
   @ApiProperty({ description: 'Notification expiry timestamp' })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   expiresAt: Date;
 
   @ApiProperty({ description: 'Number of retry attempts' })
@@ -204,15 +198,15 @@ export class Notification {
   lastError: string;
 
   @ApiProperty({ description: 'Email delivery status' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   emailStatus: Record<string, any>;
 
   @ApiProperty({ description: 'SMS delivery status' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   smsStatus: Record<string, any>;
 
   @ApiProperty({ description: 'Push notification delivery status' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   pushStatus: Record<string, any>;
 
   @ApiProperty({ description: 'Whether notification is persistent' })

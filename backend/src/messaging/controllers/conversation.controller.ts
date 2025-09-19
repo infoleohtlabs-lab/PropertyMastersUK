@@ -12,7 +12,8 @@ import {
   ParseUUIDPipe,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { ConversationService } from '../services/conversation.service';
 import { CreateConversationDto } from '../dto/create-conversation.dto';
@@ -29,7 +30,7 @@ export class ConversationController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new conversation' })
-  @ApiResponse({ status: 201, description: 'Conversation created successfully', type: Conversation })
+  @ApiResponse({ status: 201, description: 'Conversation created successfully', schema: { $ref: getSchemaPath(Conversation) } })
   async createConversation(
     @Body() createConversationDto: CreateConversationDto,
     @Request() req: any,
@@ -59,7 +60,7 @@ export class ConversationController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get conversation by ID' })
-  @ApiResponse({ status: 200, description: 'Conversation found', type: Conversation })
+  @ApiResponse({ status: 200, description: 'Conversation found', schema: { $ref: getSchemaPath(Conversation) } })
   @ApiResponse({ status: 404, description: 'Conversation not found' })
   @ApiResponse({ status: 403, description: 'Access denied to conversation' })
   async findById(
@@ -71,7 +72,7 @@ export class ConversationController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update conversation' })
-  @ApiResponse({ status: 200, description: 'Conversation updated successfully', type: Conversation })
+  @ApiResponse({ status: 200, description: 'Conversation updated successfully', schema: { $ref: getSchemaPath(Conversation) } })
   @ApiResponse({ status: 403, description: 'Access denied to conversation' })
   @ApiResponse({ status: 404, description: 'Conversation not found' })
   async updateConversation(
@@ -101,7 +102,7 @@ export class ConversationController {
 
   @Post(':id/participants')
   @ApiOperation({ summary: 'Add participant to conversation' })
-  @ApiResponse({ status: 200, description: 'Participant added successfully', type: Conversation })
+  @ApiResponse({ status: 200, description: 'Participant added successfully', schema: { $ref: getSchemaPath(Conversation) } })
   @ApiResponse({ status: 403, description: 'Access denied to conversation' })
   @ApiResponse({ status: 404, description: 'Conversation not found' })
   async addParticipant(
@@ -118,7 +119,7 @@ export class ConversationController {
 
   @Delete(':id/participants/:userId')
   @ApiOperation({ summary: 'Remove participant from conversation' })
-  @ApiResponse({ status: 200, description: 'Participant removed successfully', type: Conversation })
+  @ApiResponse({ status: 200, description: 'Participant removed successfully', schema: { $ref: getSchemaPath(Conversation) } })
   @ApiResponse({ status: 403, description: 'Access denied to conversation' })
   @ApiResponse({ status: 404, description: 'Conversation not found' })
   async removeParticipant(
@@ -243,7 +244,7 @@ export class ConversationController {
 
   @Get('direct/:userId')
   @ApiOperation({ summary: 'Get or create direct conversation with user' })
-  @ApiResponse({ status: 200, description: 'Direct conversation retrieved or created', type: Conversation })
+  @ApiResponse({ status: 200, description: 'Direct conversation retrieved or created', schema: { $ref: getSchemaPath(Conversation) } })
   async getOrCreateDirectConversation(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Request() req: any,

@@ -400,3 +400,89 @@ export class CacheResponseDto {
     cacheSize?: number;
   };
 }
+
+export class CsvImportDto {
+  @ApiProperty({ description: 'Skip header row', required: false, default: true })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  skipHeader?: boolean;
+
+  @ApiProperty({ description: 'Batch size for processing', required: false, minimum: 1, maximum: 1000, default: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(1000)
+  batchSize?: number;
+
+  @ApiProperty({ description: 'Validate data before import', required: false, default: true })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  validateData?: boolean;
+
+  @ApiProperty({ description: 'Update existing records', required: false, default: false })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  updateExisting?: boolean;
+}
+
+export class CsvImportResponseDto {
+  @ApiProperty({ description: 'Import job ID' })
+  importId: string;
+
+  @ApiProperty({ description: 'Import status' })
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+
+  @ApiProperty({ description: 'Total records in CSV' })
+  totalRecords: number;
+
+  @ApiProperty({ description: 'Records processed' })
+  processedRecords: number;
+
+  @ApiProperty({ description: 'Records imported successfully' })
+  successfulRecords: number;
+
+  @ApiProperty({ description: 'Records failed to import' })
+  failedRecords: number;
+
+  @ApiProperty({ description: 'Validation errors', required: false })
+  validationErrors?: string[];
+
+  @ApiProperty({ description: 'Import errors', required: false })
+  importErrors?: string[];
+
+  @ApiProperty({ description: 'Started at' })
+  startedAt: Date;
+
+  @ApiProperty({ description: 'Completed at', required: false })
+  completedAt?: Date;
+}
+
+export class CsvImportStatusDto {
+  @ApiProperty({ description: 'Import job ID' })
+  importId: string;
+
+  @ApiProperty({ description: 'Import status' })
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+
+  @ApiProperty({ description: 'Progress percentage' })
+  progress: number;
+
+  @ApiProperty({ description: 'Current processing message' })
+  message: string;
+
+  @ApiProperty({ description: 'Import statistics' })
+  statistics: {
+    totalRecords: number;
+    processedRecords: number;
+    successfulRecords: number;
+    failedRecords: number;
+    validationErrors: number;
+  };
+
+  @ApiProperty({ description: 'Estimated completion time', required: false })
+  estimatedCompletion?: Date;
+}

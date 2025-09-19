@@ -35,7 +35,7 @@ export class AdminActivityLog {
   @Column({ name: 'user_agent', length: 500, nullable: true })
   userAgent: string;
 
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata: Record<string, any>;
 
   @CreateDateColumn({ name: 'created_at' })

@@ -8,10 +8,22 @@ import { LandRegistryService } from './land-registry.service';
 import { DatabaseModule } from '../database/database.module';
 import { AuthModule } from '../auth/auth.module';
 import { BulkExport } from './entities/bulk-export.entity';
+import { PricePaidRecord } from './entities/price-paid-record.entity';
+import { OwnershipRecord } from './entities/ownership-record.entity';
+import { TitleRecord } from './entities/title-record.entity';
+import { ApiUsageLog } from './entities/api-usage-log.entity';
+import { Property } from '../properties/entities/property.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BulkExport]),
+    TypeOrmModule.forFeature([
+      BulkExport, 
+      PricePaidRecord, 
+      OwnershipRecord, 
+      TitleRecord, 
+      ApiUsageLog, 
+      Property
+    ]),
     HttpModule.register({
       timeout: 30000,
       maxRedirects: 3,

@@ -4,6 +4,10 @@ import { User } from '../../users/entities/user.entity';
 import { BuyerPreference } from './buyer-preference.entity';
 import { PropertySearch } from './property-search.entity';
 import { PropertyValuation } from './property-valuation.entity';
+import { SavedProperty } from './saved-property.entity';
+import { PropertyOffer } from './property-offer.entity';
+import { MortgageApplication } from './mortgage-application.entity';
+import { Viewing } from './viewing.entity';
 
 export enum BuyerStatus {
   ACTIVE = 'active',
@@ -197,6 +201,18 @@ export class Buyer {
 
   @OneToMany(() => PropertyValuation, valuation => valuation.buyer)
   valuations: PropertyValuation[];
+
+  @OneToMany(() => SavedProperty, savedProperty => savedProperty.buyer)
+  savedProperties: SavedProperty[];
+
+  @OneToMany(() => PropertyOffer, propertyOffer => propertyOffer.buyer)
+  propertyOffers: PropertyOffer[];
+
+  @OneToMany(() => MortgageApplication, mortgageApplication => mortgageApplication.buyer)
+  mortgageApplications: MortgageApplication[];
+
+  @OneToMany(() => Viewing, viewing => viewing.buyer)
+  viewings: Viewing[];
 
   @ApiProperty()
   @CreateDateColumn()

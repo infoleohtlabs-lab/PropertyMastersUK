@@ -16,6 +16,9 @@ import { LoggingModule } from './logging/logging.module';
 import { SecurityModule } from './security/security.module';
 import { DatabaseModule } from './database/database.module';
 import { LandRegistryModule } from './land-registry/land-registry.module';
+import { AdminModule } from './admin/admin.module';
+import { SolicitorModule } from './solicitors/solicitor.module';
+import { BuyersModule } from './buyers/buyers.module';
 import configuration from './config/configuration';
 import { envValidationSchema } from './config/env.validation';
 
@@ -44,6 +47,9 @@ import { envValidationSchema } from './config/env.validation';
     LoggingModule,
     SecurityModule,
     LandRegistryModule,
+    AdminModule,
+    SolicitorModule,
+    BuyersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

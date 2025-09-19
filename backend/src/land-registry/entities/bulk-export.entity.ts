@@ -24,7 +24,11 @@ export class BulkExport {
   exportId: string;
 
   @ApiProperty()
-  @Column('jsonb')
+  @Column('text')
+  request: any;
+
+  @ApiProperty()
+  @Column('text')
   searchCriteria: any;
 
   @ApiProperty()

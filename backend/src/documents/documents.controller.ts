@@ -23,7 +23,8 @@ import {
   ApiConsumes,
   ApiBody,
   ApiQuery,
-} from '@nestjs/swagger';
+
+  getSchemaPath,} from '@nestjs/swagger';
 import { DocumentsService } from './documents.service';
 import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
@@ -42,7 +43,7 @@ export class DocumentsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new document' })
-  @ApiResponse({ status: 201, description: 'Document created successfully', type: Document })
+  @ApiResponse({ status: 201, description: 'Document created successfully', schema: { $ref: getSchemaPath(Document) } })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -71,7 +72,7 @@ export class DocumentsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all documents with optional filters' })
-  @ApiResponse({ status: 200, description: 'Documents retrieved successfully', type: [Document] })
+  @ApiResponse({ status: 200, description: 'Documents retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Document) } } })
   @ApiQuery({ name: 'uploadedById', required: false, description: 'Filter by uploader ID' })
   @ApiQuery({ name: 'propertyId', required: false, description: 'Filter by property ID' })
   @ApiQuery({ name: 'tenantId', required: false, description: 'Filter by tenant ID' })
@@ -108,7 +109,7 @@ export class DocumentsController {
 
   @Get('expiring')
   @ApiOperation({ summary: 'Get documents expiring soon' })
-  @ApiResponse({ status: 200, description: 'Expiring documents retrieved successfully', type: [Document] })
+  @ApiResponse({ status: 200, description: 'Expiring documents retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Document) } } })
   @ApiQuery({ name: 'days', required: false, description: 'Number of days to look ahead (default: 30)' })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD)
   async getExpiringDocuments(@Query('days') days?: number): Promise<Document[]> {
@@ -117,7 +118,7 @@ export class DocumentsController {
 
   @Get('property/:propertyId')
   @ApiOperation({ summary: 'Get documents by property ID' })
-  @ApiResponse({ status: 200, description: 'Property documents retrieved successfully', type: [Document] })
+  @ApiResponse({ status: 200, description: 'Property documents retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Document) } } })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD, UserRole.TENANT)
   async findByProperty(@Param('propertyId', ParseUUIDPipe) propertyId: string): Promise<Document[]> {
     return this.documentsService.findByProperty(propertyId);
@@ -125,7 +126,7 @@ export class DocumentsController {
 
   @Get('tenant/:tenantId')
   @ApiOperation({ summary: 'Get documents by tenant ID' })
-  @ApiResponse({ status: 200, description: 'Tenant documents retrieved successfully', type: [Document] })
+  @ApiResponse({ status: 200, description: 'Tenant documents retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Document) } } })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD, UserRole.TENANT)
   async findByTenant(@Param('tenantId', ParseUUIDPipe) tenantId: string): Promise<Document[]> {
     return this.documentsService.findByTenant(tenantId);
@@ -133,7 +134,7 @@ export class DocumentsController {
 
   @Get('landlord/:landlordId')
   @ApiOperation({ summary: 'Get documents by landlord ID' })
-  @ApiResponse({ status: 200, description: 'Landlord documents retrieved successfully', type: [Document] })
+  @ApiResponse({ status: 200, description: 'Landlord documents retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Document) } } })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD)
   async findByLandlord(@Param('landlordId', ParseUUIDPipe) landlordId: string): Promise<Document[]> {
     return this.documentsService.findByLandlord(landlordId);
@@ -141,7 +142,7 @@ export class DocumentsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get document by ID' })
-  @ApiResponse({ status: 200, description: 'Document retrieved successfully', type: Document })
+  @ApiResponse({ status: 200, description: 'Document retrieved successfully', schema: { $ref: getSchemaPath(Document) } })
   @ApiResponse({ status: 404, description: 'Document not found' })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD, UserRole.TENANT)
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Document> {
@@ -150,7 +151,7 @@ export class DocumentsController {
 
   @Get(':id/versions')
   @ApiOperation({ summary: 'Get all versions of a document' })
-  @ApiResponse({ status: 200, description: 'Document versions retrieved successfully', type: [Document] })
+  @ApiResponse({ status: 200, description: 'Document versions retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Document) } } })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD, UserRole.TENANT)
   async getVersions(@Param('id', ParseUUIDPipe) id: string): Promise<Document[]> {
     return this.documentsService.getDocumentVersions(id);
@@ -158,7 +159,7 @@ export class DocumentsController {
 
   @Post(':id/versions')
   @ApiOperation({ summary: 'Create a new version of a document' })
-  @ApiResponse({ status: 201, description: 'Document version created successfully', type: Document })
+  @ApiResponse({ status: 201, description: 'Document version created successfully', schema: { $ref: getSchemaPath(Document) } })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   @Roles(UserRole.ADMIN, UserRole.LANDLORD, UserRole.TENANT)
@@ -173,7 +174,7 @@ export class DocumentsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update document' })
-  @ApiResponse({ status: 200, description: 'Document updated successfully', type: Document })
+  @ApiResponse({ status: 200, description: 'Document updated successfully', schema: { $ref: getSchemaPath(Document) } })
   @ApiResponse({ status: 404, description: 'Document not found' })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD, UserRole.TENANT)
   async update(
@@ -185,7 +186,7 @@ export class DocumentsController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update document status' })
-  @ApiResponse({ status: 200, description: 'Document status updated successfully', type: Document })
+  @ApiResponse({ status: 200, description: 'Document status updated successfully', schema: { $ref: getSchemaPath(Document) } })
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiBody({
     schema: {
@@ -207,7 +208,7 @@ export class DocumentsController {
 
   @Patch(':id/verify')
   @ApiOperation({ summary: 'Verify document' })
-  @ApiResponse({ status: 200, description: 'Document verified successfully', type: Document })
+  @ApiResponse({ status: 200, description: 'Document verified successfully', schema: { $ref: getSchemaPath(Document) } })
   @ApiResponse({ status: 404, description: 'Document not found' })
   @ApiBody({
     schema: {

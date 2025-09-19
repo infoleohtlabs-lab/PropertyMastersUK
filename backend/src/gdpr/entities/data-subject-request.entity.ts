@@ -94,23 +94,20 @@ export class DataSubjectRequest {
 
   @ApiProperty({ description: 'Type of data subject request', enum: RequestType })
   @Column({
-    type: 'enum',
-    enum: RequestType,
+    type: 'varchar',
   })
   type: RequestType;
 
   @ApiProperty({ description: 'Current status of the request', enum: RequestStatus })
   @Column({
-    type: 'enum',
-    enum: RequestStatus,
+    type: 'varchar',
     default: RequestStatus.SUBMITTED,
   })
   status: RequestStatus;
 
   @ApiProperty({ description: 'Priority level of the request', enum: RequestPriority })
   @Column({
-    type: 'enum',
-    enum: RequestPriority,
+    type: 'varchar',
     default: RequestPriority.MEDIUM,
   })
   priority: RequestPriority;
@@ -197,14 +194,13 @@ export class DataSubjectRequest {
 
   @ApiProperty({ description: 'Method used for identity verification', enum: VerificationMethod })
   @Column({
-    type: 'enum',
-    enum: VerificationMethod,
+    type: 'varchar',
     nullable: true,
   })
   verificationMethod?: VerificationMethod;
 
   @ApiProperty({ description: 'When identity was verified' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   verifiedAt?: Date;
 
   @ApiProperty({ description: 'Who verified the identity' })
@@ -217,15 +213,15 @@ export class DataSubjectRequest {
 
   // Processing and timeline
   @ApiProperty({ description: 'When request was acknowledged' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   acknowledgedAt?: Date;
 
   @ApiProperty({ description: 'Due date for completion (30 days from receipt)' })
-  @Column('timestamp')
+  @Column('datetime')
   dueDate: Date;
 
   @ApiProperty({ description: 'Extended due date if extension granted' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   extendedDueDate?: Date;
 
   @ApiProperty({ description: 'Reason for extension' })
@@ -233,7 +229,7 @@ export class DataSubjectRequest {
   extensionReason?: string;
 
   @ApiProperty({ description: 'When request was completed' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   completedAt?: Date;
 
   // Assignment and handling
@@ -246,7 +242,7 @@ export class DataSubjectRequest {
   assignedTo?: User;
 
   @ApiProperty({ description: 'When request was assigned' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   assignedAt?: Date;
 
   @ApiProperty({ description: 'Department responsible for handling' })
@@ -277,8 +273,7 @@ export class DataSubjectRequest {
 
   @ApiProperty({ description: 'Reason for rejection', enum: RejectionReason })
   @Column({
-    type: 'enum',
-    enum: RejectionReason,
+    type: 'varchar',
     nullable: true,
   })
   rejectionReason?: RejectionReason;
@@ -288,7 +283,7 @@ export class DataSubjectRequest {
   rejectionExplanation?: string;
 
   @ApiProperty({ description: 'When request was rejected' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   rejectedAt?: Date;
 
   // Fees and costs
@@ -314,7 +309,7 @@ export class DataSubjectRequest {
 
   // Communication log
   @ApiProperty({ description: 'Communication history with data subject' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   communicationLog?: Array<{
     timestamp: Date;
     type: string;
@@ -333,7 +328,7 @@ export class DataSubjectRequest {
   escalationReason?: string;
 
   @ApiProperty({ description: 'When request was escalated' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   escalatedAt?: Date;
 
   @ApiProperty({ description: 'Who escalated the request' })
@@ -383,7 +378,7 @@ export class DataSubjectRequest {
   userAgent?: string;
 
   @ApiProperty({ description: 'Additional metadata' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   @ApiProperty({ description: 'When the request was created' })

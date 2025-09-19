@@ -12,7 +12,8 @@ import {
   ParseUUIDPipe,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { MessageService } from '../services/message.service';
 import { CreateMessageDto } from '../dto/create-message.dto';
@@ -32,7 +33,7 @@ export class MessageController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new message' })
-  @ApiResponse({ status: 201, description: 'Message created successfully', type: Message })
+  @ApiResponse({ status: 201, description: 'Message created successfully', schema: { $ref: getSchemaPath(Message) } })
   @ApiResponse({ status: 403, description: 'Access denied to conversation' })
   async createMessage(
     @Body() createMessageDto: CreateMessageDto,
@@ -46,7 +47,7 @@ export class MessageController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get message by ID' })
-  @ApiResponse({ status: 200, description: 'Message found', type: Message })
+  @ApiResponse({ status: 200, description: 'Message found', schema: { $ref: getSchemaPath(Message) } })
   @ApiResponse({ status: 404, description: 'Message not found' })
   async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Message> {
     return this.messageService.findById(id);
@@ -72,7 +73,7 @@ export class MessageController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update a message' })
-  @ApiResponse({ status: 200, description: 'Message updated successfully', type: Message })
+  @ApiResponse({ status: 200, description: 'Message updated successfully', schema: { $ref: getSchemaPath(Message) } })
   @ApiResponse({ status: 403, description: 'Can only edit your own messages' })
   @ApiResponse({ status: 404, description: 'Message not found' })
   async updateMessage(
@@ -98,7 +99,7 @@ export class MessageController {
 
   @Post(':id/reactions')
   @ApiOperation({ summary: 'Add reaction to a message' })
-  @ApiResponse({ status: 201, description: 'Reaction added successfully', type: MessageReaction })
+  @ApiResponse({ status: 201, description: 'Reaction added successfully', schema: { $ref: getSchemaPath(MessageReaction) } })
   @ApiResponse({ status: 400, description: 'Reaction already exists' })
   @ApiResponse({ status: 403, description: 'Access denied to conversation' })
   async addReaction(
@@ -184,7 +185,7 @@ export class MessageController {
 
   @Post(':id/forward')
   @ApiOperation({ summary: 'Forward a message to another conversation' })
-  @ApiResponse({ status: 201, description: 'Message forwarded successfully', type: Message })
+  @ApiResponse({ status: 201, description: 'Message forwarded successfully', schema: { $ref: getSchemaPath(Message) } })
   @ApiResponse({ status: 403, description: 'Access denied to one or both conversations' })
   async forwardMessage(
     @Param('id', ParseUUIDPipe) messageId: string,
@@ -200,7 +201,7 @@ export class MessageController {
 
   @Get(':id/reactions')
   @ApiOperation({ summary: 'Get all reactions for a message' })
-  @ApiResponse({ status: 200, description: 'Reactions retrieved successfully', type: [MessageReaction] })
+  @ApiResponse({ status: 200, description: 'Reactions retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(MessageReaction) } } })
   async getMessageReactions(
     @Param('id', ParseUUIDPipe) messageId: string,
   ): Promise<MessageReaction[]> {
@@ -209,7 +210,7 @@ export class MessageController {
 
   @Get(':id/attachments')
   @ApiOperation({ summary: 'Get all attachments for a message' })
-  @ApiResponse({ status: 200, description: 'Attachments retrieved successfully', type: [MessageAttachment] })
+  @ApiResponse({ status: 200, description: 'Attachments retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(MessageAttachment) } } })
   async getMessageAttachments(
     @Param('id', ParseUUIDPipe) messageId: string,
   ): Promise<MessageAttachment[]> {

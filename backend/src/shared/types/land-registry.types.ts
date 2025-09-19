@@ -30,6 +30,23 @@ export interface Property {
   };
 }
 
+export interface PropertyWithDetails extends Property {
+  ownership?: Ownership;
+  priceHistory?: Transaction[];
+  marketAnalysis?: {
+    estimatedValue: number;
+    priceChange: number;
+    marketTrend: 'rising' | 'falling' | 'stable';
+    comparableProperties: Property[];
+  };
+  energyRating?: string;
+  councilTaxBand?: string;
+  floorArea?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  description?: string;
+}
+
 export interface OwnershipLookupRequest {
   titleNumber?: string;
   uprn?: string;
@@ -87,6 +104,7 @@ export interface PricePaidSearchResponse {
   transactions: Transaction[];
   totalCount: number;
   hasMore: boolean;
+  nextOffset?: number;
   statistics?: {
     averagePrice: number;
     medianPrice: number;

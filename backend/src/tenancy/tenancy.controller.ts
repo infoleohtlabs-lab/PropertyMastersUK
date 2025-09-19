@@ -750,7 +750,7 @@ export class TenancyController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get rent payment by ID' })
-  @ApiResponse({ status: 200, description: 'Rent payment retrieved successfully', type: RentPayment })
+  @ApiResponse({ status: 200, description: 'Rent payment retrieved successfully', schema: { $ref: getSchemaPath(RentPayment) } })
   @ApiResponse({ status: 404, description: 'Rent payment not found' })
   findRentPaymentById(@Param('id') id: string) {
     return this.tenancyService.findRentPaymentById(id);

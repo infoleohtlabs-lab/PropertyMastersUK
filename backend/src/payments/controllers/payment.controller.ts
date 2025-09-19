@@ -16,7 +16,8 @@ import {
   UsePipes,
   ForbiddenException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiProperty } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiProperty ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
@@ -484,7 +485,7 @@ export class PaymentController {
   @HttpCode(HttpStatus.CREATED)
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Create a new payment' })
-  @ApiResponse({ status: 201, description: 'Payment created successfully', type: Payment })
+  @ApiResponse({ status: 201, description: 'Payment created successfully', schema: { $ref: getSchemaPath(Payment) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -601,7 +602,7 @@ export class PaymentController {
   @Get(':id')
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD, UserRole.TENANT)
   @ApiOperation({ summary: 'Get payment by ID' })
-  @ApiResponse({ status: 200, description: 'Payment retrieved successfully', type: Payment })
+  @ApiResponse({ status: 200, description: 'Payment retrieved successfully', schema: { $ref: getSchemaPath(Payment) } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Payment not found' })
@@ -630,7 +631,7 @@ export class PaymentController {
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Update payment' })
-  @ApiResponse({ status: 200, description: 'Payment updated successfully', type: Payment })
+  @ApiResponse({ status: 200, description: 'Payment updated successfully', schema: { $ref: getSchemaPath(Payment) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -714,7 +715,7 @@ export class PaymentController {
   @Post(':id/process')
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD, UserRole.TENANT)
   @ApiOperation({ summary: 'Process payment' })
-  @ApiResponse({ status: 200, description: 'Payment processed successfully', type: Payment })
+  @ApiResponse({ status: 200, description: 'Payment processed successfully', schema: { $ref: getSchemaPath(Payment) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Payment not found' })
@@ -745,7 +746,7 @@ export class PaymentController {
   @Post(':id/refund')
   @Roles(UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD)
   @ApiOperation({ summary: 'Refund payment' })
-  @ApiResponse({ status: 200, description: 'Payment refunded successfully', type: Payment })
+  @ApiResponse({ status: 200, description: 'Payment refunded successfully', schema: { $ref: getSchemaPath(Payment) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })

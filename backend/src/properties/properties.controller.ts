@@ -44,14 +44,10 @@ export class PropertiesController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Invalid property data',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid property data', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - authentication required',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - authentication required', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   create(@Body() createPropertyDto: CreatePropertyDto, @Request() req) {
     return this.propertiesService.create(createPropertyDto, req.user.id);
   }
@@ -140,9 +136,7 @@ export class PropertiesController {
   })
   @ApiResponse({ 
     status: 404, 
-    description: 'Property not found',
-    type: ApiErrorResponse
-  })
+    description: 'Property not found', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   findOne(@Param('id') id: string) {
     return this.propertiesService.findOne(id);
   }
@@ -179,24 +173,16 @@ export class PropertiesController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Invalid update data',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid update data', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - authentication required',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - authentication required', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 403, 
-    description: 'Forbidden - insufficient permissions',
-    type: ApiErrorResponse
-  })
+    description: 'Forbidden - insufficient permissions', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 404, 
-    description: 'Property not found',
-    type: ApiErrorResponse
-  })
+    description: 'Property not found', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   update(@Param('id') id: string, @Body() updatePropertyDto: UpdatePropertyDto, @Request() req) {
     return this.propertiesService.update(id, updatePropertyDto);
   }
@@ -234,19 +220,13 @@ export class PropertiesController {
   })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - authentication required',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - authentication required', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 403, 
-    description: 'Forbidden - insufficient permissions',
-    type: ApiErrorResponse
-  })
+    description: 'Forbidden - insufficient permissions', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 404, 
-    description: 'Property not found',
-    type: ApiErrorResponse
-  })
+    description: 'Property not found', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   remove(@Param('id') id: string, @Request() req) {
     return this.propertiesService.remove(id);
   }
@@ -340,9 +320,7 @@ export class PropertiesController {
   })
   @ApiResponse({ 
     status: 404, 
-    description: 'Property not found',
-    type: ApiErrorResponse
-  })
+    description: 'Property not found', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   getMarketAnalysis(@Param('id') id: string) {
     return this.propertiesService.getMarketAnalysis(id);
   }
@@ -408,24 +386,16 @@ export class PropertiesController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Invalid file format or size',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid file format or size', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - authentication required',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - authentication required', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 403, 
-    description: 'Forbidden - insufficient permissions',
-    type: ApiErrorResponse
-  })
+    description: 'Forbidden - insufficient permissions', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 404, 
-    description: 'Property not found',
-    type: ApiErrorResponse
-  })
+    description: 'Property not found', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   uploadImages(
     @Param('id') id: string,
     @UploadedFiles() files: Express.Multer.File[],
@@ -471,19 +441,13 @@ export class PropertiesController {
   })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - authentication required',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - authentication required', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 403, 
-    description: 'Forbidden - insufficient permissions',
-    type: ApiErrorResponse
-  })
+    description: 'Forbidden - insufficient permissions', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 404, 
-    description: 'Property or image not found',
-    type: ApiErrorResponse
-  })
+    description: 'Property or image not found', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   deleteImage(
     @Param('id') propertyId: string,
     @Param('imageId') imageId: string,
@@ -493,7 +457,7 @@ export class PropertiesController {
 
   @Get('agent/:agentId')
   @ApiOperation({ summary: 'Get properties by agent' })
-  @ApiResponse({ status: 200, description: 'Agent properties retrieved successfully', type: [Property] })
+  @ApiResponse({ status: 200, description: 'Agent properties retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Property) } } })
   findByAgent(@Param('agentId') agentId: string) {
     return this.propertiesService.findByAgent(agentId);
   }
@@ -514,7 +478,7 @@ export class PropertiesController {
 
   @Get('nearby/:id')
   @ApiOperation({ summary: 'Get nearby properties' })
-  @ApiResponse({ status: 200, description: 'Nearby properties retrieved successfully', type: [Property] })
+  @ApiResponse({ status: 200, description: 'Nearby properties retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Property) } } })
   @ApiQuery({ name: 'radius', required: false, description: 'Search radius in kilometers' })
   getNearbyProperties(
     @Param('id') id: string,
@@ -545,7 +509,7 @@ export class PropertiesController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user favorite properties' })
-  @ApiResponse({ status: 200, description: 'User favorites retrieved successfully', type: [Property] })
+  @ApiResponse({ status: 200, description: 'User favorites retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Property) } } })
   getUserFavorites(@Request() req) {
     return this.propertiesService.getUserFavorites(req.user.id);
   }

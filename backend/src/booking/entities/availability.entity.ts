@@ -61,8 +61,7 @@ export class Availability {
   // Availability Details
   @ApiProperty({ description: 'Type of availability', enum: AvailabilityType })
   @Column({
-    type: 'enum',
-    enum: AvailabilityType,
+    type: 'varchar',
     default: AvailabilityType.AVAILABLE,
   })
   type: AvailabilityType;
@@ -77,11 +76,11 @@ export class Availability {
 
   // Time Range
   @ApiProperty({ description: 'Start time of the availability slot' })
-  @Column('timestamp with time zone')
+  @Column('datetime')
   startTime: Date;
 
   @ApiProperty({ description: 'End time of the availability slot' })
-  @Column('timestamp with time zone')
+  @Column('datetime')
   endTime: Date;
 
   @ApiProperty({ description: 'Whether this is an all-day availability' })
@@ -108,8 +107,7 @@ export class Availability {
   // Recurrence
   @ApiProperty({ description: 'Type of recurrence', enum: RecurrenceType })
   @Column({
-    type: 'enum',
-    enum: RecurrenceType,
+    type: 'varchar',
     default: RecurrenceType.NONE,
   })
   recurrenceType: RecurrenceType;
@@ -123,7 +121,7 @@ export class Availability {
   recurrenceDays?: DayOfWeek[];
 
   @ApiProperty({ description: 'End date for recurrence', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   recurrenceEndDate?: Date;
 
   @ApiProperty({ description: 'Maximum number of occurrences', required: false })
@@ -205,7 +203,7 @@ export class Availability {
 
   // Metadata
   @ApiProperty({ description: 'Additional metadata as JSON', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   @ApiProperty({ description: 'Tags for categorization', required: false })

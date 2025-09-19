@@ -12,6 +12,9 @@ import {
   IsDateString,
   Min,
   Max,
+  ValidateNested,
+  IsUUID,
+  IsInt,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
@@ -350,9 +353,6 @@ export class UserResponseDto {
 
   @ApiProperty({ description: 'Last login date' })
   lastLoginAt: Date;
-
-  @ApiProperty({ description: 'Email verification date' })
-  isEmailVerified: boolean;
 }
 
 export class PaginatedUsersResponseDto {
@@ -369,4 +369,152 @@ export class PaginatedUsersResponseDto {
 
   @ApiProperty({ description: 'Applied filters' })
   filters: UserFilterDto;
+}
+
+export class BulkUserOperationDto {
+  @ApiProperty({ description: 'Array of user IDs', type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  userIds: string[];
+
+  @ApiProperty({ description: 'Operation to perform', enum: ['activate', 'suspend', 'delete', 'verify', 'change_role', 'reset_password'] })
+  @IsString()
+  @IsEnum(['activate', 'suspend', 'delete', 'verify', 'change_role', 'reset_password'])
+  operation: 'activate' | 'suspend' | 'delete' | 'verify' | 'change_role' | 'reset_password';
+
+  @ApiPropertyOptional({ description: 'Additional data for the operation' })
+  @IsOptional()
+  data?: {
+    reason?: string;
+    newRole?: UserRole;
+    sendNotification?: boolean;
+  };
+}
+
+export class UserSessionDto {
+  @ApiProperty({ description: 'User ID' })
+  userId: string;
+
+  @ApiProperty({ description: 'Session ID' })
+  sessionId: string;
+
+  @ApiProperty({ description: 'IP address' })
+  ipAddress: string;
+
+  @ApiProperty({ description: 'User agent' })
+  userAgent: string;
+
+  @ApiProperty({ description: 'Login time' })
+  loginTime: Date;
+
+  @ApiProperty({ description: 'Last activity date' })
+  lastActivity: Date;
+
+  @ApiProperty({ description: 'Is session active' })
+  isActive: boolean;
+}
+
+export class AdvancedUserFiltersDto extends UserFilterDto {
+  @ApiPropertyOptional({ description: 'Registration date from' })
+  @IsOptional()
+  @IsDateString()
+  registrationDateFrom?: Date;
+
+  @ApiPropertyOptional({ description: 'Registration date to' })
+  @IsOptional()
+  @IsDateString()
+  registrationDateTo?: Date;
+
+  @ApiPropertyOptional({ description: 'Has properties' })
+  @IsOptional()
+  @IsBoolean()
+  hasProperties?: boolean;
+
+  @ApiPropertyOptional({ description: 'Has bookings' })
+  @IsOptional()
+  @IsBoolean()
+  hasBookings?: boolean;
+
+  @ApiPropertyOptional({ description: 'Activity level', enum: ['high', 'medium', 'low', 'inactive'] })
+  @IsOptional()
+  @IsEnum(['high', 'medium', 'low', 'inactive'])
+  activityLevel?: 'high' | 'medium' | 'low' | 'inactive';
+}
+
+export class UserActivityAnalyticsDto {
+  @ApiProperty({ description: 'User ID to analyze' })
+  @IsString()
+  userId: string;
+
+  @ApiProperty({ description: 'Time period', enum: ['day', 'week', 'month', 'year'] })
+  @IsEnum(['day', 'week', 'month', 'year'])
+  period: 'day' | 'week' | 'month' | 'year';
+
+  @ApiPropertyOptional({ description: 'Start date' })
+  @IsOptional()
+  @IsDateString()
+  startDate?: Date;
+
+  @ApiPropertyOptional({ description: 'End date' })
+  @IsOptional()
+  @IsDateString()
+  endDate?: Date;
+}
+
+export class UserActivityFiltersDto {
+  @ApiPropertyOptional({ description: 'User ID to analyze' })
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
+  @ApiPropertyOptional({ description: 'Time period', enum: ['day', 'week', 'month', 'year'] })
+  @IsOptional()
+  @IsEnum(['day', 'week', 'month', 'year'])
+  period?: 'day' | 'week' | 'month' | 'year';
+
+  @ApiPropertyOptional({ description: 'Start date' })
+  @IsOptional()
+  @IsDateString()
+  startDate?: Date;
+
+  @ApiPropertyOptional({ description: 'End date' })
+  @IsOptional()
+  @IsDateString()
+  endDate?: Date;
+}
+
+export class RolePermissionDto {
+  @ApiProperty({ description: 'User role', enum: ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'AGENT', 'BUYER', 'USER'] })
+  @IsEnum(['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'AGENT', 'BUYER', 'USER'])
+  role: string;
+
+  @ApiProperty({ description: 'List of permissions', type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  permissions: string[];
+
+  @ApiProperty({ description: 'Role description' })
+  @IsString()
+  description: string;
+
+  @ApiProperty({ description: 'Is role active' })
+  @IsBoolean()
+  isActive: boolean;
+}
+
+export class ExportUsersDto {
+  @ApiPropertyOptional({ description: 'Export format', enum: ['csv', 'excel', 'json'] })
+  @IsOptional()
+  @IsEnum(['csv', 'excel', 'json'])
+  format?: 'csv' | 'excel' | 'json';
+
+  @ApiPropertyOptional({ description: 'Fields to include in export', type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  fields?: string[];
+
+  @ApiPropertyOptional({ description: 'Filter criteria' })
+  @IsOptional()
+  filters?: UserFilterDto;
 }

@@ -64,24 +64,21 @@ export class Booking {
   // Booking Details
   @ApiProperty({ description: 'Type of booking', enum: BookingType })
   @Column({
-    type: 'enum',
-    enum: BookingType,
+    type: 'varchar',
     default: BookingType.VIEWING,
   })
   type: BookingType;
 
   @ApiProperty({ description: 'Current status of the booking', enum: BookingStatus })
   @Column({
-    type: 'enum',
-    enum: BookingStatus,
+    type: 'varchar',
     default: BookingStatus.PENDING,
   })
   status: BookingStatus;
 
   @ApiProperty({ description: 'Priority level of the booking', enum: BookingPriority })
   @Column({
-    type: 'enum',
-    enum: BookingPriority,
+    type: 'varchar',
     default: BookingPriority.MEDIUM,
   })
   priority: BookingPriority;
@@ -96,7 +93,7 @@ export class Booking {
 
   // Scheduling
   @ApiProperty({ description: 'Scheduled date and time for the booking' })
-  @Column('timestamp with time zone')
+  @Column('datetime')
   scheduledAt: Date;
 
   @ApiProperty({ description: 'Expected duration in minutes' })
@@ -104,7 +101,7 @@ export class Booking {
   durationMinutes: number;
 
   @ApiProperty({ description: 'End time calculated from scheduledAt + duration' })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   endTime?: Date;
 
   // Relationships
@@ -177,7 +174,7 @@ export class Booking {
   cancellationReason?: string;
 
   @ApiProperty({ description: 'When the booking was cancelled', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   cancelledAt?: Date;
 
   @ApiProperty({ description: 'Who cancelled the booking', required: false })
@@ -190,7 +187,7 @@ export class Booking {
 
   // Completion
   @ApiProperty({ description: 'When the booking was completed', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   completedAt?: Date;
 
   @ApiProperty({ description: 'Feedback or outcome notes', required: false })
@@ -203,7 +200,7 @@ export class Booking {
 
   // Metadata
   @ApiProperty({ description: 'Additional metadata as JSON', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   // Recurring Booking
@@ -220,7 +217,7 @@ export class Booking {
   recurrencePattern?: string;
 
   @ApiProperty({ description: 'End date for recurring bookings', required: false })
-  @Column('timestamp with time zone', { nullable: true })
+  @Column('datetime', { nullable: true })
   recurrenceEndDate?: Date;
 
   // Timestamps

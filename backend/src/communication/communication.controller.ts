@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CommunicationService } from './communication.service';
 import { CreateCommunicationDto } from './dto/create-communication.dto';
@@ -15,21 +16,21 @@ export class CommunicationController {
 
   @Post()
   @ApiOperation({ summary: 'Send a new message' })
-  @ApiResponse({ status: 201, description: 'Message sent successfully', type: Communication })
+  @ApiResponse({ status: 201, description: 'Message sent successfully', schema: { $ref: getSchemaPath(Communication) } })
   create(@Body() createCommunicationDto: CreateCommunicationDto) {
     return this.communicationService.create(createCommunicationDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all communications' })
-  @ApiResponse({ status: 200, description: 'Communications retrieved successfully', type: [Communication] })
+  @ApiResponse({ status: 200, description: 'Communications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Communication) } } })
   findAll() {
     return this.communicationService.findAll();
   }
 
   @Get('search')
   @ApiOperation({ summary: 'Search communications' })
-  @ApiResponse({ status: 200, description: 'Communications found successfully', type: [Communication] })
+  @ApiResponse({ status: 200, description: 'Communications found successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Communication) } } })
   search(
     @Query('query') query: string,
     @Query('userId') userId?: string,
@@ -39,21 +40,21 @@ export class CommunicationController {
 
   @Get('user/:userId')
   @ApiOperation({ summary: 'Get communications for a user' })
-  @ApiResponse({ status: 200, description: 'User communications retrieved successfully', type: [Communication] })
+  @ApiResponse({ status: 200, description: 'User communications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Communication) } } })
   findByUser(@Param('userId') userId: string) {
     return this.communicationService.findByUser(userId);
   }
 
   @Get('property/:propertyId')
   @ApiOperation({ summary: 'Get communications for a property' })
-  @ApiResponse({ status: 200, description: 'Property communications retrieved successfully', type: [Communication] })
+  @ApiResponse({ status: 200, description: 'Property communications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Communication) } } })
   findByProperty(@Param('propertyId') propertyId: string) {
     return this.communicationService.findByProperty(propertyId);
   }
 
   @Get('unread/:userId')
   @ApiOperation({ summary: 'Get unread communications for a user' })
-  @ApiResponse({ status: 200, description: 'Unread communications retrieved successfully', type: [Communication] })
+  @ApiResponse({ status: 200, description: 'Unread communications retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Communication) } } })
   findUnread(@Param('userId') userId: string) {
     return this.communicationService.findUnread(userId);
   }
@@ -67,7 +68,7 @@ export class CommunicationController {
 
   @Get('conversation/:user1Id/:user2Id')
   @ApiOperation({ summary: 'Get conversation between two users' })
-  @ApiResponse({ status: 200, description: 'Conversation retrieved successfully', type: [Communication] })
+  @ApiResponse({ status: 200, description: 'Conversation retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Communication) } } })
   getConversation(
     @Param('user1Id') user1Id: string,
     @Param('user2Id') user2Id: string,
@@ -77,7 +78,7 @@ export class CommunicationController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get communication by ID' })
-  @ApiResponse({ status: 200, description: 'Communication retrieved successfully', type: Communication })
+  @ApiResponse({ status: 200, description: 'Communication retrieved successfully', schema: { $ref: getSchemaPath(Communication) } })
   @ApiResponse({ status: 404, description: 'Communication not found' })
   findOne(@Param('id') id: string) {
     return this.communicationService.findOne(id);
@@ -85,7 +86,7 @@ export class CommunicationController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update communication' })
-  @ApiResponse({ status: 200, description: 'Communication updated successfully', type: Communication })
+  @ApiResponse({ status: 200, description: 'Communication updated successfully', schema: { $ref: getSchemaPath(Communication) } })
   @ApiResponse({ status: 404, description: 'Communication not found' })
   update(@Param('id') id: string, @Body() updateCommunicationDto: UpdateCommunicationDto) {
     return this.communicationService.update(id, updateCommunicationDto);
@@ -93,14 +94,14 @@ export class CommunicationController {
 
   @Post(':id/read')
   @ApiOperation({ summary: 'Mark communication as read' })
-  @ApiResponse({ status: 200, description: 'Communication marked as read', type: Communication })
+  @ApiResponse({ status: 200, description: 'Communication marked as read', schema: { $ref: getSchemaPath(Communication) } })
   markAsRead(@Param('id') id: string) {
     return this.communicationService.markAsRead(id);
   }
 
   @Post(':id/replied')
   @ApiOperation({ summary: 'Mark communication as replied' })
-  @ApiResponse({ status: 200, description: 'Communication marked as replied', type: Communication })
+  @ApiResponse({ status: 200, description: 'Communication marked as replied', schema: { $ref: getSchemaPath(Communication) } })
   markAsReplied(@Param('id') id: string) {
     return this.communicationService.markAsReplied(id);
   }

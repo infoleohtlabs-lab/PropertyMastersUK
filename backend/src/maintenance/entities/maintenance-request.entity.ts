@@ -122,16 +122,14 @@ export class MaintenanceRequest {
 
   @ApiProperty({ enum: MaintenanceRequestType, description: 'Type of maintenance request' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceRequestType,
+    type: 'varchar',
     default: MaintenanceRequestType.ROUTINE,
   })
   type: MaintenanceRequestType;
 
   @ApiProperty({ enum: MaintenanceRequestStatus, description: 'Current status of the request' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceRequestStatus,
+    type: 'varchar',
     default: MaintenanceRequestStatus.SUBMITTED,
   })
   @Index()
@@ -139,8 +137,7 @@ export class MaintenanceRequest {
 
   @ApiProperty({ enum: MaintenanceRequestPriority, description: 'Priority level of the request' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceRequestPriority,
+    type: 'varchar',
     default: MaintenanceRequestPriority.MEDIUM,
   })
   @Index()
@@ -148,16 +145,14 @@ export class MaintenanceRequest {
 
   @ApiProperty({ enum: MaintenanceRequestCategory, description: 'Category of maintenance' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceRequestCategory,
+    type: 'varchar',
   })
   @Index()
   category: MaintenanceRequestCategory;
 
   @ApiProperty({ enum: MaintenanceRequestSource, description: 'Source of the request' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceRequestSource,
+    type: 'varchar',
     default: MaintenanceRequestSource.TENANT_PORTAL,
   })
   source: MaintenanceRequestSource;
@@ -226,32 +221,32 @@ export class MaintenanceRequest {
 
   // Scheduling
   @ApiProperty({ description: 'Due date for completion', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   @Index()
   dueDate?: Date;
 
   @ApiProperty({ description: 'Preferred start date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   preferredStartDate?: Date;
 
   @ApiProperty({ description: 'Preferred completion date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   preferredCompletionDate?: Date;
 
   @ApiProperty({ description: 'Scheduled start date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   scheduledStartDate?: Date;
 
   @ApiProperty({ description: 'Scheduled completion date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   scheduledCompletionDate?: Date;
 
   @ApiProperty({ description: 'Actual start date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   actualStartDate?: Date;
 
   @ApiProperty({ description: 'Actual completion date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   actualCompletionDate?: Date;
 
   // Access Information
@@ -309,7 +304,7 @@ export class MaintenanceRequest {
   approvedBy?: User;
 
   @ApiProperty({ description: 'Approval date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   approvedAt?: Date;
 
   @ApiProperty({ description: 'Approval notes', required: false })
@@ -385,7 +380,7 @@ export class MaintenanceRequest {
   requiresFollowUp: boolean;
 
   @ApiProperty({ description: 'Follow-up date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   followUpDate?: Date;
 
   @ApiProperty({ description: 'Follow-up notes', required: false })
@@ -397,7 +392,7 @@ export class MaintenanceRequest {
   warrantyDays?: number;
 
   @ApiProperty({ description: 'Warranty expiration date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   warrantyExpiresAt?: Date;
 
   @ApiProperty({ description: 'Warranty details', required: false })
@@ -444,7 +439,7 @@ export class MaintenanceRequest {
 
   // Communication and Notifications
   @ApiProperty({ description: 'Communication log', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   communicationLog?: Array<{
     timestamp: Date;
     type: string;
@@ -459,7 +454,7 @@ export class MaintenanceRequest {
   tenantNotified: boolean;
 
   @ApiProperty({ description: 'Tenant notification date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   tenantNotifiedAt?: Date;
 
   @ApiProperty({ description: 'Notification preferences', required: false })
@@ -480,7 +475,7 @@ export class MaintenanceRequest {
   isRecurring: boolean;
 
   @ApiProperty({ description: 'Recurrence pattern', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   recurrencePattern?: {
     frequency: string;
     interval: number;
@@ -504,7 +499,7 @@ export class MaintenanceRequest {
 
   // Status Tracking
   @ApiProperty({ description: 'Status history', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   statusHistory?: Array<{
     status: MaintenanceRequestStatus;
     timestamp: Date;
@@ -513,7 +508,7 @@ export class MaintenanceRequest {
   }>;
 
   @ApiProperty({ description: 'Assignment history', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   assignmentHistory?: Array<{
     assignedTo: string;
     assignedBy: string;
@@ -527,7 +522,7 @@ export class MaintenanceRequest {
   externalReference?: string;
 
   @ApiProperty({ description: 'Integration metadata', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   integrationMetadata?: Record<string, any>;
 
   // Flags and Settings
@@ -560,12 +555,12 @@ export class MaintenanceRequest {
   cancelledBy?: User;
 
   @ApiProperty({ description: 'Cancellation date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   cancelledAt?: Date;
 
   // Additional Metadata
   @ApiProperty({ description: 'Additional metadata', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   @ApiProperty({ description: 'Tags for categorization', required: false })
@@ -573,7 +568,7 @@ export class MaintenanceRequest {
   tags?: string[];
 
   @ApiProperty({ description: 'Custom fields', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   customFields?: Record<string, any>;
 
   // Timestamps
@@ -587,22 +582,22 @@ export class MaintenanceRequest {
   updatedAt: Date;
 
   @ApiProperty({ description: 'Acknowledgment timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   acknowledgedAt?: Date;
 
   @ApiProperty({ description: 'Assignment timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   assignedAt?: Date;
 
   @ApiProperty({ description: 'Work start timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   workStartedAt?: Date;
 
   @ApiProperty({ description: 'Completion timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   completedAt?: Date;
 
   @ApiProperty({ description: 'Closed timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   closedAt?: Date;
 }

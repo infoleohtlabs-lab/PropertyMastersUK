@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody, ApiQuery ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,9 +25,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 201,
-    description: 'User created successfully',
-    type: User
-  })
+    description: 'User created successfully', schema: { $ref: getSchemaPath(User) } })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 409, description: 'User with this email already exists' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing authentication token' })
@@ -70,9 +69,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Users retrieved successfully',
-    type: [User]
-  })
+    description: 'Users retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(User) } } })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing authentication token' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
   findAll(
@@ -97,9 +94,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'User retrieved successfully',
-    type: User
-  })
+    description: 'User retrieved successfully', schema: { $ref: getSchemaPath(User) } })
   @ApiResponse({ status: 400, description: 'Invalid user ID format' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing authentication token' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })
@@ -126,9 +121,7 @@ export class UsersController {
   })
   @ApiResponse({
     status: 200,
-    description: 'User updated successfully',
-    type: User
-  })
+    description: 'User updated successfully', schema: { $ref: getSchemaPath(User) } })
   @ApiResponse({ status: 400, description: 'Invalid input data or user ID format' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing authentication token' })
   @ApiResponse({ status: 403, description: 'Forbidden - Insufficient permissions' })

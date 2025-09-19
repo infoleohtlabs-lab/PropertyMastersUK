@@ -178,9 +178,7 @@ export class CrmController {
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'Contacts retrieved successfully', 
-    type: [CrmContact] 
-  })
+    description: 'Contacts retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(CrmContact) } } })
   @ApiResponse({ status: 401, description: 'Unauthorized access' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
   @ApiResponse({ status: 400, description: 'Invalid query parameters' })
@@ -215,9 +213,7 @@ export class CrmController {
   })
   @ApiResponse({ 
     status: 200, 
-    description: 'Contact retrieved successfully', 
-    type: CrmContact 
-  })
+    description: 'Contact retrieved successfully', schema: { $ref: getSchemaPath(CrmContact) } })
   @ApiResponse({ status: 401, description: 'Unauthorized access' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
   @ApiResponse({ status: 404, description: 'Contact not found' })
@@ -249,9 +245,7 @@ export class CrmController {
   })
   @ApiResponse({ 
     status: 201, 
-    description: 'Contact created successfully', 
-    type: CrmContact 
-  })
+    description: 'Contact created successfully', schema: { $ref: getSchemaPath(CrmContact) } })
   @ApiResponse({ status: 400, description: 'Invalid contact data provided' })
   @ApiResponse({ status: 401, description: 'Unauthorized access' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
@@ -263,7 +257,7 @@ export class CrmController {
 
   @Put('contacts/:id')
   @ApiOperation({ summary: 'Update contact' })
-  @ApiResponse({ status: 200, description: 'Contact updated successfully', type: CrmContact })
+  @ApiResponse({ status: 200, description: 'Contact updated successfully', schema: { $ref: getSchemaPath(CrmContact) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async updateContact(
@@ -286,7 +280,7 @@ export class CrmController {
   // Deals Management
   @Get('deals')
   @ApiOperation({ summary: 'Get all deals' })
-  @ApiResponse({ status: 200, description: 'Deals retrieved successfully', type: [CrmDeal] })
+  @ApiResponse({ status: 200, description: 'Deals retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(CrmDeal) } } })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'stage', required: false, type: String })
@@ -309,7 +303,7 @@ export class CrmController {
 
   @Get('deals/:id')
   @ApiOperation({ summary: 'Get deal by ID' })
-  @ApiResponse({ status: 200, description: 'Deal retrieved successfully', type: CrmDeal })
+  @ApiResponse({ status: 200, description: 'Deal retrieved successfully', schema: { $ref: getSchemaPath(CrmDeal) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async getDeal(@Param('id') id: string, @Request() req) {
@@ -318,7 +312,7 @@ export class CrmController {
 
   @Post('deals')
   @ApiOperation({ summary: 'Create new deal' })
-  @ApiResponse({ status: 201, description: 'Deal created successfully', type: CrmDeal })
+  @ApiResponse({ status: 201, description: 'Deal created successfully', schema: { $ref: getSchemaPath(CrmDeal) } })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async createDeal(@Body() dealData: Partial<CrmDeal>, @Request() req) {
     return this.crmService.createDeal(dealData, req.user.id);
@@ -326,7 +320,7 @@ export class CrmController {
 
   @Put('deals/:id')
   @ApiOperation({ summary: 'Update deal' })
-  @ApiResponse({ status: 200, description: 'Deal updated successfully', type: CrmDeal })
+  @ApiResponse({ status: 200, description: 'Deal updated successfully', schema: { $ref: getSchemaPath(CrmDeal) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async updateDeal(
@@ -353,7 +347,7 @@ export class CrmController {
   // Tasks Management
   @Get('tasks')
   @ApiOperation({ summary: 'Get all tasks' })
-  @ApiResponse({ status: 200, description: 'Tasks retrieved successfully', type: [CrmTask] })
+  @ApiResponse({ status: 200, description: 'Tasks retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(CrmTask) } } })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'status', required: false, type: String })
@@ -379,7 +373,7 @@ export class CrmController {
 
   @Post('tasks')
   @ApiOperation({ summary: 'Create new task' })
-  @ApiResponse({ status: 201, description: 'Task created successfully', type: CrmTask })
+  @ApiResponse({ status: 201, description: 'Task created successfully', schema: { $ref: getSchemaPath(CrmTask) } })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async createTask(@Body() taskData: Partial<CrmTask>, @Request() req) {
     return this.crmService.createTask(taskData, req.user.id);
@@ -387,7 +381,7 @@ export class CrmController {
 
   @Put('tasks/:id')
   @ApiOperation({ summary: 'Update task' })
-  @ApiResponse({ status: 200, description: 'Task updated successfully', type: CrmTask })
+  @ApiResponse({ status: 200, description: 'Task updated successfully', schema: { $ref: getSchemaPath(CrmTask) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async updateTask(
@@ -414,7 +408,7 @@ export class CrmController {
   // Notes Management
   @Get('notes')
   @ApiOperation({ summary: 'Get all notes' })
-  @ApiResponse({ status: 200, description: 'Notes retrieved successfully', type: [CrmNote] })
+  @ApiResponse({ status: 200, description: 'Notes retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(CrmNote) } } })
   @ApiQuery({ name: 'entityType', required: false, type: String })
   @ApiQuery({ name: 'entityId', required: false, type: String })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
@@ -428,7 +422,7 @@ export class CrmController {
 
   @Post('notes')
   @ApiOperation({ summary: 'Create new note' })
-  @ApiResponse({ status: 201, description: 'Note created successfully', type: CrmNote })
+  @ApiResponse({ status: 201, description: 'Note created successfully', schema: { $ref: getSchemaPath(CrmNote) } })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async createNote(@Body() noteData: Partial<CrmNote>, @Request() req) {
     return this.crmService.createNote(noteData, req.user.id);
@@ -436,7 +430,7 @@ export class CrmController {
 
   @Put('notes/:id')
   @ApiOperation({ summary: 'Update note' })
-  @ApiResponse({ status: 200, description: 'Note updated successfully', type: CrmNote })
+  @ApiResponse({ status: 200, description: 'Note updated successfully', schema: { $ref: getSchemaPath(CrmNote) } })
   @ApiParam({ name: 'id', type: 'string' })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async updateNote(
@@ -450,7 +444,7 @@ export class CrmController {
   // Lead Management
   @Get('leads')
   @ApiOperation({ summary: 'Get all leads' })
-  @ApiResponse({ status: 200, description: 'Leads retrieved successfully', type: [Lead] })
+  @ApiResponse({ status: 200, description: 'Leads retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Lead) } } })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'status', required: false, type: String })
@@ -473,7 +467,7 @@ export class CrmController {
 
   @Post('leads')
   @ApiOperation({ summary: 'Create new lead' })
-  @ApiResponse({ status: 201, description: 'Lead created successfully', type: Lead })
+  @ApiResponse({ status: 201, description: 'Lead created successfully', schema: { $ref: getSchemaPath(Lead) } })
   @Roles(UserRole.AGENT, UserRole.ADMIN, UserRole.LANDLORD)
   async createLead(@Body() leadData: Partial<Lead>, @Request() req) {
     return this.leadService.createLead(leadData, req.user.id);

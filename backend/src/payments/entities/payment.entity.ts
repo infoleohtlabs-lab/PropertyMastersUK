@@ -96,7 +96,7 @@ export enum RefundStatus {
 @Index(['propertyId'])
 @Index(['dueDate'])
 @Index(['createdAt'])
-@Index(['stripePaymentIntentId'], { unique: true, where: 'stripe_payment_intent_id IS NOT NULL' })
+@Index(['stripePaymentIntentId'], { unique: true, where: 'stripePaymentIntentId IS NOT NULL' })
 @Index(['reference'], { unique: true })
 export class Payment {
   @ApiProperty({ description: 'Payment ID' })
@@ -117,15 +117,15 @@ export class Payment {
   description?: string;
 
   @ApiProperty({ enum: PaymentType, description: 'Payment type' })
-  @Column({ type: 'enum', enum: PaymentType })
+  @Column({ type: 'varchar' })
   type: PaymentType;
 
   @ApiProperty({ enum: PaymentStatus, description: 'Payment status' })
-  @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
+  @Column({ type: 'varchar', default: PaymentStatus.PENDING })
   status: PaymentStatus;
 
   @ApiProperty({ enum: PaymentPriority, description: 'Payment priority' })
-  @Column({ type: 'enum', enum: PaymentPriority, default: PaymentPriority.MEDIUM })
+  @Column({ type: 'varchar', default: PaymentPriority.MEDIUM })
   priority: PaymentPriority;
 
   // Relationships
@@ -212,11 +212,11 @@ export class Payment {
 
   // Payment Method and Processing
   @ApiProperty({ enum: PaymentMethod, description: 'Payment method' })
-  @Column({ type: 'enum', enum: PaymentMethod })
+  @Column({ type: 'varchar' })
   paymentMethod: PaymentMethod;
 
   @ApiProperty({ enum: PaymentFrequency, description: 'Payment frequency' })
-  @Column({ type: 'enum', enum: PaymentFrequency, default: PaymentFrequency.ONE_TIME })
+  @Column({ type: 'varchar', default: PaymentFrequency.ONE_TIME })
   frequency: PaymentFrequency;
 
   @ApiProperty({ description: 'Payment processor (e.g., stripe, paypal)', required: false })
@@ -228,7 +228,7 @@ export class Payment {
   externalTransactionId?: string;
 
   @ApiProperty({ description: 'Payment gateway response', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   gatewayResponse?: any;
 
   // Stripe Integration
@@ -258,40 +258,40 @@ export class Payment {
 
   // Dates and Scheduling
   @ApiProperty({ description: 'Payment due date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   dueDate?: Date;
 
   @ApiProperty({ description: 'Payment processed date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   processedAt?: Date;
 
   @ApiProperty({ description: 'Payment authorized date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   authorizedAt?: Date;
 
   @ApiProperty({ description: 'Payment captured date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   capturedAt?: Date;
 
   @ApiProperty({ description: 'Payment settled date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   settledAt?: Date;
 
   @ApiProperty({ description: 'Payment failed date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   failedAt?: Date;
 
   @ApiProperty({ description: 'Payment cancelled date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   cancelledAt?: Date;
 
   @ApiProperty({ description: 'Payment expires at', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   expiresAt?: Date;
 
   // Refunds and Disputes
   @ApiProperty({ enum: RefundStatus, description: 'Refund status' })
-  @Column({ type: 'enum', enum: RefundStatus, default: RefundStatus.NOT_REFUNDED })
+  @Column({ type: 'varchar', default: RefundStatus.NOT_REFUNDED })
   refundStatus: RefundStatus;
 
   @ApiProperty({ description: 'Refunded amount in pence/cents', required: false })
@@ -303,7 +303,7 @@ export class Payment {
   refundReason?: string;
 
   @ApiProperty({ description: 'Refund date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   refundedAt?: Date;
 
   @ApiProperty({ description: 'Dispute status', required: false })
@@ -315,7 +315,7 @@ export class Payment {
   disputeReason?: string;
 
   @ApiProperty({ description: 'Dispute date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   disputedAt?: Date;
 
   // Recurring Payments
@@ -335,11 +335,11 @@ export class Payment {
   isRecurring: boolean;
 
   @ApiProperty({ description: 'Next payment date for recurring payments', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   nextPaymentDate?: Date;
 
   @ApiProperty({ description: 'Recurring payment end date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   recurringEndDate?: Date;
 
   @ApiProperty({ description: 'Number of recurring payments remaining', required: false })
@@ -352,11 +352,11 @@ export class Payment {
   sendReminders: boolean;
 
   @ApiProperty({ description: 'Reminder sent dates', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   remindersSent?: Date[];
 
   @ApiProperty({ description: 'Last reminder sent date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   lastReminderSent?: Date;
 
   @ApiProperty({ description: 'Payment confirmation sent', required: false })
@@ -381,7 +381,7 @@ export class Payment {
   billingPhone?: string;
 
   @ApiProperty({ description: 'Billing address', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   billingAddress?: {
     line1?: string;
     line2?: string;
@@ -422,11 +422,11 @@ export class Payment {
   invoiceUrl?: string;
 
   @ApiProperty({ description: 'Attachment URLs', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   attachmentUrls?: string[];
 
   @ApiProperty({ description: 'Document references', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   documentReferences?: {
     invoiceNumber?: string;
     receiptNumber?: string;
@@ -444,7 +444,7 @@ export class Payment {
   reviewedBy?: string;
 
   @ApiProperty({ description: 'Review date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   reviewedAt?: Date;
 
   @ApiProperty({ description: 'Review notes', required: false })
@@ -452,7 +452,7 @@ export class Payment {
   reviewNotes?: string;
 
   @ApiProperty({ description: 'Compliance flags', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   complianceFlags?: {
     amlCheck?: boolean;
     fraudCheck?: boolean;
@@ -462,7 +462,7 @@ export class Payment {
 
   // Integration and External References
   @ApiProperty({ description: 'External system references', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   externalReferences?: {
     accountingSystemId?: string;
     bankTransactionId?: string;
@@ -471,7 +471,7 @@ export class Payment {
   };
 
   @ApiProperty({ description: 'Webhook URLs for notifications', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   webhookUrls?: string[];
 
   @ApiProperty({ description: 'API callback URL', required: false })
@@ -513,7 +513,7 @@ export class Payment {
   campaignId?: string;
 
   @ApiProperty({ description: 'UTM parameters', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   utmParameters?: {
     source?: string;
     medium?: string;
@@ -523,7 +523,7 @@ export class Payment {
   };
 
   @ApiProperty({ description: 'Payment analytics data', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   analyticsData?: {
     conversionTime?: number;
     abandonmentCount?: number;
@@ -535,15 +535,15 @@ export class Payment {
 
   // Metadata and Custom Fields
   @ApiProperty({ description: 'Custom metadata', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   metadata?: Record<string, any>;
 
   @ApiProperty({ description: 'Custom fields', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   customFields?: Record<string, any>;
 
   @ApiProperty({ description: 'Tags for categorization', required: false })
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'text', nullable: true })
   tags?: string[];
 
   // Audit Fields
@@ -564,7 +564,7 @@ export class Payment {
   updatedAt: Date;
 
   @ApiProperty({ description: 'Soft delete timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   deletedAt?: Date;
 
   // IP and User Agent for Audit

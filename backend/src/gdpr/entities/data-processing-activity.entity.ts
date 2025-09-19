@@ -109,8 +109,7 @@ export class DataProcessingActivity {
 
   @ApiProperty({ description: 'Purpose of processing', enum: ProcessingPurpose })
   @Column({
-    type: 'enum',
-    enum: ProcessingPurpose,
+    type: 'varchar',
   })
   purpose: ProcessingPurpose;
 
@@ -138,9 +137,7 @@ export class DataProcessingActivity {
   // Personal data
   @ApiProperty({ description: 'Categories of personal data', enum: DataCategory })
   @Column({
-    type: 'enum',
-    enum: DataCategory,
-    array: true,
+    type: 'simple-array',
   })
   dataCategories: DataCategory[];
 
@@ -163,9 +160,7 @@ export class DataProcessingActivity {
   // Processing activities
   @ApiProperty({ description: 'Types of processing activities', enum: ProcessingActivity })
   @Column({
-    type: 'enum',
-    enum: ProcessingActivity,
-    array: true,
+    type: 'simple-array',
   })
   activities: ProcessingActivity[];
 
@@ -218,8 +213,7 @@ export class DataProcessingActivity {
 
   @ApiProperty({ description: 'Basis for retention period', enum: RetentionBasis })
   @Column({
-    type: 'enum',
-    enum: RetentionBasis,
+    type: 'varchar',
     nullable: true,
   })
   retentionBasis?: RetentionBasis;
@@ -235,18 +229,14 @@ export class DataProcessingActivity {
   // Security measures
   @ApiProperty({ description: 'Technical security measures', enum: SecurityMeasure })
   @Column({
-    type: 'enum',
-    enum: SecurityMeasure,
-    array: true,
+    type: 'simple-array',
     nullable: true,
   })
   technicalMeasures?: SecurityMeasure[];
 
   @ApiProperty({ description: 'Organizational security measures', enum: SecurityMeasure })
   @Column({
-    type: 'enum',
-    enum: SecurityMeasure,
-    array: true,
+    type: 'simple-array',
     nullable: true,
   })
   organizationalMeasures?: SecurityMeasure[];
@@ -291,11 +281,11 @@ export class DataProcessingActivity {
 
   // Review and maintenance
   @ApiProperty({ description: 'When this record was last reviewed' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   lastReviewDate?: Date;
 
   @ApiProperty({ description: 'When this record should be reviewed next' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   reviewDate?: Date;
 
   @ApiProperty({ description: 'Review frequency in months' })
@@ -316,11 +306,11 @@ export class DataProcessingActivity {
   isActive: boolean;
 
   @ApiProperty({ description: 'When processing started' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   processingStartDate?: Date;
 
   @ApiProperty({ description: 'When processing ended (if applicable)' })
-  @Column('timestamp', { nullable: true })
+  @Column('datetime', { nullable: true })
   processingEndDate?: Date;
 
   @ApiProperty({ description: 'Version of this record' })
@@ -328,7 +318,7 @@ export class DataProcessingActivity {
   version: number;
 
   @ApiProperty({ description: 'Additional metadata' })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   @ApiProperty({ description: 'When the record was created' })

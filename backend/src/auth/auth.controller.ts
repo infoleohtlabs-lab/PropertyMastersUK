@@ -84,14 +84,10 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 401, 
-    description: 'Invalid credentials',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid credentials', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 429, 
-    description: 'Too many login attempts. Rate limit exceeded.',
-    type: ApiErrorResponse
-  })
+    description: 'Too many login attempts. Rate limit exceeded.', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async login(@Request() req) {
     return this.authService.login(req.user, req);
   }
@@ -136,14 +132,10 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Validation error or email already exists',
-    type: ApiErrorResponse
-  })
+    description: 'Validation error or email already exists', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 429, 
-    description: 'Too many registration attempts',
-    type: ApiErrorResponse
-  })
+    description: 'Too many registration attempts', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
@@ -184,9 +176,7 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 429, 
-    description: 'Too many password reset requests',
-    type: ApiErrorResponse
-  })
+    description: 'Too many password reset requests', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     return this.authService.forgotPassword(forgotPasswordDto.email);
   }
@@ -227,14 +217,10 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Invalid or expired reset token',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid or expired reset token', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 429, 
-    description: 'Too many password reset attempts',
-    type: ApiErrorResponse
-  })
+    description: 'Too many password reset attempts', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.newPassword);
   }
@@ -280,9 +266,7 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 401, 
-    description: 'Invalid or expired refresh token',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid or expired refresh token', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
   }
@@ -322,14 +306,10 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Invalid current password or validation error',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid current password or validation error', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - invalid or expired token',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - invalid or expired token', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async changePassword(@Request() req, @Body() changePasswordDto: ChangePasswordDto) {
     return this.authService.changePassword(req.user.userId, changePasswordDto.currentPassword, changePasswordDto.newPassword);
   }
@@ -365,9 +345,7 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - invalid or expired token',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - invalid or expired token', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async logout(@Request() req) {
     return this.authService.logout(req.user.userId);
   }
@@ -405,9 +383,7 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Invalid or expired verification token',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid or expired verification token', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
     return this.authService.verifyEmail(verifyEmailDto.token);
   }
@@ -451,9 +427,7 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 400, 
-    description: 'Invalid or expired token',
-    type: ApiErrorResponse
-  })
+    description: 'Invalid or expired token', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async validateResetToken(@Body() validateResetTokenDto: ValidateResetTokenDto) {
     return this.authService.validateResetToken(validateResetTokenDto.token);
   }
@@ -489,9 +463,7 @@ export class AuthController {
   })
   @ApiResponse({ 
     status: 401, 
-    description: 'Unauthorized - invalid or expired token',
-    type: ApiErrorResponse
-  })
+    description: 'Unauthorized - invalid or expired token', schema: { $ref: getSchemaPath(ApiErrorResponse) } })
   async resendVerification(@Request() req) {
     return this.authService.resendVerificationEmail(req.user.userId);
   }

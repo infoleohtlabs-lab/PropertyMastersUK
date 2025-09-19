@@ -84,8 +84,7 @@ export class Message {
 
   @ApiProperty({ enum: ConversationType, description: 'Conversation type' })
   @Column({
-    type: 'enum',
-    enum: ConversationType,
+    type: 'varchar',
     default: ConversationType.DIRECT,
   })
   conversationType: ConversationType;
@@ -100,24 +99,21 @@ export class Message {
 
   @ApiProperty({ enum: MessageType, description: 'Message type' })
   @Column({
-    type: 'enum',
-    enum: MessageType,
+    type: 'varchar',
     default: MessageType.TEXT,
   })
   type: MessageType;
 
   @ApiProperty({ enum: MessageStatus, description: 'Message status' })
   @Column({
-    type: 'enum',
-    enum: MessageStatus,
+    type: 'varchar',
     default: MessageStatus.SENT,
   })
   status: MessageStatus;
 
   @ApiProperty({ enum: MessagePriority, description: 'Message priority' })
   @Column({
-    type: 'enum',
-    enum: MessagePriority,
+    type: 'varchar',
     default: MessagePriority.NORMAL,
   })
   priority: MessagePriority;
@@ -276,7 +272,7 @@ export class Message {
   isRead: boolean;
 
   @ApiProperty({ description: 'Read at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   readAt?: Date;
 
   @ApiProperty({ description: 'Read by user IDs', type: [String], required: false })
@@ -284,11 +280,11 @@ export class Message {
   readByUserIds?: string[];
 
   @ApiProperty({ description: 'Delivered at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   deliveredAt?: Date;
 
   @ApiProperty({ description: 'Failed at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   failedAt?: Date;
 
   @ApiProperty({ description: 'Failure reason', required: false })
@@ -297,7 +293,7 @@ export class Message {
 
   // Scheduling
   @ApiProperty({ description: 'Scheduled send time', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   scheduledAt?: Date;
 
   @ApiProperty({ description: 'Is scheduled message' })
@@ -387,11 +383,11 @@ export class Message {
   updatedAt: Date;
 
   @ApiProperty({ description: 'Deleted at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   deletedAt?: Date;
 
   @ApiProperty({ description: 'Archived at timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   archivedAt?: Date;
 
   // IP and User Agent for Security

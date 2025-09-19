@@ -23,7 +23,8 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiProperty,
-} from '@nestjs/swagger';
+
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';

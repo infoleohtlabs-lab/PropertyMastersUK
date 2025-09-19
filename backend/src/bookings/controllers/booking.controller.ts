@@ -24,7 +24,8 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiProperty,
-} from '@nestjs/swagger';
+
+  getSchemaPath,} from '@nestjs/swagger';
 import { IsString, IsOptional, IsEnum, IsDateString, IsBoolean, IsNumber, IsArray, ValidateNested, IsUUID } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { BookingService } from '../services/booking.service';
@@ -646,7 +647,7 @@ export class BookingController {
   // Booking Endpoints
   @Post()
   @ApiOperation({ summary: 'Create a new booking' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Booking created successfully', type: Booking })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Booking created successfully', schema: { $ref: getSchemaPath(Booking) } })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid booking data' })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Booking conflict detected' })
   @ApiBody({ type: CreateBookingRequestDto })
@@ -666,7 +667,7 @@ export class BookingController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get booking by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Booking retrieved successfully', type: Booking })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Booking retrieved successfully', schema: { $ref: getSchemaPath(Booking) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Booking not found' })
   @ApiParam({ name: 'id', description: 'Booking ID' })
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.AGENT, UserRole.TENANT)
@@ -720,7 +721,7 @@ export class BookingController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update booking' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Booking updated successfully', type: Booking })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Booking updated successfully', schema: { $ref: getSchemaPath(Booking) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Booking not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid update data' })
   @ApiParam({ name: 'id', description: 'Booking ID' })
@@ -766,7 +767,7 @@ export class BookingController {
 
   @Patch(':id/confirm')
   @ApiOperation({ summary: 'Confirm booking' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Booking confirmed successfully', type: Booking })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Booking confirmed successfully', schema: { $ref: getSchemaPath(Booking) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Booking not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Booking cannot be confirmed' })
   @ApiParam({ name: 'id', description: 'Booking ID' })
@@ -786,7 +787,7 @@ export class BookingController {
 
   @Patch(':id/cancel')
   @ApiOperation({ summary: 'Cancel booking' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Booking cancelled successfully', type: Booking })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Booking cancelled successfully', schema: { $ref: getSchemaPath(Booking) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Booking not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Booking cannot be cancelled' })
   @ApiParam({ name: 'id', description: 'Booking ID' })
@@ -814,7 +815,7 @@ export class BookingController {
 
   @Patch(':id/check-in')
   @ApiOperation({ summary: 'Check in booking' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Booking checked in successfully', type: Booking })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Booking checked in successfully', schema: { $ref: getSchemaPath(Booking) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Booking not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Booking cannot be checked in' })
   @ApiParam({ name: 'id', description: 'Booking ID' })
@@ -834,7 +835,7 @@ export class BookingController {
 
   @Patch(':id/check-out')
   @ApiOperation({ summary: 'Check out booking' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Booking checked out successfully', type: Booking })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Booking checked out successfully', schema: { $ref: getSchemaPath(Booking) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Booking not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Booking cannot be checked out' })
   @ApiParam({ name: 'id', description: 'Booking ID' })
@@ -855,7 +856,7 @@ export class BookingController {
   // Availability Endpoints
   @Post('availability')
   @ApiOperation({ summary: 'Create availability slot' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'Availability created successfully', type: Availability })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Availability created successfully', schema: { $ref: getSchemaPath(Availability) } })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid availability data' })
   @ApiBody({ type: CreateAvailabilityRequestDto })
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.AGENT)
@@ -874,7 +875,7 @@ export class BookingController {
 
   @Get('availability/:id')
   @ApiOperation({ summary: 'Get availability by ID' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Availability retrieved successfully', type: Availability })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Availability retrieved successfully', schema: { $ref: getSchemaPath(Availability) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Availability not found' })
   @ApiParam({ name: 'id', description: 'Availability ID' })
   @Roles(UserRole.ADMIN, UserRole.PROPERTY_MANAGER, UserRole.AGENT, UserRole.TENANT)
@@ -928,7 +929,7 @@ export class BookingController {
 
   @Put('availability/:id')
   @ApiOperation({ summary: 'Update availability slot' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Availability updated successfully', type: Availability })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Availability updated successfully', schema: { $ref: getSchemaPath(Availability) } })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Availability not found' })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid update data' })
   @ApiParam({ name: 'id', description: 'Availability ID' })

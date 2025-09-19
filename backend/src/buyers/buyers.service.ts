@@ -6,11 +6,23 @@ import { BuyerPreference, PreferenceType, PreferencePriority } from './entities/
 import { PropertySearch, SearchType, SearchStatus } from './entities/property-search.entity';
 import { MarketAnalysis, AnalysisType, MarketTrend } from './entities/market-analysis.entity';
 import { PropertyValuation, ValuationType, ValuationStatus, ConfidenceLevel } from './entities/property-valuation.entity';
+import { SavedProperty } from './entities/saved-property.entity';
+import { PropertyOffer, OfferStatus, OfferType } from './entities/property-offer.entity';
+import { MortgageApplication, ApplicationStatus, MortgageType } from './entities/mortgage-application.entity';
+import { Viewing, ViewingStatus, ViewingType } from './entities/viewing.entity';
 import { CreateBuyerDto } from './dto/create-buyer.dto';
 import { UpdateBuyerDto } from './dto/update-buyer.dto';
 import { CreatePreferenceDto } from './dto/create-preference.dto';
 import { CreateSearchDto } from './dto/create-search.dto';
 import { RequestValuationDto } from './dto/request-valuation.dto';
+import { CreateSavedPropertyDto } from './dto/create-saved-property.dto';
+import { UpdateSavedPropertyDto } from './dto/update-saved-property.dto';
+import { CreatePropertyOfferDto } from './dto/create-property-offer.dto';
+import { UpdatePropertyOfferDto } from './dto/update-property-offer.dto';
+import { CreateMortgageApplicationDto } from './dto/create-mortgage-application.dto';
+import { UpdateMortgageApplicationDto } from './dto/update-mortgage-application.dto';
+import { CreateViewingDto } from './dto/create-viewing.dto';
+import { UpdateViewingDto } from './dto/update-viewing.dto';
 
 @Injectable()
 export class BuyersService {
@@ -25,6 +37,14 @@ export class BuyersService {
     private analysisRepository: Repository<MarketAnalysis>,
     @InjectRepository(PropertyValuation)
     private valuationRepository: Repository<PropertyValuation>,
+    @InjectRepository(SavedProperty)
+    private savedPropertyRepository: Repository<SavedProperty>,
+    @InjectRepository(PropertyOffer)
+    private propertyOfferRepository: Repository<PropertyOffer>,
+    @InjectRepository(MortgageApplication)
+    private mortgageApplicationRepository: Repository<MortgageApplication>,
+    @InjectRepository(Viewing)
+    private viewingRepository: Repository<Viewing>,
   ) {}
 
   // Buyer Management
@@ -307,5 +327,192 @@ export class BuyersService {
         activePreferences: preferences.length,
       },
     };
+  }
+
+  // Saved Properties Management
+  async saveProperty(buyerId: string, createSavedPropertyDto: CreateSavedPropertyDto): Promise<SavedProperty> {
+    await this.findOne(buyerId); // Verify buyer exists
+    
+    // Check if property is already saved
+    const existingSaved = await this.savedPropertyRepository.findOne({
+      where: { buyerId, propertyId: createSavedPropertyDto.propertyId, isActive: true },
+    });
+    
+    if (existingSaved) {
+      throw new BadRequestException('Property is already saved');
+    }
+    
+    const savedProperty = this.savedPropertyRepository.create({
+      ...createSavedPropertyDto,
+      buyerId,
+    });
+    
+    return await this.savedPropertyRepository.save(savedProperty);
+  }
+
+  async getSavedProperties(buyerId: string): Promise<SavedProperty[]> {
+    return await this.savedPropertyRepository.find({
+      where: { buyerId, isActive: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async updateSavedProperty(id: string, updateSavedPropertyDto: UpdateSavedPropertyDto): Promise<SavedProperty> {
+    const savedProperty = await this.savedPropertyRepository.findOne({ where: { id } });
+    if (!savedProperty) {
+      throw new NotFoundException(`Saved property with ID ${id} not found`);
+    }
+    
+    Object.assign(savedProperty, updateSavedPropertyDto);
+    return await this.savedPropertyRepository.save(savedProperty);
+  }
+
+  async removeSavedProperty(buyerId: string, propertyId: string): Promise<void> {
+    const savedProperty = await this.savedPropertyRepository.findOne({
+      where: { buyerId, propertyId, isActive: true },
+    });
+    
+    if (!savedProperty) {
+      throw new NotFoundException('Saved property not found');
+    }
+    
+    savedProperty.isActive = false;
+    await this.savedPropertyRepository.save(savedProperty);
+  }
+
+  // Property Offers Management
+  async submitOffer(buyerId: string, createPropertyOfferDto: CreatePropertyOfferDto): Promise<PropertyOffer> {
+    await this.findOne(buyerId); // Verify buyer exists
+    
+    const offer = this.propertyOfferRepository.create({
+      ...createPropertyOfferDto,
+      buyerId,
+      status: OfferStatus.PENDING,
+    });
+    
+    return await this.propertyOfferRepository.save(offer);
+  }
+
+  async getBuyerOffers(buyerId: string): Promise<PropertyOffer[]> {
+    return await this.propertyOfferRepository.find({
+      where: { buyerId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async updateOffer(offerId: string, updatePropertyOfferDto: UpdatePropertyOfferDto): Promise<PropertyOffer> {
+    const offer = await this.propertyOfferRepository.findOne({ where: { id: offerId } });
+    if (!offer) {
+      throw new NotFoundException(`Offer with ID ${offerId} not found`);
+    }
+    
+    Object.assign(offer, updatePropertyOfferDto);
+    return await this.propertyOfferRepository.save(offer);
+  }
+
+  async withdrawOffer(offerId: string): Promise<void> {
+    const offer = await this.propertyOfferRepository.findOne({ where: { id: offerId } });
+    if (!offer) {
+      throw new NotFoundException(`Offer with ID ${offerId} not found`);
+    }
+    
+    if (offer.status === OfferStatus.ACCEPTED || offer.status === OfferStatus.REJECTED) {
+      throw new BadRequestException('Cannot withdraw an offer that has been accepted or rejected');
+    }
+    
+    offer.status = OfferStatus.WITHDRAWN;
+    await this.propertyOfferRepository.save(offer);
+  }
+
+  // Mortgage Applications Management
+  async submitMortgageApplication(buyerId: string, createMortgageApplicationDto: CreateMortgageApplicationDto): Promise<MortgageApplication> {
+    await this.findOne(buyerId); // Verify buyer exists
+    
+    const application = this.mortgageApplicationRepository.create({
+      ...createMortgageApplicationDto,
+      buyerId,
+      status: ApplicationStatus.SUBMITTED,
+      submittedDate: new Date(),
+    });
+    
+    return await this.mortgageApplicationRepository.save(application);
+  }
+
+  async getMortgageApplications(buyerId: string): Promise<MortgageApplication[]> {
+    return await this.mortgageApplicationRepository.find({
+      where: { buyerId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async updateMortgageApplication(applicationId: string, updateMortgageApplicationDto: UpdateMortgageApplicationDto): Promise<MortgageApplication> {
+    const application = await this.mortgageApplicationRepository.findOne({ where: { id: applicationId } });
+    if (!application) {
+      throw new NotFoundException(`Mortgage application with ID ${applicationId} not found`);
+    }
+    
+    Object.assign(application, updateMortgageApplicationDto);
+    return await this.mortgageApplicationRepository.save(application);
+  }
+
+  async getMortgageApplicationStatus(applicationId: string): Promise<{ status: ApplicationStatus; lastUpdated: Date; details?: string }> {
+    const application = await this.mortgageApplicationRepository.findOne({ where: { id: applicationId } });
+    if (!application) {
+      throw new NotFoundException(`Mortgage application with ID ${applicationId} not found`);
+    }
+    
+    return {
+      status: application.status,
+      lastUpdated: application.updatedAt,
+      details: application.notes,
+    };
+  }
+
+  // Viewings Management
+  async scheduleViewing(buyerId: string, createViewingDto: CreateViewingDto): Promise<Viewing> {
+    await this.findOne(buyerId); // Verify buyer exists
+    
+    const viewing = this.viewingRepository.create({
+      ...createViewingDto,
+      buyerId,
+      status: ViewingStatus.SCHEDULED,
+    });
+    
+    return await this.viewingRepository.save(viewing);
+  }
+
+  async getScheduledViewings(buyerId: string): Promise<Viewing[]> {
+    return await this.viewingRepository.find({
+      where: { buyerId },
+      order: { scheduledDate: 'ASC' },
+    });
+  }
+
+  async updateViewing(viewingId: string, updateViewingDto: UpdateViewingDto): Promise<Viewing> {
+    const viewing = await this.viewingRepository.findOne({ where: { id: viewingId } });
+    if (!viewing) {
+      throw new NotFoundException(`Viewing with ID ${viewingId} not found`);
+    }
+    
+    Object.assign(viewing, updateViewingDto);
+    return await this.viewingRepository.save(viewing);
+  }
+
+  async cancelViewing(viewingId: string, cancellationReason?: string): Promise<void> {
+    const viewing = await this.viewingRepository.findOne({ where: { id: viewingId } });
+    if (!viewing) {
+      throw new NotFoundException(`Viewing with ID ${viewingId} not found`);
+    }
+    
+    if (viewing.status === ViewingStatus.COMPLETED) {
+      throw new BadRequestException('Cannot cancel a completed viewing');
+    }
+    
+    viewing.status = ViewingStatus.CANCELLED;
+    if (cancellationReason) {
+      viewing.cancellationReason = cancellationReason;
+    }
+    
+    await this.viewingRepository.save(viewing);
   }
 }

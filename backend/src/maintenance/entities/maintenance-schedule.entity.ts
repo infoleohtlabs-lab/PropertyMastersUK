@@ -85,16 +85,14 @@ export class MaintenanceSchedule {
 
   @ApiProperty({ enum: MaintenanceScheduleType, description: 'Type of maintenance schedule' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceScheduleType,
+    type: 'varchar',
   })
   @Index()
   type: MaintenanceScheduleType;
 
   @ApiProperty({ enum: MaintenanceScheduleStatus, description: 'Current status of the schedule' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceScheduleStatus,
+    type: 'varchar',
     default: MaintenanceScheduleStatus.ACTIVE,
   })
   @Index()
@@ -102,8 +100,7 @@ export class MaintenanceSchedule {
 
   @ApiProperty({ enum: MaintenanceSchedulePriority, description: 'Priority level of the schedule' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceSchedulePriority,
+    type: 'varchar',
     default: MaintenanceSchedulePriority.MEDIUM,
   })
   priority: MaintenanceSchedulePriority;
@@ -137,8 +134,7 @@ export class MaintenanceSchedule {
   // Scheduling Information
   @ApiProperty({ enum: MaintenanceScheduleFrequency, description: 'Frequency of the maintenance' })
   @Column({
-    type: 'enum',
-    enum: MaintenanceScheduleFrequency,
+    type: 'varchar',
   })
   @Index()
   frequency: MaintenanceScheduleFrequency;
@@ -152,20 +148,20 @@ export class MaintenanceSchedule {
   customFrequencyUnit?: string;
 
   @ApiProperty({ description: 'Start date for the schedule' })
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   startDate: Date;
 
   @ApiProperty({ description: 'End date for the schedule', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   endDate?: Date;
 
   @ApiProperty({ description: 'Next due date for maintenance' })
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   @Index()
   nextDueDate: Date;
 
   @ApiProperty({ description: 'Last completed date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   lastCompletedDate?: Date;
 
   @ApiProperty({ description: 'Number of days before due date to create request', required: false })
@@ -223,7 +219,7 @@ export class MaintenanceSchedule {
   safetyRequirements?: string;
 
   @ApiProperty({ description: 'Checklist items for the maintenance', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   checklist?: Array<{
     item: string;
     required: boolean;
@@ -257,7 +253,7 @@ export class MaintenanceSchedule {
   preferredContractor?: string;
 
   @ApiProperty({ description: 'Contractor contact information', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   contractorInfo?: {
     company?: string;
     contact?: string;
@@ -342,7 +338,7 @@ export class MaintenanceSchedule {
 
   // Notifications and Alerts
   @ApiProperty({ description: 'Notification settings', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   notificationSettings?: {
     emailNotifications: boolean;
     smsNotifications: boolean;
@@ -369,7 +365,7 @@ export class MaintenanceSchedule {
   weatherDependencies?: string[];
 
   @ApiProperty({ description: 'Temperature range requirements', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   temperatureRange?: {
     min?: number;
     max?: number;
@@ -395,7 +391,7 @@ export class MaintenanceSchedule {
 
   // Escalation and Dependencies
   @ApiProperty({ description: 'Escalation rules', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   escalationRules?: {
     overdueDays: number;
     escalateTo: string;
@@ -420,7 +416,7 @@ export class MaintenanceSchedule {
   autoAssignRequests: boolean;
 
   @ApiProperty({ description: 'Integration settings', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   integrationSettings?: {
     externalSystemId?: string;
     syncEnabled: boolean;
@@ -451,7 +447,7 @@ export class MaintenanceSchedule {
   pausedBy?: User;
 
   @ApiProperty({ description: 'Pause date', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   pausedAt?: Date;
 
   @ApiProperty({ description: 'Whether schedule is overdue' })
@@ -464,7 +460,7 @@ export class MaintenanceSchedule {
 
   // Additional Metadata
   @ApiProperty({ description: 'Additional metadata', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   metadata?: Record<string, any>;
 
   @ApiProperty({ description: 'Tags for categorization', required: false })
@@ -472,7 +468,7 @@ export class MaintenanceSchedule {
   tags?: string[];
 
   @ApiProperty({ description: 'Custom fields', required: false })
-  @Column('jsonb', { nullable: true })
+  @Column('text', { nullable: true })
   customFields?: Record<string, any>;
 
   // Timestamps
@@ -485,10 +481,10 @@ export class MaintenanceSchedule {
   updatedAt: Date;
 
   @ApiProperty({ description: 'Last execution timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   lastExecutedAt?: Date;
 
   @ApiProperty({ description: 'Next execution timestamp', required: false })
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   nextExecutionAt?: Date;
 }

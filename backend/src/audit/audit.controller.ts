@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiBody,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { AuditService } from './audit.service';
 import { CreateAuditLogDto } from './dto/create-audit-log.dto';
@@ -38,7 +39,7 @@ export class AuditController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new audit log entry' })
-  @ApiResponse({ status: 201, description: 'Audit log created successfully', type: AuditLog })
+  @ApiResponse({ status: 201, description: 'Audit log created successfully', schema: { $ref: getSchemaPath(AuditLog) } })
   @Roles(UserRole.ADMIN)
   async create(@Body() createAuditLogDto: CreateAuditLogDto): Promise<AuditLog> {
     return this.auditService.create(createAuditLogDto);
@@ -46,7 +47,7 @@ export class AuditController {
 
   @Post('log-action')
   @ApiOperation({ summary: 'Log a user action' })
-  @ApiResponse({ status: 201, description: 'Action logged successfully', type: AuditLog })
+  @ApiResponse({ status: 201, description: 'Action logged successfully', schema: { $ref: getSchemaPath(AuditLog) } })
   @ApiBody({
     schema: {
       type: 'object',
@@ -69,7 +70,7 @@ export class AuditController {
 
   @Post('log-security-event')
   @ApiOperation({ summary: 'Log a security event' })
-  @ApiResponse({ status: 201, description: 'Security event logged successfully', type: AuditLog })
+  @ApiResponse({ status: 201, description: 'Security event logged successfully', schema: { $ref: getSchemaPath(AuditLog) } })
   @ApiBody({
     schema: {
       type: 'object',
@@ -92,7 +93,7 @@ export class AuditController {
 
   @Get()
   @ApiOperation({ summary: 'Get all audit logs with optional filters' })
-  @ApiResponse({ status: 200, description: 'Audit logs retrieved successfully', type: [AuditLog] })
+  @ApiResponse({ status: 200, description: 'Audit logs retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(AuditLog) } } })
   @ApiQuery({ name: 'actorId', required: false, description: 'Filter by actor ID' })
   @ApiQuery({ name: 'entityType', required: false, enum: AuditEntityType, description: 'Filter by entity type' })
   @ApiQuery({ name: 'entityId', required: false, description: 'Filter by entity ID' })
@@ -137,7 +138,7 @@ export class AuditController {
 
   @Get('security-events')
   @ApiOperation({ summary: 'Get security events' })
-  @ApiResponse({ status: 200, description: 'Security events retrieved successfully', type: [AuditLog] })
+  @ApiResponse({ status: 200, description: 'Security events retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(AuditLog) } } })
   @ApiQuery({ name: 'startDate', required: false, description: 'Filter from date (ISO string)' })
   @ApiQuery({ name: 'endDate', required: false, description: 'Filter to date (ISO string)' })
   @ApiQuery({ name: 'severity', required: false, enum: AuditSeverity, description: 'Filter by severity' })
@@ -155,7 +156,7 @@ export class AuditController {
 
   @Get('high-risk')
   @ApiOperation({ summary: 'Get high-risk events' })
-  @ApiResponse({ status: 200, description: 'High-risk events retrieved successfully', type: [AuditLog] })
+  @ApiResponse({ status: 200, description: 'High-risk events retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(AuditLog) } } })
   @ApiQuery({ name: 'threshold', required: false, type: Number, description: 'Risk score threshold (default: 7)' })
   @Roles(UserRole.ADMIN)
   async getHighRiskEvents(@Query('threshold') threshold?: number): Promise<AuditLog[]> {
@@ -164,7 +165,7 @@ export class AuditController {
 
   @Get('correlation/:correlationId')
   @ApiOperation({ summary: 'Get audit logs by correlation ID' })
-  @ApiResponse({ status: 200, description: 'Correlated audit logs retrieved successfully', type: [AuditLog] })
+  @ApiResponse({ status: 200, description: 'Correlated audit logs retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(AuditLog) } } })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD)
   async findByCorrelationId(@Param('correlationId') correlationId: string): Promise<AuditLog[]> {
     return this.auditService.findByCorrelationId(correlationId);
@@ -172,7 +173,7 @@ export class AuditController {
 
   @Get('entity/:entityType/:entityId')
   @ApiOperation({ summary: 'Get audit logs for a specific entity' })
-  @ApiResponse({ status: 200, description: 'Entity audit logs retrieved successfully', type: [AuditLog] })
+  @ApiResponse({ status: 200, description: 'Entity audit logs retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(AuditLog) } } })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD)
   async findByEntity(
     @Param('entityType') entityType: AuditEntityType,
@@ -183,7 +184,7 @@ export class AuditController {
 
   @Get('timeline/:entityType/:entityId')
   @ApiOperation({ summary: 'Get activity timeline for a specific entity' })
-  @ApiResponse({ status: 200, description: 'Activity timeline retrieved successfully', type: [AuditLog] })
+  @ApiResponse({ status: 200, description: 'Activity timeline retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(AuditLog) } } })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD)
   async getActivityTimeline(
     @Param('entityType') entityType: AuditEntityType,
@@ -194,7 +195,7 @@ export class AuditController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get audit log by ID' })
-  @ApiResponse({ status: 200, description: 'Audit log retrieved successfully', type: AuditLog })
+  @ApiResponse({ status: 200, description: 'Audit log retrieved successfully', schema: { $ref: getSchemaPath(AuditLog) } })
   @ApiResponse({ status: 404, description: 'Audit log not found' })
   @Roles(UserRole.ADMIN, UserRole.LANDLORD)
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<AuditLog> {
@@ -203,7 +204,7 @@ export class AuditController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update audit log' })
-  @ApiResponse({ status: 200, description: 'Audit log updated successfully', type: AuditLog })
+  @ApiResponse({ status: 200, description: 'Audit log updated successfully', schema: { $ref: getSchemaPath(AuditLog) } })
   @ApiResponse({ status: 404, description: 'Audit log not found' })
   @Roles(UserRole.ADMIN)
   async update(
@@ -215,7 +216,7 @@ export class AuditController {
 
   @Patch(':id/review')
   @ApiOperation({ summary: 'Mark audit log as reviewed' })
-  @ApiResponse({ status: 200, description: 'Audit log marked as reviewed', type: AuditLog })
+  @ApiResponse({ status: 200, description: 'Audit log marked as reviewed', schema: { $ref: getSchemaPath(AuditLog) } })
   @ApiResponse({ status: 404, description: 'Audit log not found' })
   @ApiBody({
     schema: {

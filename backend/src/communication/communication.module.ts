@@ -26,7 +26,7 @@ import { CommunicationController } from './controllers/communication.controller'
     PropertiesModule,
     TenantOrganizationsModule,
     forwardRef(() => MaintenanceModule),
-    BookingsModule,
+    forwardRef(() => BookingsModule),
   ],
   controllers: [CommunicationController],
   providers: [CommunicationService],

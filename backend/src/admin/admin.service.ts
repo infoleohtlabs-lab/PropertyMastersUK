@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from '../users/entities/user.entity';
-import { Property } from '../properties/entities/property.entity';
+import { Property, PropertyStatus } from '../properties/entities/property.entity';
 import { AdminActivityLog } from './entities/admin-activity-log.entity';
 import { SystemConfig } from './entities/system-config.entity';
 import * as os from 'os';
@@ -67,7 +67,7 @@ export class AdminService {
     });
     const activeProperties = await this.propertyRepository.count({
       where: {
-        status: 'ACTIVE',
+        status: PropertyStatus.AVAILABLE,
       },
     });
 

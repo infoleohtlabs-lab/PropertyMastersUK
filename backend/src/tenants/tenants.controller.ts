@@ -14,7 +14,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes ,
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TenantsService } from './tenants.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
@@ -40,21 +41,21 @@ export class TenantsController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new tenant profile' })
-  @ApiResponse({ status: 201, description: 'Tenant created successfully', type: Tenant })
+  @ApiResponse({ status: 201, description: 'Tenant created successfully', schema: { $ref: getSchemaPath(Tenant) } })
   async create(@Body() createTenantDto: CreateTenantDto, @Request() req): Promise<Tenant> {
     return await this.tenantsService.create(createTenantDto, req.user.userId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all tenants' })
-  @ApiResponse({ status: 200, description: 'List of all tenants', type: [Tenant] })
+  @ApiResponse({ status: 200, description: 'List of all tenants', schema: { type: 'array', items: { $ref: getSchemaPath(Tenant) } } })
   async findAll(@Query() query: any): Promise<any> {
     return await this.tenantsService.findAll(query);
   }
 
   @Get('me')
   @ApiOperation({ summary: 'Get current tenant profile' })
-  @ApiResponse({ status: 200, description: 'Current tenant profile', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Current tenant profile', schema: { $ref: getSchemaPath(Tenant) } })
   async getCurrentTenant(@Request() req): Promise<Tenant> {
     return await this.tenantsService.findByUserId(req.user.userId);
   }
@@ -69,21 +70,21 @@ export class TenantsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get tenant by ID' })
-  @ApiResponse({ status: 200, description: 'Tenant details', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Tenant details', schema: { $ref: getSchemaPath(Tenant) } })
   async findOne(@Param('id') id: string, @Request() req): Promise<Tenant> {
     return await this.tenantsService.findOne(id, req.user);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update tenant profile' })
-  @ApiResponse({ status: 200, description: 'Tenant updated successfully', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Tenant updated successfully', schema: { $ref: getSchemaPath(Tenant) } })
   async update(@Param('id') id: string, @Body() updateTenantDto: UpdateTenantDto, @Request() req): Promise<Tenant> {
     return await this.tenantsService.update(id, updateTenantDto, req.user);
   }
 
   @Patch('me/update')
   @ApiOperation({ summary: 'Update current tenant profile' })
-  @ApiResponse({ status: 200, description: 'Tenant updated successfully', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Tenant updated successfully', schema: { $ref: getSchemaPath(Tenant) } })
   async updateCurrentTenant(@Request() req, @Body() updateTenantDto: UpdateTenantDto): Promise<Tenant> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.update(tenant.id, updateTenantDto, req.user);
@@ -91,7 +92,7 @@ export class TenantsController {
 
   @Patch('me/consent')
   @ApiOperation({ summary: 'Update tenant consent preferences' })
-  @ApiResponse({ status: 200, description: 'Consent updated successfully', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Consent updated successfully', schema: { $ref: getSchemaPath(Tenant) } })
   async updateConsent(@Request() req, @Body() consentDto: ConsentDto): Promise<Tenant> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.updateConsent(tenant.id, consentDto);
@@ -107,7 +108,7 @@ export class TenantsController {
   // Reference Management
   @Post('me/references')
   @ApiOperation({ summary: 'Add a new reference' })
-  @ApiResponse({ status: 201, description: 'Reference added successfully', type: TenantReference })
+  @ApiResponse({ status: 201, description: 'Reference added successfully', schema: { $ref: getSchemaPath(TenantReference) } })
   async addReference(@Request() req, @Body() createReferenceDto: CreateReferenceDto): Promise<TenantReference> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.addReference(tenant.id, createReferenceDto, req.user);
@@ -115,7 +116,7 @@ export class TenantsController {
 
   @Get('me/references')
   @ApiOperation({ summary: 'Get tenant references' })
-  @ApiResponse({ status: 200, description: 'List of tenant references', type: [TenantReference] })
+  @ApiResponse({ status: 200, description: 'List of tenant references', schema: { type: 'array', items: { $ref: getSchemaPath(TenantReference) } } })
   async getReferences(@Request() req): Promise<TenantReference[]> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.getReferences(tenant.id, req.user);
@@ -123,14 +124,14 @@ export class TenantsController {
 
   @Post('references/:referenceId/request')
   @ApiOperation({ summary: 'Request a reference from landlord/employer' })
-  @ApiResponse({ status: 200, description: 'Reference request sent', type: TenantReference })
+  @ApiResponse({ status: 200, description: 'Reference request sent', schema: { $ref: getSchemaPath(TenantReference) } })
   async requestReference(@Param('referenceId') referenceId: string): Promise<TenantReference> {
     return await this.tenantsService.requestReference(referenceId);
   }
 
   @Patch('references/:referenceId/status')
   @ApiOperation({ summary: 'Update reference status' })
-  @ApiResponse({ status: 200, description: 'Reference status updated', type: TenantReference })
+  @ApiResponse({ status: 200, description: 'Reference status updated', schema: { $ref: getSchemaPath(TenantReference) } })
   async updateReferenceStatus(
     @Param('referenceId') referenceId: string,
     @Body('status') status: ReferenceStatus,
@@ -142,7 +143,7 @@ export class TenantsController {
   @Post('me/documents/upload')
   @ApiOperation({ summary: 'Upload tenant document' })
   @ApiConsumes('multipart/form-data')
-  @ApiResponse({ status: 201, description: 'Document uploaded successfully', type: TenantDocument })
+  @ApiResponse({ status: 201, description: 'Document uploaded successfully', schema: { $ref: getSchemaPath(TenantDocument) } })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -203,7 +204,7 @@ export class TenantsController {
 
   @Get('me/documents')
   @ApiOperation({ summary: 'Get tenant documents' })
-  @ApiResponse({ status: 200, description: 'List of tenant documents', type: [TenantDocument] })
+  @ApiResponse({ status: 200, description: 'List of tenant documents', schema: { type: 'array', items: { $ref: getSchemaPath(TenantDocument) } } })
   async getDocuments(@Request() req): Promise<TenantDocument[]> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.getDocuments(tenant.id, req.user);
@@ -211,7 +212,7 @@ export class TenantsController {
 
   @Patch('documents/:documentId/status')
   @ApiOperation({ summary: 'Update document verification status' })
-  @ApiResponse({ status: 200, description: 'Document status updated', type: TenantDocument })
+  @ApiResponse({ status: 200, description: 'Document status updated', schema: { $ref: getSchemaPath(TenantDocument) } })
   async updateDocumentStatus(
     @Param('documentId') documentId: string,
     @Body('status') status: DocumentStatus,
@@ -230,7 +231,7 @@ export class TenantsController {
   // Credit and Background Checks
   @Post('me/credit-check')
   @ApiOperation({ summary: 'Perform credit check' })
-  @ApiResponse({ status: 200, description: 'Credit check completed', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Credit check completed', schema: { $ref: getSchemaPath(Tenant) } })
   async performCreditCheck(@Request() req): Promise<Tenant> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.performCreditCheck(tenant.id);
@@ -238,7 +239,7 @@ export class TenantsController {
 
   @Post('me/dwp-check')
   @ApiOperation({ summary: 'Perform DWP benefit check' })
-  @ApiResponse({ status: 200, description: 'DWP check completed', type: Tenant })
+  @ApiResponse({ status: 200, description: 'DWP check completed', schema: { $ref: getSchemaPath(Tenant) } })
   async performDWPCheck(@Request() req): Promise<Tenant> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.performDWPCheck(tenant.id);
@@ -246,7 +247,7 @@ export class TenantsController {
 
   @Post('me/employment-check')
   @ApiOperation({ summary: 'Perform employment verification' })
-  @ApiResponse({ status: 200, description: 'Employment check completed', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Employment check completed', schema: { $ref: getSchemaPath(Tenant) } })
   async performEmploymentCheck(@Request() req): Promise<Tenant> {
     const tenant = await this.tenantsService.findByUserId(req.user.userId);
     return await this.tenantsService.performEmploymentCheck(tenant.id);
@@ -254,7 +255,7 @@ export class TenantsController {
 
   @Patch(':id/status')
   @ApiOperation({ summary: 'Update tenant application status' })
-  @ApiResponse({ status: 200, description: 'Application status updated', type: Tenant })
+  @ApiResponse({ status: 200, description: 'Application status updated', schema: { $ref: getSchemaPath(Tenant) } })
   async updateApplicationStatus(
     @Param('id') id: string,
     @Body('status') status: string,

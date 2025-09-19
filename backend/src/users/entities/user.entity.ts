@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { TenantOrganization } from '../../common/entities/tenant-organization.entity';
 
@@ -13,6 +13,9 @@ export enum UserRole {
   PROPERTY_MANAGER = 'property_manager',
   CONTRACTOR = 'contractor',
   VIEWER = 'viewer',
+  SUPER_ADMIN = 'super_admin',
+  MANAGER = 'manager',
+  USER = 'user',
 }
 
 export enum UserStatus {
@@ -151,4 +154,11 @@ export class User {
   @ApiProperty()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  // Relationships
+  @OneToMany('Property', 'owner')
+  properties: any[];
+
+  @OneToMany('Booking', 'user')
+  bookings: any[];
 }

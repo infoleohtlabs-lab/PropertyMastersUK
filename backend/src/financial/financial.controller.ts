@@ -19,7 +19,8 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiParam,
-} from '@nestjs/swagger';
+
+  getSchemaPath,} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FinancialService } from './financial.service';
 import {
@@ -44,7 +45,7 @@ export class FinancialController {
   // Transaction endpoints
   @Post('transactions')
   @ApiOperation({ summary: 'Create a new transaction' })
-  @ApiResponse({ status: 201, description: 'Transaction created successfully', type: Transaction })
+  @ApiResponse({ status: 201, description: 'Transaction created successfully', schema: { $ref: getSchemaPath(Transaction) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   createTransaction(@Body() createTransactionDto: CreateTransactionDto): Promise<Transaction> {
@@ -53,7 +54,7 @@ export class FinancialController {
 
   @Get('transactions')
   @ApiOperation({ summary: 'Get all transactions' })
-  @ApiResponse({ status: 200, description: 'Transactions retrieved successfully', type: [Transaction] })
+  @ApiResponse({ status: 200, description: 'Transactions retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Transaction) } } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiQuery({ name: 'userId', required: false, description: 'Filter by user ID' })
   @ApiQuery({ name: 'propertyId', required: false, description: 'Filter by property ID' })
@@ -89,7 +90,7 @@ export class FinancialController {
 
   @Get('transactions/:id')
   @ApiOperation({ summary: 'Get transaction by ID' })
-  @ApiResponse({ status: 200, description: 'Transaction retrieved successfully', type: Transaction })
+  @ApiResponse({ status: 200, description: 'Transaction retrieved successfully', schema: { $ref: getSchemaPath(Transaction) } })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'id', description: 'Transaction ID' })
@@ -99,7 +100,7 @@ export class FinancialController {
 
   @Patch('transactions/:id')
   @ApiOperation({ summary: 'Update transaction' })
-  @ApiResponse({ status: 200, description: 'Transaction updated successfully', type: Transaction })
+  @ApiResponse({ status: 200, description: 'Transaction updated successfully', schema: { $ref: getSchemaPath(Transaction) } })
   @ApiResponse({ status: 404, description: 'Transaction not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'id', description: 'Transaction ID' })
@@ -123,7 +124,7 @@ export class FinancialController {
   // Invoice endpoints
   @Post('invoices')
   @ApiOperation({ summary: 'Create a new invoice' })
-  @ApiResponse({ status: 201, description: 'Invoice created successfully', type: Invoice })
+  @ApiResponse({ status: 201, description: 'Invoice created successfully', schema: { $ref: getSchemaPath(Invoice) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   createInvoice(@Body() createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
@@ -132,7 +133,7 @@ export class FinancialController {
 
   @Get('invoices')
   @ApiOperation({ summary: 'Get all invoices' })
-  @ApiResponse({ status: 200, description: 'Invoices retrieved successfully', type: [Invoice] })
+  @ApiResponse({ status: 200, description: 'Invoices retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(Invoice) } } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiQuery({ name: 'createdBy', required: false, description: 'Filter by creator ID' })
   @ApiQuery({ name: 'invoiceTo', required: false, description: 'Filter by recipient ID' })
@@ -166,7 +167,7 @@ export class FinancialController {
 
   @Get('invoices/:id')
   @ApiOperation({ summary: 'Get invoice by ID' })
-  @ApiResponse({ status: 200, description: 'Invoice retrieved successfully', type: Invoice })
+  @ApiResponse({ status: 200, description: 'Invoice retrieved successfully', schema: { $ref: getSchemaPath(Invoice) } })
   @ApiResponse({ status: 404, description: 'Invoice not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'id', description: 'Invoice ID' })
@@ -176,7 +177,7 @@ export class FinancialController {
 
   @Patch('invoices/:id')
   @ApiOperation({ summary: 'Update invoice' })
-  @ApiResponse({ status: 200, description: 'Invoice updated successfully', type: Invoice })
+  @ApiResponse({ status: 200, description: 'Invoice updated successfully', schema: { $ref: getSchemaPath(Invoice) } })
   @ApiResponse({ status: 404, description: 'Invoice not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'id', description: 'Invoice ID' })
@@ -199,7 +200,7 @@ export class FinancialController {
 
   @Post('invoices/:id/mark-paid')
   @ApiOperation({ summary: 'Mark invoice as paid' })
-  @ApiResponse({ status: 200, description: 'Invoice marked as paid successfully', type: Invoice })
+  @ApiResponse({ status: 200, description: 'Invoice marked as paid successfully', schema: { $ref: getSchemaPath(Invoice) } })
   @ApiResponse({ status: 404, description: 'Invoice not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'id', description: 'Invoice ID' })
@@ -214,7 +215,7 @@ export class FinancialController {
   // Financial Report endpoints
   @Post('reports')
   @ApiOperation({ summary: 'Create a new financial report' })
-  @ApiResponse({ status: 201, description: 'Financial report created successfully', type: FinancialReport })
+  @ApiResponse({ status: 201, description: 'Financial report created successfully', schema: { $ref: getSchemaPath(FinancialReport) } })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   createFinancialReport(@Body() createFinancialReportDto: CreateFinancialReportDto): Promise<FinancialReport> {
@@ -223,7 +224,7 @@ export class FinancialController {
 
   @Get('reports')
   @ApiOperation({ summary: 'Get all financial reports' })
-  @ApiResponse({ status: 200, description: 'Financial reports retrieved successfully', type: [FinancialReport] })
+  @ApiResponse({ status: 200, description: 'Financial reports retrieved successfully', schema: { type: 'array', items: { $ref: getSchemaPath(FinancialReport) } } })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiQuery({ name: 'generatedBy', required: false, description: 'Filter by generator ID' })
   @ApiQuery({ name: 'propertyId', required: false, description: 'Filter by property ID' })
@@ -247,7 +248,7 @@ export class FinancialController {
 
   @Get('reports/:id')
   @ApiOperation({ summary: 'Get financial report by ID' })
-  @ApiResponse({ status: 200, description: 'Financial report retrieved successfully', type: FinancialReport })
+  @ApiResponse({ status: 200, description: 'Financial report retrieved successfully', schema: { $ref: getSchemaPath(FinancialReport) } })
   @ApiResponse({ status: 404, description: 'Financial report not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'id', description: 'Financial report ID' })
@@ -257,7 +258,7 @@ export class FinancialController {
 
   @Patch('reports/:id')
   @ApiOperation({ summary: 'Update financial report' })
-  @ApiResponse({ status: 200, description: 'Financial report updated successfully', type: FinancialReport })
+  @ApiResponse({ status: 200, description: 'Financial report updated successfully', schema: { $ref: getSchemaPath(FinancialReport) } })
   @ApiResponse({ status: 404, description: 'Financial report not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiParam({ name: 'id', description: 'Financial report ID' })
