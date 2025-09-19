@@ -65,6 +65,18 @@ import TenantReferencing from './pages/TenantReferencing';
 import GDPRCompliance from './pages/GDPRCompliance';
 import CRM from './pages/CRM';
 
+// Buyer pages
+import SavedProperties from './pages/buyer/SavedProperties';
+import MyViewings from './pages/buyer/MyViewings';
+import PropertyOffers from './pages/buyer/PropertyOffers';
+import MortgageApplications from './pages/buyer/MortgageApplications';
+import SavedSearches from './pages/buyer/SavedSearches';
+
+// Solicitor pages
+import LegalCases from './pages/solicitor/LegalCases';
+import Conveyancing from './pages/solicitor/Conveyancing';
+import ContractManagement from './pages/solicitor/ContractManagement';
+
 // Dashboard nested pages
 import DashboardProperties from './pages/dashboards/DashboardProperties';
 import DashboardBookings from './pages/dashboards/DashboardBookings';
@@ -358,6 +370,50 @@ function App() {
           <Route path="/crm" element={
             <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.AGENT]}>
               <CRM />
+            </ProtectedRoute>
+          } />
+          
+          {/* Buyer Routes - Buyer only */}
+          <Route path="/buyer/saved" element={
+            <ProtectedRoute allowedRoles={[UserRole.BUYER]}>
+              <SavedProperties />
+            </ProtectedRoute>
+          } />
+          <Route path="/buyer/viewings" element={
+            <ProtectedRoute allowedRoles={[UserRole.BUYER]}>
+              <MyViewings />
+            </ProtectedRoute>
+          } />
+          <Route path="/buyer/offers" element={
+            <ProtectedRoute allowedRoles={[UserRole.BUYER]}>
+              <PropertyOffers />
+            </ProtectedRoute>
+          } />
+          <Route path="/buyer/mortgage" element={
+            <ProtectedRoute allowedRoles={[UserRole.BUYER]}>
+              <MortgageApplications />
+            </ProtectedRoute>
+          } />
+          <Route path="/buyer/searches" element={
+            <ProtectedRoute allowedRoles={[UserRole.BUYER]}>
+              <SavedSearches />
+            </ProtectedRoute>
+          } />
+          
+          {/* Solicitor Routes - Solicitor only */}
+          <Route path="/solicitor/cases" element={
+            <ProtectedRoute allowedRoles={[UserRole.SOLICITOR]}>
+              <LegalCases />
+            </ProtectedRoute>
+          } />
+          <Route path="/solicitor/conveyancing" element={
+            <ProtectedRoute allowedRoles={[UserRole.SOLICITOR]}>
+              <Conveyancing />
+            </ProtectedRoute>
+          } />
+          <Route path="/solicitor/contracts" element={
+            <ProtectedRoute allowedRoles={[UserRole.SOLICITOR]}>
+              <ContractManagement />
             </ProtectedRoute>
           } />
           

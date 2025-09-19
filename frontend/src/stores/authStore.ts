@@ -270,29 +270,40 @@ export const useAuthStore = create<AuthState>()(
 
       // Initialize Supabase auth listener
       initializeAuth: async () => {
-        // Get initial session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          const user = await authService.getCurrentUser();
-          if (user) {
-            set({
-              user,
-              token: session.access_token,
-              refreshToken: session.refresh_token,
-              isAuthenticated: true,
-              isEmailVerified: user.emailVerified || false,
-              twoFactorEnabled: user.twoFactorEnabled || false,
-              permissions: user.permissions || []
-            });
-            
-            // Initialize messaging service with auth
-            try {
-              await messagingService.reinitializeWithAuth();
-            } catch (error) {
-              console.error('Failed to initialize messaging service:', error);
-            }
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('Error getting session:', error);
+            return;
           }
+
+          if (session?.user) {
+            const userData = await get().getCurrentUser();
+            if (userData) {
+              set({ 
+                user: userData, 
+                token: session.access_token, 
+                isAuthenticated: true,
+                isLoading: false 
+              });
+            }
+          } else {
+            set({ 
+              user: null, 
+              token: null, 
+              isAuthenticated: false,
+              isLoading: false 
+            });
+          }
+        } catch (error) {
+          console.error('Error in initializeAuth:', error);
+          set({ 
+            user: null, 
+            token: null, 
+            isAuthenticated: false,
+            isLoading: false 
+          });
         }
 
         // Listen for auth changes

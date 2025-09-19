@@ -134,7 +134,7 @@ export interface BulkExport {
   userId: string;
   exportId: string;
   searchCriteria?: Record<string, any>;
-  format: ExportFormat;
+  exportFormat: ExportFormat;
   status: ExportStatus;
   downloadUrl?: string;
   recordCount?: number;
@@ -192,7 +192,7 @@ export interface PricePaidSearchRequest {
 // Bulk export request
 export interface BulkExportRequest {
   searchCriteria: PropertySearchRequest | PricePaidSearchRequest;
-  format: ExportFormat;
+  exportFormat: ExportFormat;
   includeOwnership?: boolean;
   includePriceHistory?: boolean;
 }

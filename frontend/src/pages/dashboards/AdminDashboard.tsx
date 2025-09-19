@@ -6,6 +6,7 @@ import { Modal } from '../../components/ui/Modal';
 import { User, UserRole } from '../../types/auth';
 import { formatCurrency } from '../../utils';
 import AdminSidebar from '../../components/admin/AdminSidebar';
+import LandRegistryImport from '../../components/admin/LandRegistryImport';
 import {
   Users,
   Building,
@@ -60,7 +61,10 @@ import {
   MapPin,
   Home,
   Car,
-  Briefcase
+  Briefcase,
+  Save,
+  Send,
+  Link
 } from 'lucide-react';
 
 interface AdminStats {
@@ -331,7 +335,8 @@ const AdminDashboard: React.FC = () => {
             { id: 'maintenance', label: 'Maintenance', icon: Wrench },
             { id: 'integrations', label: 'Integration Services', icon: Database },
             { id: 'security', label: 'Security Monitoring', icon: Lock },
-            { id: 'land-registry', label: 'Land Registry Import', icon: Upload }
+            { id: 'land-registry', label: 'Land Registry Import', icon: Upload },
+            { id: 'backup', label: 'Backup & Recovery', icon: HardDrive }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -572,45 +577,264 @@ const AdminDashboard: React.FC = () => {
       {/* System Configuration Tab */}
       {activeTab === 'system-config' && (
         <div className="space-y-6">
-          {/* System Settings Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* System Configuration Header */}
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">System Configuration</h2>
+              <p className="text-gray-600">Manage system settings, integrations, and configurations</p>
+            </div>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Save className="h-4 w-4 mr-2" />
+              Save All Changes
+            </Button>
+          </div>
+
+          {/* Configuration Status Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="h-5 w-5 mr-2" />
-                  General Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Globe className="h-4 w-4 mr-2" />
-                    Site Configuration
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Email Settings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Bell className="h-4 w-4 mr-2" />
-                    Notification Preferences
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Key className="h-4 w-4 mr-2" />
-                    API Configuration
-                  </Button>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">System Health</p>
+                    <p className="text-2xl font-bold text-green-600">Healthy</p>
+                    <p className="text-xs text-gray-500">All systems operational</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>
             <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Active Configs</p>
+                    <p className="text-2xl font-bold text-blue-600">24</p>
+                    <p className="text-xs text-gray-500">Configuration items</p>
+                  </div>
+                  <Settings className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Last Backup</p>
+                    <p className="text-2xl font-bold text-purple-600">2h ago</p>
+                    <p className="text-xs text-gray-500">Automatic backup</p>
+                  </div>
+                  <Database className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Pending Updates</p>
+                    <p className="text-2xl font-bold text-orange-600">3</p>
+                    <p className="text-xs text-gray-500">Require attention</p>
+                  </div>
+                  <AlertTriangle className="h-8 w-8 text-orange-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Configuration Sections */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* General System Settings */}
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Database className="h-5 w-5 mr-2" />
-                  Database Management
+                  <Settings className="h-5 w-5 mr-2" />
+                  General System Settings
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Site Name</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    defaultValue="PropertyMasters UK"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Site URL</label>
+                  <input 
+                    type="url" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    defaultValue="https://propertymastersuk.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Maintenance Mode</label>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm text-gray-600">Enable maintenance mode</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Default Language</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="en">English (UK)</option>
+                    <option value="en-us">English (US)</option>
+                  </select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Email Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Mail className="h-5 w-5 mr-2" />
+                  Email Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">SMTP Host</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="smtp.gmail.com"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Port</label>
+                    <input 
+                      type="number" 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      defaultValue="587"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Encryption</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="tls">TLS</option>
+                      <option value="ssl">SSL</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">From Email</label>
+                  <input 
+                    type="email" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    placeholder="noreply@propertymastersuk.com"
+                  />
+                </div>
+                <Button variant="outline" className="w-full">
+                  <Send className="h-4 w-4 mr-2" />
+                  Test Email Configuration
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* API Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Key className="h-5 w-5 mr-2" />
+                  API Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Rate Limit (requests/minute)</label>
+                  <input 
+                    type="number" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    defaultValue="1000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">API Version</label>
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="v1">Version 1.0</option>
+                    <option value="v2">Version 2.0 (Beta)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">CORS Origins</label>
+                  <textarea 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    rows={3}
+                    placeholder="https://app.propertymastersuk.com&#10;https://admin.propertymastersuk.com"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" className="rounded" defaultChecked />
+                  <span className="text-sm text-gray-600">Enable API documentation</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Security Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2" />
+                  Security Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Session Timeout (minutes)</label>
+                  <input 
+                    type="number" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    defaultValue="30"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Password Policy</label>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-sm text-gray-600">Minimum 8 characters</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-sm text-gray-600">Require uppercase letters</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-sm text-gray-600">Require special characters</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Failed Login Attempts</label>
+                  <input 
+                    type="number" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    defaultValue="5"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input type="checkbox" className="rounded" defaultChecked />
+                  <span className="text-sm text-gray-600">Enable two-factor authentication</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Advanced Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Database className="h-5 w-5 mr-2" />
+                Advanced System Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Database Management</h4>
                   <Button variant="outline" className="w-full justify-start">
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Backup & Restore
@@ -623,42 +847,40 @@ const AdminDashboard: React.FC = () => {
                     <HardDrive className="h-4 w-4 mr-2" />
                     Storage Management
                   </Button>
+                </div>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Integration Services</h4>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Globe className="h-4 w-4 mr-2" />
+                    UK APIs Configuration
+                  </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <Zap className="h-4 w-4 mr-2" />
-                    Query Optimization
+                    Webhook Management
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Link className="h-4 w-4 mr-2" />
+                    Third-party Integrations
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="h-5 w-5 mr-2" />
-                  Security Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
                 <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">System Maintenance</h4>
                   <Button variant="outline" className="w-full justify-start">
-                    <Lock className="h-4 w-4 mr-2" />
-                    Access Control
+                    <Clock className="h-4 w-4 mr-2" />
+                    Scheduled Tasks
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
-                    <Key className="h-4 w-4 mr-2" />
-                    Authentication
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileCheck className="h-4 w-4 mr-2" />
-                    Audit Logs
+                    <FileText className="h-4 w-4 mr-2" />
+                    Log Management
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <AlertTriangle className="h-4 w-4 mr-2" />
-                    Security Alerts
+                    System Alerts
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -1986,59 +2208,238 @@ const AdminDashboard: React.FC = () => {
             </Card>
           </div>
 
-          {/* System Settings */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* System Configuration */}
+          <div className="space-y-6">
+            {/* Configuration Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Database Status</p>
+                      <p className="text-2xl font-bold text-green-600">Online</p>
+                      <p className="text-xs text-gray-500">99.9% uptime</p>
+                    </div>
+                    <Database className="h-8 w-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">API Rate Limit</p>
+                      <p className="text-2xl font-bold text-blue-600">1000/h</p>
+                      <p className="text-xs text-gray-500">Per user</p>
+                    </div>
+                    <Zap className="h-8 w-8 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Email Queue</p>
+                      <p className="text-2xl font-bold text-orange-600">47</p>
+                      <p className="text-xs text-gray-500">Pending</p>
+                    </div>
+                    <Mail className="h-8 w-8 text-orange-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Security Level</p>
+                      <p className="text-2xl font-bold text-purple-600">High</p>
+                      <p className="text-xs text-gray-500">All checks pass</p>
+                    </div>
+                    <Shield className="h-8 w-8 text-purple-500" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Configuration Sections */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Database Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Database className="h-5 w-5 mr-2" />
+                    Database Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Connection Pool Size</label>
+                      <input type="number" className="w-full p-2 border rounded-md" defaultValue="20" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Query Timeout (ms)</label>
+                      <input type="number" className="w-full p-2 border rounded-md" defaultValue="30000" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Backup Schedule</label>
+                      <select className="w-full p-2 border rounded-md">
+                        <option>Daily at 2:00 AM</option>
+                        <option>Weekly on Sunday</option>
+                        <option>Monthly</option>
+                      </select>
+                    </div>
+                    <Button className="w-full">Update Database Settings</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Email Configuration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Mail className="h-5 w-5 mr-2" />
+                    Email Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">SMTP Server</label>
+                      <input type="text" className="w-full p-2 border rounded-md" defaultValue="smtp.gmail.com" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">SMTP Port</label>
+                      <input type="number" className="w-full p-2 border rounded-md" defaultValue="587" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">From Email</label>
+                      <input type="email" className="w-full p-2 border rounded-md" defaultValue="noreply@propertymasters.uk" />
+                    </div>
+                    <Button className="w-full">Update Email Settings</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* API Rate Limiting */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Zap className="h-5 w-5 mr-2" />
+                    API Rate Limiting
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Requests per Hour</label>
+                      <input type="number" className="w-full p-2 border rounded-md" defaultValue="1000" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Burst Limit</label>
+                      <input type="number" className="w-full p-2 border rounded-md" defaultValue="100" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Window Size (minutes)</label>
+                      <input type="number" className="w-full p-2 border rounded-md" defaultValue="60" />
+                    </div>
+                    <Button className="w-full">Update Rate Limits</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Security Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Shield className="h-5 w-5 mr-2" />
+                    Security Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Two-Factor Authentication</label>
+                      <input type="checkbox" className="rounded" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Password Complexity</label>
+                      <input type="checkbox" className="rounded" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Session Timeout (hours)</label>
+                      <input type="number" className="w-20 p-1 border rounded" defaultValue="24" />
+                    </div>
+                    <Button className="w-full">Update Security Settings</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Integration Management */}
             <Card>
               <CardHeader>
-                <CardTitle>System Configuration</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Link className="h-5 w-5 mr-2" />
+                  Integration Management
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Maintenance Mode</span>
-                    <Button variant="outline" size="sm">Configure</Button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium">Land Registry API</h4>
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">Connected and active</p>
+                    <Button variant="outline" size="sm" className="w-full">Configure</Button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Backup Schedule</span>
-                    <Button variant="outline" size="sm">Manage</Button>
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium">Companies House API</h4>
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">Connected and active</p>
+                    <Button variant="outline" size="sm" className="w-full">Configure</Button>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Security Settings</span>
-                    <Button variant="outline" size="sm">Review</Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">API Rate Limits</span>
-                    <Button variant="outline" size="sm">Adjust</Button>
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-medium">Royal Mail PAF</h4>
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">Limited access</p>
+                    <Button variant="outline" size="sm" className="w-full">Configure</Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* System Information */}
             <Card>
               <CardHeader>
-                <CardTitle>Recent System Events</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Monitor className="h-5 w-5 mr-2" />
+                  System Information
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">System backup completed</p>
-                      <p className="text-xs text-gray-500">2 hours ago</p>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Application Version</p>
+                    <p className="text-lg font-semibold">v2.1.3</p>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Database optimization finished</p>
-                      <p className="text-xs text-gray-500">6 hours ago</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Database Version</p>
+                    <p className="text-lg font-semibold">PostgreSQL 14.2</p>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Security scan initiated</p>
-                      <p className="text-xs text-gray-500">1 day ago</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Node.js Version</p>
+                    <p className="text-lg font-semibold">v18.17.0</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Last Restart</p>
+                    <p className="text-lg font-semibold">2 days ago</p>
                   </div>
                 </div>
               </CardContent>
@@ -2048,193 +2449,86 @@ const AdminDashboard: React.FC = () => {
       )}
 
       {activeTab === 'land-registry' && (
+        <LandRegistryImport />
+      )}
+
+      {/* GDPR Compliance Tab */}
+      {activeTab === 'gdpr' && (
         <div className="space-y-6">
-          {/* Land Registry API Status */}
+          {/* GDPR Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
-              <CardContent className="card-compact">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-label text-gray-600">API Status</p>
-                    <p className="text-heading-3 text-green-600">Online</p>
-                    <div className="flex items-center mt-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      <span className="text-caption text-gray-500">99.9% uptime</span>
-                    </div>
+                    <p className="text-sm font-medium text-gray-600">Data Requests</p>
+                    <p className="text-2xl font-bold text-blue-600">23</p>
+                    <p className="text-xs text-gray-500">This month</p>
                   </div>
-                  <div className="p-3 bg-green-100 rounded-lg">
-                    <Wifi className="h-8 w-8 text-green-600" />
-                  </div>
+                  <FileText className="h-8 w-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="card-compact">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-label text-gray-600">Daily Requests</p>
-                    <p className="text-heading-3">12,847</p>
-                    <div className="flex items-center mt-2">
-                      <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
-                      <span className="text-caption text-green-500 font-medium">+15.3%</span>
-                      <span className="text-caption text-gray-500 ml-1">vs yesterday</span>
-                    </div>
+                    <p className="text-sm font-medium text-gray-600">Consent Rate</p>
+                    <p className="text-2xl font-bold text-green-600">94.2%</p>
+                    <p className="text-xs text-gray-500">Active users</p>
                   </div>
-                  <div className="p-3 bg-blue-100 rounded-lg">
-                    <Activity className="h-8 w-8 text-blue-600" />
-                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="card-compact">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-label text-gray-600">Cache Hit Rate</p>
-                    <p className="text-heading-3">94.2%</p>
-                    <div className="flex items-center mt-2">
-                      <ArrowUp className="h-4 w-4 text-green-500 mr-1" />
-                      <span className="text-caption text-green-500 font-medium">+2.1%</span>
-                      <span className="text-caption text-gray-500 ml-1">efficiency</span>
-                    </div>
+                    <p className="text-sm font-medium text-gray-600">Data Deletions</p>
+                    <p className="text-2xl font-bold text-red-600">7</p>
+                    <p className="text-xs text-gray-500">This month</p>
                   </div>
-                  <div className="p-3 bg-purple-100 rounded-lg">
-                    <Database className="h-8 w-8 text-purple-600" />
-                  </div>
+                  <Trash2 className="h-8 w-8 text-red-500" />
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="card-compact">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-label text-gray-600">Error Rate</p>
-                    <p className="text-heading-3 text-red-600">0.3%</p>
-                    <div className="flex items-center mt-2">
-                      <ArrowDown className="h-4 w-4 text-green-500 mr-1" />
-                      <span className="text-caption text-green-500 font-medium">-0.2%</span>
-                      <span className="text-caption text-gray-500 ml-1">improvement</span>
-                    </div>
+                    <p className="text-sm font-medium text-gray-600">Compliance Score</p>
+                    <p className="text-2xl font-bold text-purple-600">98%</p>
+                    <p className="text-xs text-gray-500">Overall rating</p>
                   </div>
-                  <div className="p-3 bg-red-100 rounded-lg">
-                    <AlertTriangle className="h-8 w-8 text-red-600" />
-                  </div>
+                  <Shield className="h-8 w-8 text-purple-500" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* API Endpoints Monitoring */}
+          {/* GDPR Actions */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Monitor className="h-5 w-5 mr-2" />
-                  API Endpoints Status
+                  <Download className="h-5 w-5 mr-2" />
+                  Data Export Requests
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                      <div>
-                        <p className="text-sm font-medium">Property Ownership Lookup</p>
-                        <p className="text-xs text-gray-500">Average response: 245ms</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-green-600 font-medium">Healthy</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                      <div>
-                        <p className="text-sm font-medium">Price Paid Data Search</p>
-                        <p className="text-xs text-gray-500">Average response: 312ms</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-green-600 font-medium">Healthy</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
-                      <div>
-                        <p className="text-sm font-medium">Bulk Data Processing</p>
-                        <p className="text-xs text-gray-500">Average response: 1.2s</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-yellow-600 font-medium">Slow</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
-                      <div>
-                        <p className="text-sm font-medium">Transaction History</p>
-                        <p className="text-xs text-gray-500">Average response: 189ms</p>
-                      </div>
-                    </div>
-                    <span className="text-sm text-green-600 font-medium">Healthy</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Usage Analytics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Most Used Endpoint</span>
-                    <span className="text-sm text-blue-600">Property Ownership (45%)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Peak Usage Time</span>
-                    <span className="text-sm text-gray-600">2:00 PM - 4:00 PM</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Average Daily Requests</span>
-                    <span className="text-sm text-gray-600">12,847</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Data Sync Status</span>
-                    <span className="text-sm text-green-600">Last synced: 2 hours ago</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Data Management */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Database className="h-5 w-5 mr-2" />
-                  Data Synchronization
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Last Full Sync</span>
-                    <span className="text-sm text-gray-600">2024-01-15 02:00</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Records Synced</span>
-                    <span className="text-sm text-gray-600">2,847,392</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Sync Status</span>
-                    <span className="text-sm text-green-600">Up to date</span>
-                  </div>
-                  <Button className="w-full" variant="outline">
+                  <Button className="w-full justify-start">
                     <Download className="h-4 w-4 mr-2" />
-                    Force Sync Now
+                    Request User Data Export
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Export Status
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Download Export Files
                   </Button>
                 </div>
               </CardContent>
@@ -2243,28 +2537,24 @@ const AdminDashboard: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <HardDrive className="h-5 w-5 mr-2" />
-                  Storage Usage
+                  <Trash2 className="h-5 w-5 mr-2" />
+                  Data Deletion Tools
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Property Data</span>
-                    <span className="text-sm text-gray-600">2.4 GB</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Price History</span>
-                    <span className="text-sm text-gray-600">1.8 GB</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Cache Storage</span>
-                    <span className="text-sm text-gray-600">512 MB</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: '68%' }}></div>
-                  </div>
-                  <p className="text-xs text-gray-500">68% of allocated storage used</p>
+                  <Button variant="destructive" className="w-full justify-start">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Request Data Deletion
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Clock className="h-4 w-4 mr-2" />
+                    View Deletion Queue
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Activity className="h-4 w-4 mr-2" />
+                    Deletion History
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -2272,69 +2562,98 @@ const AdminDashboard: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Settings className="h-5 w-5 mr-2" />
-                  Configuration
+                  <UserCheck className="h-5 w-5 mr-2" />
+                  Consent Management
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
+                  <Button className="w-full justify-start">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Update Consent Settings
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Consent Records
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Consent Status
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Activity className="h-5 w-5 mr-2" />
+                  Privacy Audit Logs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Button className="w-full justify-start">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Audit Logs
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Audit Report
+                  </Button>
                   <Button variant="outline" className="w-full justify-start">
                     <Settings className="h-4 w-4 mr-2" />
-                    API Rate Limits
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Database className="h-4 w-4 mr-2" />
-                    Cache Settings
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Monitor className="h-4 w-4 mr-2" />
-                    Monitoring Alerts
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Logs
+                    Configure Logging
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Recent Activity Log */}
+          {/* Recent GDPR Activities */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Activity className="h-5 w-5 mr-2" />
-                Recent Land Registry Activity
-              </CardTitle>
+              <CardTitle>Recent GDPR Activities</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Bulk search completed for SW1A postcodes</p>
-                    <p className="text-xs text-gray-500">2 minutes ago • 1,247 properties processed</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <Download className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-medium">Data export requested</p>
+                      <p className="text-sm text-gray-600">User: john.doe@email.com</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">In Progress</p>
+                    <p className="text-xs text-gray-500">2 hours ago</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Price history data updated</p>
-                    <p className="text-xs text-gray-500">15 minutes ago • 3,892 new transactions</p>
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="font-medium">Consent updated</p>
+                      <p className="text-sm text-gray-600">User: sarah.smith@email.com</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">Completed</p>
+                    <p className="text-xs text-gray-500">5 hours ago</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">API rate limit warning</p>
-                    <p className="text-xs text-gray-500">1 hour ago • Approaching daily limit (85%)</p>
+                <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <Trash2 className="h-5 w-5 text-red-600" />
+                    <div>
+                      <p className="font-medium">Data deletion completed</p>
+                      <p className="text-sm text-gray-600">User: mike.brown@email.com</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Data synchronization completed</p>
-                    <p className="text-xs text-gray-500">2 hours ago • All systems synchronized</p>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">Completed</p>
+                    <p className="text-xs text-gray-500">1 day ago</p>
                   </div>
                 </div>
               </div>
@@ -2343,115 +2662,277 @@ const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'reports' && (
+      {activeTab === 'backup' && (
         <div className="space-y-6">
-          {/* Report Categories */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Backup Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
-                  User Reports
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    User Activity Report
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Registration Analytics
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    User Engagement
-                  </Button>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Last Backup</p>
+                    <p className="text-2xl font-bold text-green-600">2 hours ago</p>
+                    <p className="text-xs text-gray-500">Successful</p>
+                  </div>
+                  <Database className="h-8 w-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Building className="h-5 w-5 mr-2" />
-                  Property Reports
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Listing Performance
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Market Analysis
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Property Trends
-                  </Button>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Backup Size</p>
+                    <p className="text-2xl font-bold text-blue-600">2.4 GB</p>
+                    <p className="text-xs text-gray-500">Total storage</p>
+                  </div>
+                  <HardDrive className="h-8 w-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>
             <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Retention</p>
+                    <p className="text-2xl font-bold text-purple-600">30 days</p>
+                    <p className="text-xs text-gray-500">Auto cleanup</p>
+                  </div>
+                  <Clock className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Success Rate</p>
+                    <p className="text-2xl font-bold text-green-600">99.8%</p>
+                    <p className="text-xs text-gray-500">Last 30 days</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Backup Actions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Banknote className="h-5 w-5 mr-2" />
-                  Financial Reports
+                  <Database className="h-5 w-5 mr-2" />
+                  Create Backup
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Revenue Report
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Backup Type</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>Full Database Backup</option>
+                      <option>Incremental Backup</option>
+                      <option>Schema Only</option>
+                      <option>Data Only</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Description</label>
+                    <input 
+                      type="text" 
+                      placeholder="Optional backup description"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <Button className="w-full">
+                    <Database className="h-4 w-4 mr-2" />
+                    Create Backup Now
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Commission Tracking
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Payment Analytics
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <RefreshCw className="h-5 w-5 mr-2" />
+                  Restore Database
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Select Backup</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>2024-01-15 14:30 - Full Backup</option>
+                      <option>2024-01-15 12:00 - Incremental</option>
+                      <option>2024-01-14 14:30 - Full Backup</option>
+                      <option>2024-01-14 12:00 - Incremental</option>
+                    </select>
+                  </div>
+                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <div className="flex items-center">
+                      <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
+                      <p className="text-sm text-yellow-800">Warning: This will overwrite current data</p>
+                    </div>
+                  </div>
+                  <Button variant="destructive" className="w-full">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Restore Database
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Quick Report Generation */}
+          {/* Backup Schedule */}
           <Card>
             <CardHeader>
-              <CardTitle>Generate Custom Report</CardTitle>
+              <CardTitle className="flex items-center">
+                <Calendar className="h-5 w-5 mr-2" />
+                Backup Schedule Settings
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Select Report Type</option>
-                  <option>User Analytics</option>
-                  <option>Property Performance</option>
-                  <option>Financial Summary</option>
-                  <option>System Usage</option>
-                </select>
-                <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Time Period</option>
-                  <option>Last 7 days</option>
-                  <option>Last 30 days</option>
-                  <option>Last 3 months</option>
-                  <option>Last year</option>
-                </select>
-                <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Format</option>
-                  <option>PDF</option>
-                  <option>Excel</option>
-                  <option>CSV</option>
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Automatic Backups</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-sm">Enable automatic backups</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-sm">Email notifications</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-medium">Schedule</h4>
+                  <div className="space-y-2">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>Daily at 2:00 AM</option>
+                      <option>Every 6 hours</option>
+                      <option>Weekly on Sunday</option>
+                      <option>Custom schedule</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="font-medium">Retention Policy</h4>
+                  <div className="space-y-2">
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option>Keep for 30 days</option>
+                      <option>Keep for 90 days</option>
+                      <option>Keep for 1 year</option>
+                      <option>Keep forever</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6">
                 <Button>
-                  <Download className="h-4 w-4 mr-2" />
-                  Generate Report
+                  <Settings className="h-4 w-4 mr-2" />
+                  Update Schedule
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Backup History */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Backup History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Date & Time</th>
+                      <th className="text-left p-2">Type</th>
+                      <th className="text-left p-2">Size</th>
+                      <th className="text-left p-2">Status</th>
+                      <th className="text-left p-2">Duration</th>
+                      <th className="text-left p-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b hover:bg-gray-50">
+                      <td className="p-2">2024-01-15 14:30:00</td>
+                      <td className="p-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Full</span>
+                      </td>
+                      <td className="p-2">2.4 GB</td>
+                      <td className="p-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Success</span>
+                      </td>
+                      <td className="p-2">4m 32s</td>
+                      <td className="p-2">
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <RefreshCw className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="border-b hover:bg-gray-50">
+                      <td className="p-2">2024-01-15 12:00:00</td>
+                      <td className="p-2">
+                        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">Incremental</span>
+                      </td>
+                      <td className="p-2">156 MB</td>
+                      <td className="p-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Success</span>
+                      </td>
+                      <td className="p-2">1m 12s</td>
+                      <td className="p-2">
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <RefreshCw className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr className="border-b hover:bg-gray-50">
+                      <td className="p-2">2024-01-14 14:30:00</td>
+                      <td className="p-2">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Full</span>
+                      </td>
+                      <td className="p-2">2.3 GB</td>
+                      <td className="p-2">
+                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Success</span>
+                      </td>
+                      <td className="p-2">4m 18s</td>
+                      <td className="p-2">
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Download className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <RefreshCw className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>

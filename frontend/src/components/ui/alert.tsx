@@ -56,4 +56,3 @@ const AlertDescription: React.FC<AlertDescriptionProps> = ({
 };
 
 export { Alert, AlertDescription };
-ex

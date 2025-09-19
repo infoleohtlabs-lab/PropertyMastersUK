@@ -754,7 +754,7 @@ const MaintenanceManagement: React.FC = () => {
             </div>
             
             <div className="border-t pt-4">
-              <h4 className="font-medium text-gray-900 mb-2">Property &amp; Tenant Information</h4>
+              <h4 className="font-medium text-gray-900 mb-2">Property & Tenant Information</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <div className="flex items-center space-x-2 mb-1">
@@ -779,7 +779,7 @@ const MaintenanceManagement: React.FC = () => {
               </div>
             </div>
             
-            {selectedRequest.attachments.length &gt; 0 && (
+            {selectedRequest.attachments.length > 0 && (
               <div className="border-t pt-4">
                 <h4 className="font-medium text-gray-900 mb-2">Attachments</h4>
                 <div className="space-y-2">
@@ -798,7 +798,7 @@ const MaintenanceManagement: React.FC = () => {
               </div>
             )}
             
-            {selectedRequest.notes.length &gt; 0 && (
+            {selectedRequest.notes.length > 0 && (
               <div className="border-t pt-4">
                 <h4 className="font-medium text-gray-900 mb-2">Notes</h4>
                 <div className="space-y-2">

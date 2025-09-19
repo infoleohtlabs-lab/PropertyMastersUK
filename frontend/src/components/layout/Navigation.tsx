@@ -25,7 +25,11 @@ import {
   Menu,
   X,
   ChevronDown,
-  Target
+  Target,
+  Heart,
+  Scale,
+  FileCheck,
+  FileSignature
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 import { UserRole } from '../../types';
@@ -43,7 +47,7 @@ const navigationItems: NavigationItem[] = [
     name: 'Dashboard',
     href: '/dashboard',
     icon: Home,
-    roles: [UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD, UserRole.TENANT, UserRole.BUYER]
+    roles: [UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD, UserRole.TENANT, UserRole.BUYER, UserRole.SOLICITOR]
   },
   {
     name: 'Properties',
@@ -78,10 +82,58 @@ const navigationItems: NavigationItem[] = [
     ]
   },
   {
+    name: 'Saved Properties',
+    href: '/buyer/saved',
+    icon: Heart,
+    roles: [UserRole.BUYER]
+  },
+  {
+    name: 'My Viewings',
+    href: '/buyer/viewings',
+    icon: Calendar,
+    roles: [UserRole.BUYER]
+  },
+  {
+    name: 'Property Offers',
+    href: '/buyer/offers',
+    icon: FileText,
+    roles: [UserRole.BUYER]
+  },
+  {
+    name: 'Mortgage Applications',
+    href: '/buyer/mortgage',
+    icon: CreditCard,
+    roles: [UserRole.BUYER]
+  },
+  {
+    name: 'Saved Searches',
+    href: '/buyer/searches',
+    icon: Search,
+    roles: [UserRole.BUYER]
+  },
+  {
+    name: 'Legal Cases',
+    href: '/solicitor/cases',
+    icon: Scale,
+    roles: [UserRole.SOLICITOR]
+  },
+  {
+    name: 'Conveyancing',
+    href: '/solicitor/conveyancing',
+    icon: FileCheck,
+    roles: [UserRole.SOLICITOR]
+  },
+  {
+    name: 'Contract Management',
+    href: '/solicitor/contracts',
+    icon: FileSignature,
+    roles: [UserRole.SOLICITOR]
+  },
+  {
     name: 'Clients',
     href: '/clients',
     icon: Users,
-    roles: [UserRole.ADMIN, UserRole.AGENT],
+    roles: [UserRole.ADMIN, UserRole.AGENT, UserRole.SOLICITOR],
     children: [
       {
         name: 'All Clients',
@@ -237,7 +289,7 @@ const navigationItems: NavigationItem[] = [
     name: 'Documents',
     href: '/documents',
     icon: FileText,
-    roles: [UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD, UserRole.TENANT],
+    roles: [UserRole.ADMIN, UserRole.AGENT, UserRole.LANDLORD, UserRole.TENANT, UserRole.SOLICITOR],
     children: [
       {
         name: 'All Documents',
