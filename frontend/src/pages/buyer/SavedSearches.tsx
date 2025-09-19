@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Bell, BellOff, Edit, Trash2, Plus, Filter, Calendar, Home, Pound } from 'lucide-react';
+import { Search, MapPin, Bell, BellOff, Edit, Trash2, Plus, Filter, Calendar, Home, PoundSterling } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 
 interface SavedSearch {

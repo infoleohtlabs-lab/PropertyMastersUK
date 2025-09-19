@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search, Filter, Plus, Eye, Edit, Download, Upload, CheckCircle, Clock, AlertTriangle, User, Calendar, Pound, Send, Archive, Copy } from 'lucide-react';
+import { FileText, Search, Filter, Plus, Eye, Edit, Download, Upload, CheckCircle, Clock, AlertTriangle, User, Calendar, PoundSterling, Send, Archive, Copy } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 
 interface Contract {
@@ -871,7 +871,7 @@ const ContractManagement: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Pound className="h-6 w-6 text-purple-600" />
+                <PoundSterling className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Value</p>

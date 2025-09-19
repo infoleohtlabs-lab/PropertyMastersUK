@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Building2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Building2, Mail, Lock, Eye, EyeOff, Edit3, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { showToast } from '../../components/ui/Toast';
@@ -55,16 +55,30 @@ const Login: React.FC = () => {
 
 
 
-  const handleDemoLogin = async (role: 'agent' | 'landlord' | 'tenant' | 'admin' | 'solicitor' | 'buyer') => {
-    const credentials = {
-      agent: { email: 'agent.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-      landlord: { email: 'landlord.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-      tenant: { email: 'tenant.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-      admin: { email: 'admin.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-      solicitor: { email: 'solicitor.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-      buyer: { email: 'buyer.propertymastersuk@gmail.com', password: 'PropertyTest2024!' }
-    };
+  const credentials = {
+    agent: { email: 'agent.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+    landlord: { email: 'landlord.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+    tenant: { email: 'tenant.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+    admin: { email: 'admin.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+    solicitor: { email: 'solicitor.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
+    buyer: { email: 'buyer.propertymastersuk@gmail.com', password: 'PropertyTest2024!' }
+  };
 
+  const handleAutofill = (role: 'agent' | 'landlord' | 'tenant' | 'admin' | 'solicitor' | 'buyer') => {
+    const creds = credentials[role];
+    handleChange({ target: { name: 'email', value: creds.email } } as any);
+    handleChange({ target: { name: 'password', value: creds.password } } as any);
+    showToast.success(`Form filled with ${role} credentials`);
+  };
+
+  const handleClearForm = () => {
+    handleChange({ target: { name: 'email', value: '' } } as any);
+    handleChange({ target: { name: 'password', value: '' } } as any);
+    handleChange({ target: { name: 'rememberMe', value: false } } as any);
+    showToast.success('Form cleared');
+  };
+
+  const handleDemoLogin = async (role: 'agent' | 'landlord' | 'tenant' | 'admin' | 'solicitor' | 'buyer') => {
     try {
       await login(credentials[role]);
       showToast.success(`Welcome back, demo ${role}!`);
@@ -174,8 +188,87 @@ const Login: React.FC = () => {
         </div>
       </form>
 
+      {/* Quick Fill Section */}
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-blue-700 flex items-center gap-2">
+            <Edit3 className="h-4 w-4" />
+            Quick Fill Credentials
+          </h3>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleClearForm}
+            className="text-red-600 border-red-300 hover:bg-red-50 flex items-center gap-1"
+          >
+            <Trash2 className="h-3 w-3" />
+            Clear
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleAutofill('admin')}
+            className="text-blue-600 border-blue-300 hover:bg-blue-100"
+          >
+            Admin
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleAutofill('agent')}
+            className="text-blue-600 border-blue-300 hover:bg-blue-100"
+          >
+            Agent
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleAutofill('landlord')}
+            className="text-blue-600 border-blue-300 hover:bg-blue-100"
+          >
+            Landlord
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleAutofill('tenant')}
+            className="text-blue-600 border-blue-300 hover:bg-blue-100"
+          >
+            Tenant
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleAutofill('solicitor')}
+            className="text-blue-600 border-blue-300 hover:bg-blue-100"
+          >
+            Solicitor
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleAutofill('buyer')}
+            className="text-blue-600 border-blue-300 hover:bg-blue-100"
+          >
+            Buyer
+          </Button>
+        </div>
+        <p className="text-xs text-blue-600 mt-2 text-center">
+          Click to fill form fields, then manually click "Sign in"
+        </p>
+      </div>
+
       {/* Demo Accounts */}
-      <div className="mt-8">
+      <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-300" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, Pound, Search, Filter, Plus, Eye, Edit, Download } from 'lucide-react';
+import { FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, PoundSterling, Search, Filter, Plus, Eye, Edit, Download } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 
 interface LegalCase {

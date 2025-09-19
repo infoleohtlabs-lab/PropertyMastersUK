@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Home, FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, Pound, Search, Filter, Plus, Eye, Edit, Download, MapPin, Phone, Mail } from 'lucide-react';
+import { Home, FileText, Clock, CheckCircle, AlertTriangle, User, Calendar, PoundSterling, Search, Filter, Plus, Eye, Edit, Download, MapPin, Phone, Mail } from 'lucide-react';
 import { useAuthStore } from '../../stores/authStore';
 
 interface ConveyancingTransaction {
@@ -866,7 +866,7 @@ const Conveyancing: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Pound className="h-6 w-6 text-purple-600" />
+                <PoundSterling className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Value</p>
