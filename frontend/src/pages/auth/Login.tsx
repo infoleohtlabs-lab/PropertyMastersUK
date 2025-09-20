@@ -57,12 +57,12 @@ const Login: React.FC = () => {
 
 
   const credentials = {
-    agent: { email: 'agent.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-    landlord: { email: 'landlord.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-    tenant: { email: 'tenant.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-    admin: { email: 'admin.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-    solicitor: { email: 'solicitor.propertymastersuk@gmail.com', password: 'PropertyTest2024!' },
-    buyer: { email: 'buyer.propertymastersuk@gmail.com', password: 'PropertyTest2024!' }
+    agent: { email: 'agent@propertymastersuk.com', password: 'agent123' },
+    landlord: { email: 'landlord@propertymastersuk.com', password: 'landlord123' },
+    tenant: { email: 'tenant@propertymastersuk.com', password: 'tenant123' },
+    admin: { email: 'admin@propertymastersuk.com', password: 'admin123' },
+    solicitor: { email: 'solicitor@propertymastersuk.com', password: 'solicitor123' },
+    buyer: { email: 'buyer@propertymastersuk.com', password: 'buyer123' }
   };
 
   const handleAutofill = (role: 'agent' | 'landlord' | 'tenant' | 'admin' | 'solicitor' | 'buyer') => {

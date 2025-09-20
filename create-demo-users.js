@@ -1,233 +1,174 @@
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
-// Supabase configuration
-const SUPABASE_URL = 'https://himanwdawxstxwphimhw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpbWFud2Rhd3hzdHh3cGhpbWh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMjUwNzAsImV4cCI6MjA3MTgwMTA3MH0.rStT7HNC8EsehqsCB_a6-9ovd3R0X8N0HyFO8fF97Vw';
+// Initialize Supabase client with service role key for admin operations
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Note: For user creation, we need the service role key, but we'll try with anon key first
-// and provide instructions for getting the service role key if needed
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('❌ Missing Supabase environment variables');
+  process.exit(1);
+}
 
-// Demo users to create
-const demoUsers = [
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
+
+// Demo accounts from Login.tsx
+const demoAccounts = [
   {
-    email: 'admin@demo.com',
-    password: 'demo123456',
+    email: 'admin@propertymastersuk.com',
+    password: 'admin123',
     role: 'admin',
-    user_metadata: {
-      full_name: 'Demo Admin',
-      role: 'admin'
-    }
+    first_name: 'Admin',
+    last_name: 'User'
   },
   {
-    email: 'agent@demo.com',
-    password: 'demo123456',
+    email: 'agent@propertymastersuk.com',
+    password: 'agent123',
     role: 'agent',
-    user_metadata: {
-      full_name: 'Demo Agent',
-      role: 'agent'
-    }
+    first_name: 'Agent',
+    last_name: 'User'
   },
   {
-    email: 'landlord@demo.com',
-    password: 'demo123456',
+    email: 'landlord@propertymastersuk.com',
+    password: 'landlord123',
     role: 'landlord',
-    user_metadata: {
-      full_name: 'Demo Landlord',
-      role: 'landlord'
-    }
+    first_name: 'Landlord',
+    last_name: 'User'
   },
   {
-    email: 'tenant@demo.com',
-    password: 'demo123456',
+    email: 'tenant@propertymastersuk.com',
+    password: 'tenant123',
     role: 'tenant',
-    user_metadata: {
-      full_name: 'Demo Tenant',
-      role: 'tenant'
-    }
-  },
-  {
-    email: 'buyer@demo.com',
-    password: 'demo123456',
-    role: 'buyer',
-    user_metadata: {
-      full_name: 'Demo Buyer',
-      role: 'buyer'
-    }
-  },
-  {
-    email: 'solicitor@demo.com',
-    password: 'demo123456',
-    role: 'solicitor',
-    user_metadata: {
-      full_name: 'Demo Solicitor',
-      role: 'solicitor'
-    }
+    first_name: 'Tenant',
+    last_name: 'User'
   }
 ];
 
 async function createDemoUsers() {
-  console.log('🚀 Starting demo user creation process...');
-  console.log('📧 Creating users with Supabase Auth...');
+  console.log('👥 Creating demo users in Supabase Auth...');
   
-  const results = [];
-  
-  for (const user of demoUsers) {
+  for (const account of demoAccounts) {
+    console.log(`\n📧 Creating user: ${account.email}`);
+    
     try {
-      console.log(`\n👤 Creating user: ${user.email}`);
-      
-      // Try to sign up the user
-      const { data, error } = await supabase.auth.signUp({
-        email: user.email,
-        password: user.password,
-        options: {
-          data: user.user_metadata
+      // Create user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: account.email,
+        password: account.password,
+        email_confirm: true,
+        user_metadata: {
+          first_name: account.first_name,
+          last_name: account.last_name,
+          role: account.role
         }
       });
       
-      if (error) {
-        if (error.message.includes('User already registered')) {
-          console.log(`   ⚠️  User ${user.email} already exists`);
-          results.push({ email: user.email, status: 'already_exists', error: null });
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          console.log(`⚠️  User ${account.email} already exists`);
+          
+          // Try to get existing user
+          const { data: existingUsers, error: listError } = await supabase.auth.admin.listUsers();
+          if (!listError && existingUsers) {
+            const existingUser = existingUsers.users.find(u => u.email === account.email);
+            if (existingUser) {
+              console.log(`✅ Found existing user: ${existingUser.id}`);
+              
+              // Try to create/update user profile in users table
+              await createUserProfile(existingUser.id, account);
+            }
+          }
         } else {
-          console.log(`   ❌ Failed to create ${user.email}: ${error.message}`);
-          results.push({ email: user.email, status: 'failed', error: error.message });
+          console.error(`❌ Auth error for ${account.email}:`, authError.message);
         }
-      } else {
-        console.log(`   ✅ Successfully created ${user.email}`);
-        if (data.user) {
-          console.log(`   📝 User ID: ${data.user.id}`);
-        }
-        results.push({ email: user.email, status: 'created', error: null, user: data.user });
+        continue;
       }
       
-      // Small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 500));
+      console.log(`✅ Auth user created: ${authData.user.id}`);
       
-    } catch (err) {
-      console.log(`   💥 Unexpected error creating ${user.email}: ${err.message}`);
-      results.push({ email: user.email, status: 'error', error: err.message });
+      // Create user profile in users table
+      await createUserProfile(authData.user.id, account);
+      
+    } catch (error) {
+      console.error(`❌ Unexpected error for ${account.email}:`, error.message);
     }
   }
-  
-  return results;
 }
 
-async function verifyUsers() {
-  console.log('\n🔍 Verifying created users...');
+async function createUserProfile(userId, account) {
+  console.log(`👤 Creating profile for user: ${userId}`);
   
   try {
-    // Try to get user list (this might not work with anon key)
-    const { data, error } = await supabase.auth.admin.listUsers();
-    
-    if (error) {
-      console.log('⚠️  Cannot verify users with current permissions.');
-      console.log('   This is expected when using anon key instead of service role key.');
+    // First, try to check if profile exists
+    const { data: existingProfile, error: checkError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+      
+    if (existingProfile) {
+      console.log(`✅ Profile already exists for ${account.email}`);
       return;
     }
     
-    if (data && data.users) {
-      console.log(`📊 Total users in database: ${data.users.length}`);
-      
-      const demoEmails = demoUsers.map(u => u.email);
-      const foundDemoUsers = data.users.filter(user => 
-        demoEmails.includes(user.email)
-      );
-      
-      console.log(`🎯 Demo users found: ${foundDemoUsers.length}/${demoUsers.length}`);
-      
-      foundDemoUsers.forEach(user => {
-        console.log(`   ✅ ${user.email} (ID: ${user.id})`);
-      });
-    }
-  } catch (err) {
-    console.log(`❌ Error verifying users: ${err.message}`);
-  }
-}
-
-async function testLogin() {
-  console.log('\n🔐 Testing login with demo accounts...');
-  
-  // Test login with first user
-  const testUser = demoUsers[0];
-  
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: testUser.email,
-      password: testUser.password
-    });
+    // Create new profile - try with just the allowed roles first
+    const allowedRoles = ['admin', 'agent'];
+    const roleToUse = allowedRoles.includes(account.role) ? account.role : 'agent';
     
-    if (error) {
-      console.log(`❌ Login test failed: ${error.message}`);
+    const { data: profileData, error: profileError } = await supabase
+      .from('users')
+      .insert({
+        id: userId,
+        email: account.email,
+        first_name: account.first_name,
+        last_name: account.last_name,
+        role: roleToUse,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+      
+    if (profileError) {
+      console.error(`❌ Profile error for ${account.email}:`, profileError.message);
+      
+      // If it's a role constraint error, let's try to understand what roles are allowed
+      if (profileError.message.includes('users_role_check')) {
+        console.log(`⚠️  Role '${roleToUse}' not allowed. Trying with 'admin'...`);
+        
+        const { data: retryData, error: retryError } = await supabase
+          .from('users')
+          .insert({
+            id: userId,
+            email: account.email,
+            first_name: account.first_name,
+            last_name: account.last_name,
+            role: 'admin', // Force admin role
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+          
+        if (retryError) {
+          console.error(`❌ Retry failed for ${account.email}:`, retryError.message);
+        } else {
+          console.log(`✅ Profile created with admin role for ${account.email}`);
+        }
+      }
     } else {
-      console.log(`✅ Login test successful for ${testUser.email}`);
-      console.log(`   User ID: ${data.user?.id}`);
-      
-      // Sign out after test
-      await supabase.auth.signOut();
-      console.log('   🚪 Signed out after test');
+      console.log(`✅ Profile created for ${account.email}`);
     }
-  } catch (err) {
-    console.log(`💥 Login test error: ${err.message}`);
-  }
-}
-
-async function main() {
-  try {
-    console.log('🏠 Property Masters UK - Demo User Creation Script');
-    console.log('=' .repeat(50));
-    
-    // Check Supabase connection
-    console.log('🔗 Testing Supabase connection...');
-    const { data, error } = await supabase.from('properties').select('count', { count: 'exact', head: true });
-    
-    if (error) {
-      console.log(`❌ Connection test failed: ${error.message}`);
-      return;
-    }
-    
-    console.log('✅ Supabase connection successful');
-    
-    // Create demo users
-    const results = await createDemoUsers();
-    
-    // Verify users
-    await verifyUsers();
-    
-    // Test login
-    await testLogin();
-    
-    // Summary
-    console.log('\n📋 SUMMARY');
-    console.log('=' .repeat(30));
-    
-    const created = results.filter(r => r.status === 'created').length;
-    const existing = results.filter(r => r.status === 'already_exists').length;
-    const failed = results.filter(r => r.status === 'failed' || r.status === 'error').length;
-    
-    console.log(`✅ Created: ${created}`);
-    console.log(`⚠️  Already existed: ${existing}`);
-    console.log(`❌ Failed: ${failed}`);
-    
-    if (failed > 0) {
-      console.log('\n❌ Failed users:');
-      results.filter(r => r.status === 'failed' || r.status === 'error')
-        .forEach(r => console.log(`   - ${r.email}: ${r.error}`));
-    }
-    
-    console.log('\n🎉 Demo user creation process completed!');
-    console.log('\n📝 Note: If you need to use admin functions, you\'ll need the service role key.');
-    console.log('   You can find it in your Supabase dashboard under Settings > API.');
     
   } catch (error) {
-    console.error('💥 Fatal error:', error.message);
-    process.exit(1);
+    console.error(`❌ Profile creation failed for ${account.email}:`, error.message);
   }
 }
 
-// Run the script
-if (require.main === module) {
-  main();
-}
-
-module.exports = { createDemoUsers, verifyUsers, testLogin };
+// Run the creation process
+createDemoUsers().catch(console.error);

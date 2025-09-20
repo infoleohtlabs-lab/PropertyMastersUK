@@ -137,40 +137,53 @@ class MessagingService {
   private wsService: WebSocketService | null = null;
   private currentUserId: string | null = null;
   private typingTimeouts: Map<string, NodeJS.Timeout> = new Map();
+  private initialized: boolean = false;
 
   constructor() {
-    this.initializeWebSocket();
+    // Don't initialize WebSocket immediately to avoid store access issues
+    // It will be initialized when needed
   }
 
   private async initializeWebSocket(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+
     try {
       // Check if WebSocket URL is configured
       const wsUrl = import.meta.env.VITE_WS_URL;
       if (!wsUrl) {
         console.log('WebSocket URL not configured, skipping WebSocket initialization');
+        this.initialized = true;
         return;
       }
 
-      // Get token from auth store instead of localStorage
-      const authStore = useAuthStore.getState();
-      const token = authStore.token;
-      
-      if (!token || !authStore.isAuthenticated) {
-        console.warn('No auth token found or user not authenticated, WebSocket not initialized');
-        return;
+      // Get token from auth store safely
+      try {
+        const authStore = useAuthStore.getState();
+        const token = authStore.token;
+        
+        if (!token || !authStore.isAuthenticated) {
+          console.warn('No auth token found or user not authenticated, WebSocket not initialized');
+          return;
+        }
+
+        this.wsService = new WebSocketService({
+          url: wsUrl,
+          token,
+          autoConnect: true,
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+        });
+
+        await this.wsService.connect();
+        console.log('WebSocket initialized successfully');
+        this.initialized = true;
+      } catch (storeError) {
+        console.warn('Auth store not ready, deferring WebSocket initialization');
+        // Don't mark as initialized so it can be retried later
       }
-
-      this.wsService = new WebSocketService({
-        url: wsUrl,
-        token,
-        autoConnect: true,
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-      });
-
-      await this.wsService.connect();
-      console.log('WebSocket initialized successfully');
     } catch (error) {
       console.error('Failed to initialize WebSocket:', error);
     }
@@ -316,8 +329,16 @@ class MessagingService {
     this.wsService?.emit('remove_reaction', { messageId, emoji });
   }
 
+  // Ensure WebSocket is initialized when needed
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.initializeWebSocket();
+    }
+  }
+
   // API calls
   async getConversations(page = 1, limit = 20): Promise<{ conversations: Conversation[]; total: number }> {
+    await this.ensureInitialized();
     const response = await apiService.get<{ conversations: Conversation[]; total: number }>('/conversations', {
       params: { page, limit },
     });
